@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Consulta do Gabarito</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="student-page">
+      <div class="student-card">
+        <h1>Consulta do Gabarito</h1>
+        <h2><%= view.title %></h2>
+        <img src="<%= qr %>" alt="QR Code da versão" class="qr-code" />
+        <div class="questions-list">
+          <% view.items.forEach((item) => { %>
+            <article class="question-block">
+              <p class="question-text"><%= item.statement %></p>
+              <ul>
+                <% item.options.forEach((option) => { %>
+                  <li><%= option %></li>
+                <% }) %>
+              </ul>
+              <p class="answer-label">Resposta correta: <strong><%= item.correctAnswer %></strong></p>
+            </article>
+          <% }) %>
+        </div>
+        <a href="/dashboard" class="back-link">Voltar ao painel</a>
+      </div>
+    </main>
+  </body>
+</html>
