@@ -6,9 +6,11 @@ class ErroDeNegocio(Exception):
 
     status_code = 422
 
-    def __init__(self, mensagem: str) -> None:
+    def __init__(self, mensagem: str, codigo: str | None = None, dados: dict | None = None) -> None:
         super().__init__(mensagem)
         self.mensagem = mensagem
+        self.codigo = codigo  # identificador do motivo, para o front tratar (ex.: "leitura_duvidosa")
+        self.dados = dados or {}  # informações extras devolvidas junto com o erro
 
 
 class NaoEncontrado(ErroDeNegocio):

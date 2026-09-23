@@ -92,6 +92,12 @@ uvicorn app.main:app --reload
 | `GET` | `/api/avaliacoes/{id}/versoes/{codigo}/qrcode.png` | ✅ | Imagem PNG do QR Code da versão, para a prova impressa. |
 | `GET` | `/api/avaliacoes/{id}/versoes/{codigo}/folha.pdf` e `.png` | ✅ | Folha de respostas da versão (A4, com QR Code e marcadores) para imprimir (RF27). |
 | `POST` | `/api/correcoes/leitura` | ✅ | Envia a foto da folha (campo `imagem`) e recebe as respostas lidas, **sem registrar** (RF31 a RF36). |
+| `POST` | `/api/correcoes` | ✅ | **Corrige e registra**: foto (campo `imagem`) + `aluno_id` opcional → nota e resultado (RF37 a RF40). |
+| `POST` | `/api/correcoes/manual` | ✅ | Registra respostas conferidas pelo professor: `{"codigo", "respostas": {"1": "A", "2": null, "3": "*"}, "aluno_id"}`. |
+| `GET` | `/api/avaliacoes/{id}/resultados` | ✅ | Resultados da avaliação, com nota e situação de cada questão (RF41 a RF43). |
+| `GET` / `DELETE` | `/api/resultados/{id}` | ✅ | Um resultado: questão, marcada, correta, situação e nota / exclui o resultado. |
+| `GET` | `/api/avaliacoes/{id}/estatisticas` | ✅ | Por questão (escolhas por alternativa, mais escolhida) e da turma (média, distribuição) (RF44 a RF46). |
+| `GET` | `/api/avaliacoes/{id}/resultados.xlsx` | ✅ | Relatório Excel: resultados, questões e resumo (RF47, RF48). |
 | `GET` | `/student/gabarito/{codigo}` | — | Rota pública do aluno (é o link dentro do QR Code). |
 
 ### Orientações para o front-end
@@ -153,6 +159,14 @@ Colunas das questões: `enunciado`, `alternativa_a` … `alternativa_d` (`altern
 * `POST /api/correcoes/leitura` responde `{"codigo", "avaliacao_id", "avaliacao", "versao", "confiavel", "mensagem", "respostas": {"1": "A", "2": null}, "em_branco", "multiplas", "ilegiveis", "questoes": [...]}`.
 * `confiavel: false` = alguma marcação ficou duvidosa (rasura, marca fraca, "X"): mostrar `mensagem` e pedir nova foto ou conferência (RN15). Em branco e mais de uma marcação (anulada) não impedem o registro, só aparecem como aviso.
 * Folha que não dá para ler responde `422` com `{"codigo", "detail"}`. Códigos: `imagem_invalida`, `folha_fora_do_padrao`, `qrcode_nao_lido`, `prova_desconhecida`.
+
+**Corrigir e registrar a nota.**
+* `POST /api/correcoes` (multipart: `imagem` + `aluno_id` opcional) lê a folha, calcula a nota e grava. Resposta `201`: `{"resultado": {..., "nota", "acertos", "erros", "em_branco", "anuladas", "questoes": [{"numero", "marcada", "correta", "situacao"}]}, "leitura": {...}}`.
+* Leitura duvidosa **não grava nada** (RN15): `422` com `{"codigo": "leitura_duvidosa", "detail", "ilegiveis": [3], "respostas": {...}, "codigo_versao"}`. Mostre a folha lida, peça nova foto ou deixe o professor conferir e enviar em `POST /api/correcoes/manual`.
+* Regra da nota: todas as questões valem o mesmo; `nota = acertos / questões × nota_maxima`. Em branco e mais de uma marcação (`"*"`, anulada) não pontuam.
+* O mesmo aluno corrigido de novo na mesma avaliação **substitui** o resultado anterior. Com `turma_id` na avaliação, o aluno precisa ser dessa turma.
+* Estatísticas contam pela **questão e letra originais** do banco, mesmo com versões embaralhadas.
+* Com `SUPABASE_URL`/`SUPABASE_KEY`, a foto de cada folha corrigida fica guardada no Storage (bucket `SUPABASE_BUCKET`).
 
 **Tela do aluno.** `/student/gabarito/{codigo}` devolve **JSON**, sem login:
 

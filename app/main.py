@@ -3,12 +3,13 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import Settings, get_settings
-from app.controllers import aluno, auth, avaliacoes, cadastros, correcoes, painel, questoes
+from app.controllers import aluno, auth, avaliacoes, cadastros, correcoes, painel, questoes, resultados
 from app.database.connection import criar_pool
 from app.services.errors import ErroDeNegocio
 
@@ -50,10 +51,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.exception_handler(ErroDeNegocio)
     def erro_de_negocio(_: Request, erro: ErroDeNegocio):
-        conteudo = {"detail": erro.mensagem}
-        if codigo := getattr(erro, "codigo", None):  # ex.: motivo da falha na leitura da folha
-            conteudo["codigo"] = codigo
-        return JSONResponse(status_code=erro.status_code, content=conteudo)
+        conteudo = {"detail": erro.mensagem, **erro.dados}
+        if erro.codigo:  # ex.: motivo da falha na leitura da folha
+            conteudo["codigo"] = erro.codigo
+        return JSONResponse(status_code=erro.status_code, content=jsonable_encoder(conteudo))
 
     app.include_router(auth.router)
     app.include_router(painel.router)
@@ -61,6 +62,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(questoes.router)
     app.include_router(avaliacoes.router)
     app.include_router(correcoes.router)
+    app.include_router(resultados.router)
     app.include_router(aluno.router)
 
     @app.get("/api/health", tags=["infra"])
