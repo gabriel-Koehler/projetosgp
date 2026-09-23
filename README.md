@@ -71,6 +71,20 @@ uvicorn app.main:app --reload
 | `POST` | `/api/auth/login` | — | Corpo `{"username", "password"}`. Cria a sessão; `401` se inválido. |
 | `POST` | `/api/auth/logout` | — | Encerra a sessão. |
 | `GET` | `/api/auth/me` | ✅ | Professor logado (`username`, `nome`) — use para mostrar o nome na navbar. |
+| `GET` / `POST` | `/api/semestres` | ✅ | Lista (`?ativo=true`) / cadastra semestres (RF02). |
+| `GET` / `PUT` | `/api/semestres/{id}` | ✅ | Consulta / edita um semestre. |
+| `PATCH` | `/api/semestres/{id}/ativo` | ✅ | Corpo `{"ativo": false}` desativa (ou reativa) o semestre. |
+| `GET` / `POST` | `/api/turmas` | ✅ | Lista (`?semestre_id=`) / cadastra turmas (RF03). |
+| `GET` / `PUT` / `DELETE` | `/api/turmas/{id}` | ✅ | Consulta / edita / exclui (`409` se tiver alunos ou avaliações). |
+| `GET` / `POST` | `/api/turmas/{id}/alunos` | ✅ | Lista / cadastra alunos da turma (RF04). |
+| `POST` | `/api/turmas/{id}/alunos/importar` | ✅ | Importa planilha (campo `arquivo`, RF05). Ver "Importações" abaixo. |
+| `GET` / `PUT` / `DELETE` | `/api/alunos/{id}` | ✅ | Consulta / edita / exclui um aluno. |
+| `GET` | `/api/alunos/modelo.csv` e `.xlsx` | ✅ | Modelo de planilha de alunos. |
+| `GET` / `POST` | `/api/questoes` | ✅ | Busca (`?busca=&disciplina=&categoria=&dificuldade=&pagina=&por_pagina=`) / cadastra questões (RF06, RF09). |
+| `GET` / `PUT` / `DELETE` | `/api/questoes/{id}` | ✅ | Consulta / edita / exclui. Questão já usada em avaliação é **arquivada** em vez de apagada (RF08). |
+| `GET` | `/api/questoes/filtros` | ✅ | Disciplinas e categorias já cadastradas (para os filtros da tela). |
+| `POST` | `/api/questoes/importar` | ✅ | Importa planilha de questões (campo `arquivo`, RF10 a RF12). |
+| `GET` | `/api/questoes/modelo.csv` e `.xlsx` | ✅ | Modelo de planilha de questões (RF13). |
 | `POST` | `/api/avaliacoes` | ✅ | Cria a avaliação e gera as versões, gabaritos e códigos de QR Code. |
 | `GET` | `/api/avaliacoes` e `/api/avaliacoes/{id}` | ✅ | Lista / detalha avaliações com versões e gabaritos. |
 | `PATCH` | `/api/avaliacoes/{id}/gabarito` | ✅ | Corpo `{"liberado": true}` libera (ou bloqueia) a consulta do gabarito pelo aluno. |
@@ -93,6 +107,14 @@ await fetch("/api/auth/login", {
 ```
 
 **Mensagens de erro.** Os erros vêm em `{"detail": "mensagem em português"}` e podem ser exibidos direto ao professor (ex.: `"Usuário ou senha inválidos."`, `"Informe exatamente 3 nome(s) de versão, sem nomes vazios."`).
+
+**Questões.** Corpo do cadastro/edição: `{"enunciado", "alternativas": ["A", "B", "C", "D"] (E opcional), "correta": "B", "disciplina", "categoria", "dificuldade": "facil" | "media" | "dificil"}`.
+
+**Importações (alunos e questões).** Envie o arquivo `.xlsx` ou `.csv` no campo `arquivo` (multipart). Fluxo em dois passos:
+1. `POST .../importar` → **prévia**, nada é gravado: `{"total_linhas", "validas": [{"linha", "dados"}], "erros": [{"linha", "mensagens": [...]}], "importados": 0}`.
+2. Professor confere e confirma → mesmo arquivo em `POST .../importar?confirmar=true` → grava só as linhas válidas e devolve `importados`.
+
+Colunas das questões: `enunciado`, `alternativa_a` … `alternativa_d` (`alternativa_e` opcional), `gabarito`, `disciplina`, `categoria`, `dificuldade`. Colunas dos alunos: `nome`, `matricula`, `email`. Acentos e maiúsculas no cabeçalho são ignorados. Questões repetidas (na planilha ou já no banco) aparecem como erro.
 
 **Criar avaliação.** Nesta fase (N1), o front envia as **questões selecionadas completas**. Quando o provedor mock [N1-BE-02] / Supabase [N2-BE-03] entrar, passa a enviar só os ids.
 
