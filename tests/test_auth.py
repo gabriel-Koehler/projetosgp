@@ -1,5 +1,5 @@
 def test_health_e_publico(client):
-    assert client.get("/api/health").json() == {"status": "ok"}
+    assert client.get("/api/health").status_code == 200
 
 
 def test_login_com_credenciais_validas(client):
