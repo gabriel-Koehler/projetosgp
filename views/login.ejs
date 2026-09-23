@@ -3,27 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login do Professor</title>
+    <title>Login do Professor · ProvaFácil</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
-  <body class="auth-page">
-    <main class="auth-card">
-      <h1>Sistema de Avaliações</h1>
-      <h2>Login do professor</h2>
-      <% if (error) { %>
-        <p class="error"><%= error %></p>
-      <% } %>
-      <form method="POST" action="/login">
-        <label>
-          Usuário
-          <input type="text" name="username" placeholder="professor" required />
-        </label>
-        <label>
-          Senha
-          <input type="password" name="password" placeholder="123456" required />
-        </label>
-        <button type="submit">Entrar</button>
-      </form>
+  <body>
+    <main class="auth-page">
+      <div class="auth-card<%= error ? ' shake' : '' %>">
+        <span class="auth-card__brand"><span aria-hidden="true">📝</span> ProvaFácil</span>
+        <h1>Sistema de Avaliações</h1>
+        <h2>Login do professor</h2>
+        <% if (error) { %>
+          <p class="error" role="alert" aria-live="assertive"><span aria-hidden="true">⚠️</span> <%= error %></p>
+        <% } %>
+        <form method="POST" action="/login" novalidate>
+          <label>
+            Usuário
+            <input
+              type="text"
+              name="username"
+              placeholder="professor"
+              class="<%= error ? 'input-error' : '' %>"
+              aria-invalid="<%= error ? 'true' : 'false' %>"
+              autocomplete="username"
+              autofocus
+              required
+            />
+          </label>
+          <label>
+            Senha
+            <input
+              type="password"
+              name="password"
+              placeholder="123456"
+              class="<%= error ? 'input-error' : '' %>"
+              aria-invalid="<%= error ? 'true' : 'false' %>"
+              autocomplete="current-password"
+              required
+            />
+          </label>
+          <button type="submit">Entrar</button>
+        </form>
+      </div>
     </main>
+    <%- include('partials/footer') %>
   </body>
 </html>

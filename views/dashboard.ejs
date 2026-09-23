@@ -3,19 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Painel do Professor</title>
+    <title>Painel do Professor · ProvaFácil</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <div>
+    <%- include('partials/header', { username }) %>
+
+    <main>
+      <div class="page-heading">
         <h1>Painel do professor</h1>
         <p>Bem-vindo, <strong><%= username %></strong></p>
       </div>
-      <a class="logout" href="/logout">Sair</a>
-    </header>
-
-    <main class="container">
+      <div class="container">
       <section class="panel">
         <h2>Banco de questões</h2>
         <form method="POST" action="/questions" class="question-form">
@@ -76,6 +75,9 @@
           </div>
         <% } %>
       </section>
+      </div>
     </main>
+
+    <%- include('partials/footer') %>
   </body>
 </html>
