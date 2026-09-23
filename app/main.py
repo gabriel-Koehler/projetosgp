@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import Settings, get_settings
-from app.controllers import aluno, auth, avaliacoes, painel
+from app.controllers import aluno, auth, avaliacoes, cadastros, painel, questoes
 from app.database.connection import criar_pool
 from app.services.errors import ErroDeNegocio
 
@@ -54,6 +54,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.include_router(auth.router)
     app.include_router(painel.router)
+    app.include_router(cadastros.router)
+    app.include_router(questoes.router)
     app.include_router(avaliacoes.router)
     app.include_router(aluno.router)
 
