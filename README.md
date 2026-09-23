@@ -128,7 +128,9 @@ from app.core.security import require_professor
 router = APIRouter(prefix="/api/semestres", dependencies=[Depends(require_professor)])
 ```
 
-Depois registre o router em `app/main.py` (`app.include_router(...)`). Dados mock ficam em `app/mocks/`.
+Depois registre o router em `app/main.py` (`app.include_router(...)`).
+
+**Camadas.** Cada funcionalidade segue `controllers/` → `services/` → `repositories/`: o controller só trata HTTP, o service aplica as regras e o repository fala com o banco. Erros de regra são lançados como `ErroDeNegocio` / `NaoEncontrado` / `AcessoNegado` / `Conflito` (`app/services/errors.py`) e viram respostas `422` / `404` / `403` / `409` com `{"detail": "..."}`.
 
 ---
 
@@ -218,9 +220,12 @@ python scripts/create_github_issues_kanban.py SEU_TOKEN_GITHUB_AQUI
 ├── public/                         # Arquivos estáticos (CSS, imagens)
 ├── app/                            # Backend em Python (FastAPI)
 │   ├── main.py                     # Cria a aplicação e registra os routers
-│   ├── core/                       # Configuração, autenticação, embaralhamento e QR Code
-│   ├── routers/                    # Rotas HTTP (auth, avaliações, aluno)
-│   └── mocks/                      # Dados em memória da N1
+│   ├── core/                       # Configuração e autenticação
+│   ├── controllers/                # Rotas HTTP: recebem a requisição e chamam os services
+│   ├── services/                   # Regras de negócio (versões, gabaritos, QR Code, correção)
+│   ├── repositories/               # Acesso aos dados (consultas ao banco)
+│   ├── models/                     # Entidades do domínio
+│   └── schemas/                    # Formatos JSON de entrada e saída da API
 ├── tests/                          # Testes do backend (pytest)
 ├── requirements.txt                # Dependências de produção
 ├── requirements-dev.txt            # Dependências de desenvolvimento e testes

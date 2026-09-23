@@ -2,7 +2,7 @@ from collections import Counter
 
 import pytest
 
-from app.core.version_builder import (
+from app.services.version_builder import (
     ConfiguracaoVersoes,
     Nomenclatura,
     Questao,
