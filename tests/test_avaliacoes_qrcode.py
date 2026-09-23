@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import pytest
 
-from app.core.qrcode_service import gerar_qrcode_png
+from app.services.qrcode_service import gerar_qrcode_png
 
 QUESTOES = [
     {"id": f"Q{i}", "enunciado": f"Pergunta {i}", "alternativas": ["a", "b", "c", "d"], "correta": "ABCD"[i % 4]}

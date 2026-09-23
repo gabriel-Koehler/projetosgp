@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 from app.core.config import Settings
 from app.main import create_app
-from app.mocks.avaliacoes_store import AvaliacoesStore, get_store
+from app.repositories.avaliacao_repository import AvaliacaoRepository, get_avaliacao_repository
 
 
 @pytest.fixture
@@ -23,8 +23,8 @@ def settings() -> Settings:
 @pytest.fixture
 def client(settings) -> TestClient:
     app = create_app(settings)
-    store = AvaliacoesStore()  # estado limpo a cada teste
-    app.dependency_overrides[get_store] = lambda: store
+    repositorio = AvaliacaoRepository()  # estado limpo a cada teste
+    app.dependency_overrides[get_avaliacao_repository] = lambda: repositorio
     return TestClient(app)
 
 

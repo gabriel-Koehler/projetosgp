@@ -1,11 +1,13 @@
 """Ponto de entrada da API: `uvicorn app.main:app --reload`."""
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import Settings, get_settings
-from app.routers import aluno, auth, avaliacoes, painel
+from app.controllers import aluno, auth, avaliacoes, painel
+from app.services.errors import ErroDeNegocio
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -34,6 +36,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
 
     app.dependency_overrides[get_settings] = lambda: settings
+
+    @app.exception_handler(ErroDeNegocio)
+    def erro_de_negocio(_: Request, erro: ErroDeNegocio):
+        return JSONResponse(status_code=erro.status_code, content={"detail": erro.mensagem})
 
     app.include_router(auth.router)
     app.include_router(painel.router)
