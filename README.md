@@ -25,6 +25,113 @@
 
 ---
 
+## ⚙️ Back-end (API Python)
+
+### Como rodar localmente
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate            # Linux/macOS: source .venv/bin/activate
+pip install -r requirements-dev.txt
+copy .env.example .env            # Linux/macOS: cp .env.example .env  (ajuste os valores)
+uvicorn app.main:app --reload
+```
+
+* API em `http://localhost:8000` e documentação interativa das rotas em `http://localhost:8000/docs`.
+* Testes: `pytest`.
+* Login padrão da N1 (mock): usuário `professor`, senha `123456` (configurável no `.env`).
+
+### Variáveis de ambiente (`.env`)
+
+| Variável | Para que serve |
+| :--- | :--- |
+| `SECRET_KEY` | Assina o cookie de sessão. **Obrigatória em produção** (sem ela, todo reinício desloga o professor). |
+| `PROFESSOR_USERNAME` / `PROFESSOR_PASSWORD` / `PROFESSOR_NOME` | Credenciais do professor na N1. Na N2 passam a vir do Supabase. |
+| `SESSION_HTTPS_ONLY` | `true` em produção: o cookie só trafega por HTTPS. |
+| `CORS_ORIGINS` | Origens do front autorizadas, separadas por vírgula. Vazio se o front for servido pelo mesmo domínio. |
+| `PUBLIC_BASE_URL` | Domínio público usado no link do QR Code (ex.: `https://provafacil.onrender.com`). Vazio = endereço da requisição. |
+
+### Rotas disponíveis
+
+| Método | Rota | Login | O que faz |
+| :--- | :--- | :---: | :--- |
+| `GET` | `/api/health` | — | Verificação para o deploy. |
+| `POST` | `/api/auth/login` | — | Corpo `{"username", "password"}`. Cria a sessão; `401` se inválido. |
+| `POST` | `/api/auth/logout` | — | Encerra a sessão. |
+| `GET` | `/api/auth/me` | ✅ | Professor logado (`username`, `nome`) — use para mostrar o nome na navbar. |
+| `POST` | `/api/avaliacoes` | ✅ | Cria a avaliação e gera as versões, gabaritos e códigos de QR Code. |
+| `GET` | `/api/avaliacoes` e `/api/avaliacoes/{id}` | ✅ | Lista / detalha avaliações com versões e gabaritos. |
+| `PATCH` | `/api/avaliacoes/{id}/gabarito` | ✅ | Corpo `{"liberado": true}` libera (ou bloqueia) a consulta do gabarito pelo aluno. |
+| `GET` | `/api/avaliacoes/{id}/versoes/{codigo}/qrcode.png` | ✅ | Imagem PNG do QR Code da versão, para a prova impressa. |
+| `GET` | `/student/gabarito/{codigo}` | — | Rota pública do aluno (é o link dentro do QR Code). |
+
+### Orientações para o front-end
+
+**Autenticação.** O login usa **cookie de sessão** (`sessao_professor`), não token. Nas chamadas com `fetch`, envie `credentials: "include"`. Qualquer rota administrativa responde `401` sem login — redirecione para a tela de login.
+
+> ⚠️ O cookie usa `SameSite=Lax`: front e API devem ficar **no mesmo domínio** (ex.: o FastAPI servindo as telas, ou um proxy). Se forem publicados em domínios diferentes (ex.: Vercel + Render), o navegador não envia o cookie — combinar com o back-end antes do deploy.
+
+```js
+await fetch("/api/auth/login", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
+  body: JSON.stringify({ username, password }),
+});
+```
+
+**Mensagens de erro.** Os erros vêm em `{"detail": "mensagem em português"}` e podem ser exibidos direto ao professor (ex.: `"Usuário ou senha inválidos."`, `"Informe exatamente 3 nome(s) de versão, sem nomes vazios."`).
+
+**Criar avaliação.** Nesta fase (N1), o front envia as **questões selecionadas completas**. Quando o provedor mock [N1-BE-02] / Supabase [N2-BE-03] entrar, passa a enviar só os ids.
+
+```json
+{
+  "nome": "N1 — Engenharia de Software",
+  "semestre": "2026/2",
+  "turma": "ES-01",
+  "questoes": [
+    { "id": "Q1", "enunciado": "...", "alternativas": ["...", "...", "...", "..."], "correta": "B" }
+  ],
+  "configuracao": {
+    "quantidade": 3,
+    "nomenclatura": "letras",
+    "nomes_personalizados": [],
+    "mesmas_questoes": true,
+    "questoes_por_versao": null,
+    "embaralhar_questoes": true,
+    "embaralhar_alternativas": true
+  }
+}
+```
+
+* `nomenclatura`: `letras` (A, B, C), `numeros` (1, 2, 3), `cores` (Azul, Verde, Amarela) ou `personalizada` (exige `nomes_personalizados` com um nome por versão).
+* `mesmas_questoes: false` + `questoes_por_versao`: cada versão recebe um conjunto diferente de questões (sem repetição quando há questões suficientes).
+* A resposta traz, para cada versão: `nome`, `codigo`, `url_aluno`, `url_qrcode`, `questoes` (já na ordem da versão, com a letra `correta`) e `gabarito` (`{"1": "C", "2": "A", ...}`).
+
+**Prova impressa e folha de respostas.** Use a imagem de `url_qrcode` em um `<img src>` (a sessão do professor autentica a requisição, desde que front e API estejam no mesmo domínio). O mesmo QR Code será lido na correção automática (N2) para identificar a avaliação e a versão.
+
+**Tela do aluno.** `/student/gabarito/{codigo}` devolve **JSON**, sem login:
+
+```json
+{ "avaliacao": "N1 — Engenharia de Software", "versao": "A", "gabarito": [{ "questao": 1, "alternativa": "C" }] }
+```
+
+* O gabarito fica **bloqueado até o professor liberar** (`PATCH /api/avaliacoes/{id}/gabarito`): o QR Code está impresso na prova e, sem isso, o aluno veria as respostas durante a prova. Enquanto bloqueado, a rota responde `403` com a mensagem para exibir.
+* Código inexistente responde `404`. A página visual do aluno é do card [N1-FE-06].
+
+**Novas rotas administrativas.** Proteja o router inteiro com a dependência de login:
+
+```python
+from fastapi import APIRouter, Depends
+from app.core.security import require_professor
+
+router = APIRouter(prefix="/api/semestres", dependencies=[Depends(require_professor)])
+```
+
+Depois registre o router em `app/main.py` (`app.include_router(...)`). Dados mock ficam em `app/mocks/`.
+
+---
+
 ## 📋 Organização do Trabalho e Governança no GitHub
 
 O projeto é organizado rigorosamente pelas etapas do documento oficial **Escopo do Projeto e Critérios de Avaliação**:
@@ -61,5 +168,13 @@ python scripts/create_github_issues_kanban.py SEU_TOKEN_GITHUB_AQUI
 │   └── create_github_issues_kanban.py  # Script de automação de issues e labels
 ├── public/                         # Arquivos estáticos (CSS, imagens)
 ├── app/                            # Backend em Python (FastAPI)
+│   ├── main.py                     # Cria a aplicação e registra os routers
+│   ├── core/                       # Configuração, autenticação, embaralhamento e QR Code
+│   ├── routers/                    # Rotas HTTP (auth, avaliações, aluno)
+│   └── mocks/                      # Dados em memória da N1
+├── tests/                          # Testes do backend (pytest)
+├── requirements.txt                # Dependências de produção
+├── requirements-dev.txt            # Dependências de desenvolvimento e testes
+├── .env.example                    # Modelo das variáveis de ambiente
 └── README.md                       # Documentação principal
 ```
