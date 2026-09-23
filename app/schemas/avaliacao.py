@@ -1,15 +1,10 @@
 """Formatos de entrada e saída (JSON) das rotas de avaliação."""
 
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 from app.services.version_builder import Nomenclatura
-
-
-class QuestaoIn(BaseModel):
-    id: str = Field(min_length=1)
-    enunciado: str = Field(min_length=1)
-    alternativas: list[str] = Field(min_length=2, max_length=26)
-    correta: str = Field(min_length=1, max_length=1)
 
 
 class ConfiguracaoIn(BaseModel):
@@ -23,10 +18,12 @@ class ConfiguracaoIn(BaseModel):
 
 
 class AvaliacaoIn(BaseModel):
-    nome: str = Field(min_length=1)
-    semestre: str | None = None
-    turma: str | None = None
-    questoes: list[QuestaoIn] = Field(min_length=1)
+    nome: str = Field(min_length=1, max_length=200)
+    turma_id: int | None = None
+    questao_ids: list[int] = Field(min_length=1, description="Questões do banco, na ordem da prova")
+    # RF16: ajuste do gabarito só nesta avaliação, ex.: {"12": "C"}.
+    gabaritos: dict[int, str] = {}
+    nota_maxima: float = Field(default=10, gt=0, le=1000)
     configuracao: ConfiguracaoIn
 
 
@@ -36,7 +33,7 @@ class LiberarGabaritoIn(BaseModel):
 
 class QuestaoVersaoOut(BaseModel):
     numero: int
-    questao_id: str
+    questao_id: str | None
     enunciado: str
     alternativas: list[str]
     correta: str
@@ -44,6 +41,7 @@ class QuestaoVersaoOut(BaseModel):
 
 
 class VersaoOut(BaseModel):
+    id: int
     nome: str
     codigo: str
     url_aluno: str
@@ -52,12 +50,29 @@ class VersaoOut(BaseModel):
     gabarito: dict[int, str]
 
 
+class ResumoAvaliacaoOut(BaseModel):
+    id: int
+    nome: str
+    turma_id: int | None
+    turma_nome: str | None
+    semestre_nome: str | None
+    nota_maxima: float
+    gabarito_liberado: bool
+    criada_em: datetime
+    quantidade_versoes: int
+    quantidade_questoes: int
+
+
 class AvaliacaoOut(BaseModel):
     id: int
     nome: str
-    semestre: str | None
-    turma: str | None
+    turma_id: int | None
+    turma_nome: str | None
+    semestre_nome: str | None
+    nota_maxima: float
+    configuracao: dict
     gabarito_liberado: bool
+    criada_em: datetime
     versoes: list[VersaoOut]
 
 

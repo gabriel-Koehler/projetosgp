@@ -86,7 +86,8 @@ uvicorn app.main:app --reload
 | `POST` | `/api/questoes/importar` | ✅ | Importa planilha de questões (campo `arquivo`, RF10 a RF12). |
 | `GET` | `/api/questoes/modelo.csv` e `.xlsx` | ✅ | Modelo de planilha de questões (RF13). |
 | `POST` | `/api/avaliacoes` | ✅ | Cria a avaliação e gera as versões, gabaritos e códigos de QR Code. |
-| `GET` | `/api/avaliacoes` e `/api/avaliacoes/{id}` | ✅ | Lista / detalha avaliações com versões e gabaritos. |
+| `GET` | `/api/avaliacoes` | ✅ | Lista resumida (`?turma_id=`): nome, turma, quantidade de versões e de questões. |
+| `GET` / `DELETE` | `/api/avaliacoes/{id}` | ✅ | Detalha com versões e gabaritos / exclui (`409` se já tiver provas corrigidas). |
 | `PATCH` | `/api/avaliacoes/{id}/gabarito` | ✅ | Corpo `{"liberado": true}` libera (ou bloqueia) a consulta do gabarito pelo aluno. |
 | `GET` | `/api/avaliacoes/{id}/versoes/{codigo}/qrcode.png` | ✅ | Imagem PNG do QR Code da versão, para a prova impressa. |
 | `GET` | `/student/gabarito/{codigo}` | — | Rota pública do aluno (é o link dentro do QR Code). |
@@ -116,16 +117,15 @@ await fetch("/api/auth/login", {
 
 Colunas das questões: `enunciado`, `alternativa_a` … `alternativa_d` (`alternativa_e` opcional), `gabarito`, `disciplina`, `categoria`, `dificuldade`. Colunas dos alunos: `nome`, `matricula`, `email`. Acentos e maiúsculas no cabeçalho são ignorados. Questões repetidas (na planilha ou já no banco) aparecem como erro.
 
-**Criar avaliação.** Nesta fase (N1), o front envia as **questões selecionadas completas**. Quando o provedor mock [N1-BE-02] / Supabase [N2-BE-03] entrar, passa a enviar só os ids.
+**Criar avaliação.** O front envia os **ids das questões do banco**, na ordem da prova. Tudo (avaliação, versões, questões de cada versão e gabaritos) é gravado numa transação só: se algo falhar, nada fica salvo.
 
 ```json
 {
   "nome": "N1 — Engenharia de Software",
-  "semestre": "2026/2",
-  "turma": "ES-01",
-  "questoes": [
-    { "id": "Q1", "enunciado": "...", "alternativas": ["...", "...", "...", "..."], "correta": "B" }
-  ],
+  "turma_id": 3,
+  "questao_ids": [12, 7, 30, 4],
+  "gabaritos": { "7": "C" },
+  "nota_maxima": 10,
   "configuracao": {
     "quantidade": 3,
     "nomenclatura": "letras",
@@ -138,6 +138,7 @@ Colunas das questões: `enunciado`, `alternativa_a` … `alternativa_d` (`altern
 }
 ```
 
+* `gabaritos` (opcional, RF16): ajusta a alternativa correta **só nesta avaliação**, sem mudar a questão no banco.
 * `nomenclatura`: `letras` (A, B, C), `numeros` (1, 2, 3), `cores` (Azul, Verde, Amarela) ou `personalizada` (exige `nomes_personalizados` com um nome por versão).
 * `mesmas_questoes: false` + `questoes_por_versao`: cada versão recebe um conjunto diferente de questões (sem repetição quando há questões suficientes).
 * A resposta traz, para cada versão: `nome`, `codigo`, `url_aluno`, `url_qrcode`, `questoes` (já na ordem da versão, com a letra `correta`) e `gabarito` (`{"1": "C", "2": "A", ...}`).
@@ -186,7 +187,7 @@ Depois registre o router em `app/main.py` (`app.include_router(...)`).
 - [ ] **Destino do código Node/Express** (`server.js`, `src/core.js`, `views/*.ejs`, `package.json`): migrar as telas para o FastAPI e remover o Node, ou manter só como protótipo até a migração?
 - [ ] **`node_modules/` está versionado no git.** Adicionar ao `.gitignore` e remover do repositório.
 - [ ] **[N1-BE-02] Provedor mock:** proteger `/api/semestres`, `/api/turmas`, `/api/questoes` com `Depends(require_professor)` (ver exemplo acima) e usar os mesmos campos de questão da API: `id`, `enunciado`, `alternativas` (lista), `correta` (letra).
-- [ ] **Criação de avaliação:** hoje o front envia as questões completas. Quando o [N1-BE-02] entrar, passar a enviar só os ids — combinar o momento da troca.
+- [ ] **Criação de avaliação (N2):** o front passa a enviar `questao_ids` (ids do banco de questões) e `turma_id`, em vez das questões completas. Ver exemplo acima.
 - [ ] **[N1-FE-06] Tela do aluno:** consome o JSON de `/student/gabarito/{codigo}` e trata `403` (gabarito ainda não liberado) e `404` (QR Code inválido).
 - [ ] **[N1-FE-05] Botão "Liberar gabarito"** na tela da avaliação, chamando o `PATCH /api/avaliacoes/{id}/gabarito`.
 - [ ] **[N1-FE-06] Layout da folha de respostas** para a correção automática [N2-BE-05]: posição fixa do QR Code, marcadores nos quatro cantos (para alinhar a foto) e bolinhas em grade regular. Definir juntos antes de fechar o layout — o OMR depende disso.
