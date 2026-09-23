@@ -9,7 +9,6 @@ from app.core.config import Settings
 from app.database import migrate
 from app.database.connection import conectar
 from app.main import create_app
-from app.repositories.avaliacao_repository import AvaliacaoRepository, get_avaliacao_repository
 
 # Testes que usam o banco rodam só com TEST_DATABASE_URL definida (um banco
 # PostgreSQL descartável: as tabelas são apagadas e recriadas).
@@ -28,10 +27,8 @@ def settings() -> Settings:
 
 @pytest.fixture
 def client(settings) -> TestClient:
-    app = create_app(settings)
-    repositorio = AvaliacaoRepository()  # estado limpo a cada teste
-    app.dependency_overrides[get_avaliacao_repository] = lambda: repositorio
-    return TestClient(app)
+    """Cliente da API sem banco configurado."""
+    return TestClient(create_app(settings))
 
 
 @pytest.fixture
