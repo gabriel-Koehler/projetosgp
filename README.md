@@ -38,7 +38,17 @@ uvicorn app.main:app --reload
 ```
 
 * API em `http://localhost:8000` e documentação interativa das rotas em `http://localhost:8000/docs`.
-* Testes: `pytest`.
+* Testes: `pytest`. Os testes de banco só rodam com `TEST_DATABASE_URL` apontando para um PostgreSQL **descartável** (as tabelas são apagadas e recriadas); sem ela, são pulados.
+
+### Banco de dados (Supabase)
+
+1. No Supabase, copie a connection string em *Project Settings → Database* e coloque em `DATABASE_URL` no `.env`.
+2. Crie as tabelas e o professor inicial: `python -m app.database.migrate` (pode rodar de novo sem problema).
+3. Teste a conexão: `python -m app.database.check` (lista tabelas faltando e confere o bucket do Storage).
+4. `GET /api/health` responde `"banco": "ok"` quando a API está conectada.
+
+* O esquema fica em [`app/database/schema.sql`](app/database/schema.sql).
+* Os dados são acessados direto pelo PostgreSQL (`psycopg` com pool de conexões), porque a API REST do Supabase não faz transações com vários comandos. O `supabase-py` é usado para o **Storage** das fotos das folhas de resposta.
 * Login padrão da N1 (mock): usuário `professor`, senha `123456` (configurável no `.env`).
 
 ### Variáveis de ambiente (`.env`)
@@ -48,6 +58,8 @@ uvicorn app.main:app --reload
 | `SECRET_KEY` | Assina o cookie de sessão. **Obrigatória em produção** (sem ela, todo reinício desloga o professor). |
 | `PROFESSOR_USERNAME` / `PROFESSOR_PASSWORD` / `PROFESSOR_NOME` | Credenciais do professor na N1. Na N2 passam a vir do Supabase. |
 | `SESSION_HTTPS_ONLY` | `true` em produção: o cookie só trafega por HTTPS. |
+| `DATABASE_URL` | Connection string do PostgreSQL do Supabase. Em produção, use o pooler (porta 6543). |
+| `SUPABASE_URL` / `SUPABASE_KEY` / `SUPABASE_BUCKET` | Supabase Storage para guardar as fotos das folhas corrigidas (opcional). |
 | `CORS_ORIGINS` | Origens do front autorizadas, separadas por vírgula. Vazio se o front for servido pelo mesmo domínio. |
 | `PUBLIC_BASE_URL` | Domínio público usado no link do QR Code (ex.: `https://provafacil.onrender.com`). Vazio = endereço da requisição. |
 
@@ -163,7 +175,7 @@ Depois registre o router em `app/main.py` (`app.include_router(...)`).
 - [ ] **Comando de start no Render:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`; build: `pip install -r requirements.txt`; health check: `/api/health`.
 - [ ] **Variáveis de produção:** `SECRET_KEY` (valor aleatório e fixo), `SESSION_HTTPS_ONLY=true`, `PUBLIC_BASE_URL` (URL pública do sistema, usada no QR Code), `PROFESSOR_USERNAME`/`PROFESSOR_PASSWORD`.
 - [ ] **Versão do Python:** o README cita 3.11; o back-end foi testado no 3.14. Fixar a mesma versão no Render (`PYTHON_VERSION`) e no ambiente local.
-- [ ] **Local dos scripts do banco:** o card [N2-INF-01] cita `src/database/schema.sql`, mas `src/` é do código Node e o back-end usa `app/database/` ([N2-BE-02]). Proposta: `app/database/schema.sql` e `app/database/seed.sql`.
+- [ ] **`schema.sql` proposto pelo back-end:** já existe em [`app/database/schema.sql`](app/database/schema.sql) com todas as tabelas que a API usa. Revisar, ajustar e usar como base do [N2-INF-01] (em vez de `src/database/`, que é do código Node). Rodar no Supabase com `python -m app.database.migrate`.
 - [ ] **[N2-INF-01] `schema.sql` precisa ter:** `codigo` único na tabela de versões; `gabarito_liberado` (boolean, padrão `false`) na avaliação; `ordem_original` na questão da versão; cópia do enunciado e das alternativas na versão (ver RN14 abaixo).
 - [ ] **[N1-INF-02] Script do .zip:** excluir também `.venv/`, `.pytest_cache/` e `.env`.
 
