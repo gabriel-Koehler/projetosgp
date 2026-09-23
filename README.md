@@ -140,6 +140,7 @@ Depois registre o router em `app/main.py` (`app.include_router(...)`). Dados moc
 
 * **Gabarito bloqueado até o professor liberar.** O QR Code vai impresso na prova; se a consulta ficasse aberta, o aluno veria as respostas durante a prova. O professor libera em `PATCH /api/avaliacoes/{id}/gabarito`.
 * **QR Code com código aleatório por versão** (`/student/gabarito/{codigo}`), e não com o id sequencial: ninguém consegue adivinhar o link de outra versão. O código identifica a avaliação e a versão — é ele que a correção automática (OMR) vai ler.
+* **Banco de dados: Supabase (PostgreSQL)**, decisão da equipe (o RNF08 do documento cita MySQL; justificativa vai em ADR).
 * **Login por cookie de sessão** (`sessao_professor`, `SameSite=Lax`), não por token.
 * **Gabarito calculado pela posição da alternativa**, nunca pelo texto (alternativas com texto repetido não quebram o gabarito). Cada questão da versão guarda `ordem_original`, que liga a alternativa exibida à letra original do banco — necessário para as estatísticas por alternativa.
 
@@ -173,7 +174,7 @@ Depois registre o router em `app/main.py` (`app.include_router(...)`). Dados moc
 
 ### 📄 Com o Alyson (Documentação e Arquitetura)
 
-- [ ] **Banco de dados:** o requisito **RNF08 pede MySQL**, e o projeto usa **Supabase (PostgreSQL)**. Confirmar com o professor e registrar a decisão em ADR [N2-DOC-01].
+- [ ] **ADR do banco de dados:** a equipe decidiu usar **Supabase (PostgreSQL)**. Como o requisito **RNF08** do documento cita MySQL, registrar em ADR [N2-DOC-01] o motivo da escolha (banco gerenciado em nuvem gratuito, Storage para as fotos das folhas, cliente `supabase-py`).
 - [ ] **ADRs das decisões do back-end** listadas acima: gabarito bloqueado até liberar, QR Code com código aleatório e sessão por cookie.
 - [ ] **[N1-DOC-02] README v1:** manter as seções "Back-end (API Python)" e "Pontos a Combinar" ao reescrever o README.
 - [ ] **Contagem de cards:** o README e o backlog falam em 32 atividades, mas o quadro Kanban tem 36. Ajustar.
