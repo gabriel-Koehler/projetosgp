@@ -132,6 +132,54 @@ Depois registre o router em `app/main.py` (`app.include_router(...)`). Dados moc
 
 ---
 
+## 🤝 Pontos a Combinar entre Back-end e Equipe
+
+> Lista viva: quem resolver um item marca `[x]` e anota a decisão ao lado (ou o link da ADR/PR). Dúvidas sobre o back-end: **Luan Eliseu**.
+
+### Decisões já tomadas no back-end (para todos seguirem)
+
+* **Gabarito bloqueado até o professor liberar.** O QR Code vai impresso na prova; se a consulta ficasse aberta, o aluno veria as respostas durante a prova. O professor libera em `PATCH /api/avaliacoes/{id}/gabarito`.
+* **QR Code com código aleatório por versão** (`/student/gabarito/{codigo}`), e não com o id sequencial: ninguém consegue adivinhar o link de outra versão. O código identifica a avaliação e a versão — é ele que a correção automática (OMR) vai ler.
+* **Login por cookie de sessão** (`sessao_professor`, `SameSite=Lax`), não por token.
+* **Gabarito calculado pela posição da alternativa**, nunca pelo texto (alternativas com texto repetido não quebram o gabarito). Cada questão da versão guarda `ordem_original`, que liga a alternativa exibida à letra original do banco — necessário para as estatísticas por alternativa.
+
+### 🎨 Com o Gabriel (Front-end)
+
+- [ ] **Quem serve as telas:** o FastAPI (templates Jinja2 + arquivos estáticos) ou um front separado? Como o login é por cookie `SameSite=Lax`, front e API precisam ficar **no mesmo domínio**. Recomendação do back-end: FastAPI servindo as telas.
+- [ ] **Destino do código Node/Express** (`server.js`, `src/core.js`, `views/*.ejs`, `package.json`): migrar as telas para o FastAPI e remover o Node, ou manter só como protótipo até a migração?
+- [ ] **`node_modules/` está versionado no git.** Adicionar ao `.gitignore` e remover do repositório.
+- [ ] **[N1-BE-02] Provedor mock:** proteger `/api/semestres`, `/api/turmas`, `/api/questoes` com `Depends(require_professor)` (ver exemplo acima) e usar os mesmos campos de questão da API: `id`, `enunciado`, `alternativas` (lista), `correta` (letra).
+- [ ] **Criação de avaliação:** hoje o front envia as questões completas. Quando o [N1-BE-02] entrar, passar a enviar só os ids — combinar o momento da troca.
+- [ ] **[N1-FE-06] Tela do aluno:** consome o JSON de `/student/gabarito/{codigo}` e trata `403` (gabarito ainda não liberado) e `404` (QR Code inválido).
+- [ ] **[N1-FE-05] Botão "Liberar gabarito"** na tela da avaliação, chamando o `PATCH /api/avaliacoes/{id}/gabarito`.
+- [ ] **[N1-FE-06] Layout da folha de respostas** para a correção automática [N2-BE-05]: posição fixa do QR Code, marcadores nos quatro cantos (para alinhar a foto) e bolinhas em grade regular. Definir juntos antes de fechar o layout — o OMR depende disso.
+
+### 🚀 Com o Diego (Infraestrutura e Deploy)
+
+- [ ] **Deploy no mesmo domínio** para front e API (ver item do cookie acima). Se o front for para a Vercel e a API para o Render, avisar o back-end para ajustar a sessão.
+- [ ] **Comando de start no Render:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`; build: `pip install -r requirements.txt`; health check: `/api/health`.
+- [ ] **Variáveis de produção:** `SECRET_KEY` (valor aleatório e fixo), `SESSION_HTTPS_ONLY=true`, `PUBLIC_BASE_URL` (URL pública do sistema, usada no QR Code), `PROFESSOR_USERNAME`/`PROFESSOR_PASSWORD`.
+- [ ] **Versão do Python:** o README cita 3.11; o back-end foi testado no 3.14. Fixar a mesma versão no Render (`PYTHON_VERSION`) e no ambiente local.
+- [ ] **Local dos scripts do banco:** o card [N2-INF-01] cita `src/database/schema.sql`, mas `src/` é do código Node e o back-end usa `app/database/` ([N2-BE-02]). Proposta: `app/database/schema.sql` e `app/database/seed.sql`.
+- [ ] **[N2-INF-01] `schema.sql` precisa ter:** `codigo` único na tabela de versões; `gabarito_liberado` (boolean, padrão `false`) na avaliação; `ordem_original` na questão da versão; cópia do enunciado e das alternativas na versão (ver RN14 abaixo).
+- [ ] **[N1-INF-02] Script do .zip:** excluir também `.venv/`, `.pytest_cache/` e `.env`.
+
+### 📐 Com a Eloisa (Requisitos, MER e Testes)
+
+- [ ] **[N2-MER-01] / [N2-MER-02] MER e dicionário de dados:** incluir `codigo` da versão, `gabarito_liberado` da avaliação e `ordem_original` da questão na versão.
+- [ ] **RN14 (resultados não mudam se a questão for editada):** a versão deve guardar uma **cópia** do enunciado, das alternativas e do gabarito no momento da geração, em vez de só apontar para a questão do banco. Refletir isso no MER.
+- [ ] **[N1-REQ-02] Roteiro de testes:** incluir o caso "aluno escaneia o QR Code antes da liberação → vê a mensagem de gabarito não liberado" e "depois da liberação → vê só as letras corretas".
+- [ ] **Card [N1-BE-03] cita a regra RN25**, que não existe no documento de requisitos (as regras vão até RN15). Corrigir no backlog.
+
+### 📄 Com o Alyson (Documentação e Arquitetura)
+
+- [ ] **Banco de dados:** o requisito **RNF08 pede MySQL**, e o projeto usa **Supabase (PostgreSQL)**. Confirmar com o professor e registrar a decisão em ADR [N2-DOC-01].
+- [ ] **ADRs das decisões do back-end** listadas acima: gabarito bloqueado até liberar, QR Code com código aleatório e sessão por cookie.
+- [ ] **[N1-DOC-02] README v1:** manter as seções "Back-end (API Python)" e "Pontos a Combinar" ao reescrever o README.
+- [ ] **Contagem de cards:** o README e o backlog falam em 32 atividades, mas o quadro Kanban tem 36. Ajustar.
+
+---
+
 ## 📋 Organização do Trabalho e Governança no GitHub
 
 O projeto é organizado rigorosamente pelas etapas do documento oficial **Escopo do Projeto e Critérios de Avaliação**:
