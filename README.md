@@ -90,6 +90,8 @@ uvicorn app.main:app --reload
 | `GET` / `DELETE` | `/api/avaliacoes/{id}` | ✅ | Detalha com versões e gabaritos / exclui (`409` se já tiver provas corrigidas). |
 | `PATCH` | `/api/avaliacoes/{id}/gabarito` | ✅ | Corpo `{"liberado": true}` libera (ou bloqueia) a consulta do gabarito pelo aluno. |
 | `GET` | `/api/avaliacoes/{id}/versoes/{codigo}/qrcode.png` | ✅ | Imagem PNG do QR Code da versão, para a prova impressa. |
+| `GET` | `/api/avaliacoes/{id}/versoes/{codigo}/folha.pdf` e `.png` | ✅ | Folha de respostas da versão (A4, com QR Code e marcadores) para imprimir (RF27). |
+| `POST` | `/api/correcoes/leitura` | ✅ | Envia a foto da folha (campo `imagem`) e recebe as respostas lidas, **sem registrar** (RF31 a RF36). |
 | `GET` | `/student/gabarito/{codigo}` | — | Rota pública do aluno (é o link dentro do QR Code). |
 
 ### Orientações para o front-end
@@ -145,6 +147,13 @@ Colunas das questões: `enunciado`, `alternativa_a` … `alternativa_d` (`altern
 
 **Prova impressa e folha de respostas.** Use a imagem de `url_qrcode` em um `<img src>` (a sessão do professor autentica a requisição, desde que front e API estejam no mesmo domínio). O mesmo QR Code será lido na correção automática (N2) para identificar a avaliação e a versão.
 
+**Folha de respostas e correção automática (OMR).**
+* A folha é **gerada pelo back-end** (`folha.pdf`), porque a leitura depende do layout exato: 4 quadrados pretos nos cantos, QR Code no alto à direita e grade de bolinhas. Imprima em **tamanho real (100%)**, sem "ajustar à página". Comporta até 93 questões de 2 a 5 alternativas.
+* A foto pode ser tirada com o celular, torta, com sombra, deitada ou de cabeça para baixo — mas com os 4 cantos aparecendo.
+* `POST /api/correcoes/leitura` responde `{"codigo", "avaliacao_id", "avaliacao", "versao", "confiavel", "mensagem", "respostas": {"1": "A", "2": null}, "em_branco", "multiplas", "ilegiveis", "questoes": [...]}`.
+* `confiavel: false` = alguma marcação ficou duvidosa (rasura, marca fraca, "X"): mostrar `mensagem` e pedir nova foto ou conferência (RN15). Em branco e mais de uma marcação (anulada) não impedem o registro, só aparecem como aviso.
+* Folha que não dá para ler responde `422` com `{"codigo", "detail"}`. Códigos: `imagem_invalida`, `folha_fora_do_padrao`, `qrcode_nao_lido`, `prova_desconhecida`.
+
 **Tela do aluno.** `/student/gabarito/{codigo}` devolve **JSON**, sem login:
 
 ```json
@@ -190,11 +199,12 @@ Depois registre o router em `app/main.py` (`app.include_router(...)`).
 - [ ] **Criação de avaliação (N2):** o front passa a enviar `questao_ids` (ids do banco de questões) e `turma_id`, em vez das questões completas. Ver exemplo acima.
 - [ ] **[N1-FE-06] Tela do aluno:** consome o JSON de `/student/gabarito/{codigo}` e trata `403` (gabarito ainda não liberado) e `404` (QR Code inválido).
 - [ ] **[N1-FE-05] Botão "Liberar gabarito"** na tela da avaliação, chamando o `PATCH /api/avaliacoes/{id}/gabarito`.
-- [ ] **[N1-FE-06] Layout da folha de respostas** para a correção automática [N2-BE-05]: posição fixa do QR Code, marcadores nos quatro cantos (para alinhar a foto) e bolinhas em grade regular. Definir juntos antes de fechar o layout — o OMR depende disso.
+- [ ] **[N1-FE-06] Folha de respostas:** usar a folha gerada pelo back-end (`GET /api/avaliacoes/{id}/versoes/{codigo}/folha.pdf`) em vez de diagramar em HTML — a leitura automática depende do layout exato. O front só precisa de um botão "Imprimir folha de respostas" por versão. A prova com os enunciados continua sendo HTML (`@media print`).
 
 ### 🚀 Com o Diego (Infraestrutura e Deploy)
 
 - [ ] **Deploy no mesmo domínio** para front e API (ver item do cookie acima). Se o front for para a Vercel e a API para o Render, avisar o back-end para ajustar a sessão.
+- [ ] **Leitor de QR Code no servidor:** o `pyzbar` precisa da biblioteca do sistema `libzbar0`. Se o Render permitir (ex.: deploy com Docker, `apt-get install -y libzbar0`), instalar; se não, a API usa sozinha o leitor do OpenCV (um pouco menos tolerante a fotos ruins).
 - [ ] **Comando de start no Render:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`; build: `pip install -r requirements.txt`; health check: `/api/health`.
 - [ ] **Variáveis de produção:** `SECRET_KEY` (valor aleatório e fixo), `SESSION_HTTPS_ONLY=true`, `PUBLIC_BASE_URL` (URL pública do sistema, usada no QR Code), `PROFESSOR_USERNAME`/`PROFESSOR_PASSWORD`.
 - [ ] **Versão do Python:** o README cita 3.11; o back-end foi testado no 3.14. Fixar a mesma versão no Render (`PYTHON_VERSION`) e no ambiente local.

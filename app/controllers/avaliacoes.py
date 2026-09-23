@@ -1,6 +1,9 @@
 """Rotas HTTP de avaliações, versões e QR Codes (RF14 a RF28). Exigem o professor logado."""
 
+import re
 from dataclasses import asdict
+
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Request, Response, status
 
@@ -16,6 +19,8 @@ from app.schemas.avaliacao import (
     VersaoOut,
 )
 from app.services.avaliacao_service import AvaliacaoService, get_avaliacao_service
+from app.services.errors import ErroDeNegocio
+from app.services.folha_resposta import folha_pdf, folha_png
 from app.services.qrcode_service import gerar_qrcode_png
 from app.services.version_builder import ConfiguracaoVersoes
 
@@ -120,3 +125,33 @@ def qrcode_da_versao(
     service.obter_versao(prof, avaliacao_id, codigo)
     png = gerar_qrcode_png(url_do_aluno(request, settings, codigo))
     return Response(content=png, media_type="image/png")
+
+
+@router.get("/{avaliacao_id}/versoes/{codigo}/folha.{formato}", response_class=Response)
+def folha_de_respostas(
+    avaliacao_id: int,
+    codigo: str,
+    formato: Literal["pdf", "png"],
+    request: Request,
+    settings: Settings = Depends(get_settings),
+    prof: int = Professor,
+    service: AvaliacaoService = Service,
+):
+    """RF27: folha de respostas da versão, com QR Code, pronta para imprimir (A4).
+
+    Imprima em tamanho real (100%, sem "ajustar à página") para a leitura automática funcionar.
+    """
+    avaliacao = service.obter(prof, avaliacao_id)
+    versao = service.obter_versao(prof, avaliacao_id, codigo)
+    alternativas = [len(q.alternativas) for q in versao.versao.questoes]
+    gerar = folha_pdf if formato == "pdf" else folha_png
+    try:
+        conteudo = gerar(avaliacao.nome, versao.versao.nome, url_do_aluno(request, settings, codigo), alternativas)
+    except ValueError as erro:
+        raise ErroDeNegocio(str(erro)) from erro
+    nome = re.sub(r"[^A-Za-z0-9]+", "_", f"folha_{avaliacao.id}_{versao.versao.nome}") + f".{formato}"
+    return Response(
+        content=conteudo,
+        media_type="application/pdf" if formato == "pdf" else "image/png",
+        headers={"Content-Disposition": f'inline; filename="{nome}"'},
+    )
