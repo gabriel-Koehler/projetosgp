@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import Settings, get_settings
-from app.controllers import aluno, auth, avaliacoes, cadastros, painel, questoes
+from app.controllers import aluno, auth, avaliacoes, cadastros, correcoes, painel, questoes
 from app.database.connection import criar_pool
 from app.services.errors import ErroDeNegocio
 
@@ -50,13 +50,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.exception_handler(ErroDeNegocio)
     def erro_de_negocio(_: Request, erro: ErroDeNegocio):
-        return JSONResponse(status_code=erro.status_code, content={"detail": erro.mensagem})
+        conteudo = {"detail": erro.mensagem}
+        if codigo := getattr(erro, "codigo", None):  # ex.: motivo da falha na leitura da folha
+            conteudo["codigo"] = codigo
+        return JSONResponse(status_code=erro.status_code, content=conteudo)
 
     app.include_router(auth.router)
     app.include_router(painel.router)
     app.include_router(cadastros.router)
     app.include_router(questoes.router)
     app.include_router(avaliacoes.router)
+    app.include_router(correcoes.router)
     app.include_router(aluno.router)
 
     @app.get("/api/health", tags=["infra"])

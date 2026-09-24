@@ -8,3 +8,8 @@ psycopg[binary]==3.3.6
 psycopg-pool==3.3.3
 supabase==2.31.0
 openpyxl==3.1.5
+opencv-python-headless==5.0.0.93
+numpy==2.5.3
+# Leitor de QR Code mais robusto. No Linux precisa da biblioteca do sistema libzbar0;
+# sem ela, a leitura usa o leitor de QR Code do OpenCV automaticamente.
+pyzbar==0.1.9
