@@ -175,10 +175,12 @@ def _decodificar_qr(imagem: np.ndarray) -> tuple[str, tuple[float, float]] | Non
         for resultado in pyzbar.decode(imagem, symbols=[pyzbar.ZBarSymbol.QRCODE]):
             r = resultado.rect
             return resultado.data.decode("utf-8", "replace"), (r.left + r.width / 2, r.top + r.height / 2)
-    texto, pontos, _ = cv2.QRCodeDetector().detectAndDecode(imagem)
-    if texto and pontos is not None:
-        centro = pontos.reshape(-1, 2).mean(axis=0)
-        return texto, (float(centro[0]), float(centro[1]))
+    # Sem pyzbar: detectores do OpenCV (o Aruco é bem mais confiável que o clássico).
+    for detector in (cv2.QRCodeDetectorAruco(), cv2.QRCodeDetector()):
+        texto, pontos, _ = detector.detectAndDecode(imagem)
+        if texto and pontos is not None:
+            centro = pontos.reshape(-1, 2).mean(axis=0)
+            return texto, (float(centro[0]), float(centro[1]))
     return None
 
 

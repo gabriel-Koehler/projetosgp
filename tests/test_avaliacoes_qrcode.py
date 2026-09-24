@@ -9,13 +9,14 @@ from fastapi.testclient import TestClient
 
 from app.main import create_app
 from app.repositories.avaliacao_repository import AvaliacaoRepository
+from app.services.omr_service import _decodificar_qr
 from app.services.qrcode_service import gerar_qrcode_png
 
 
 def ler_qrcode(png: bytes) -> str:
     imagem = cv2.imdecode(np.frombuffer(png, np.uint8), cv2.IMREAD_GRAYSCALE)
-    texto, _, _ = cv2.QRCodeDetector().detectAndDecode(imagem)
-    return texto
+    lido = _decodificar_qr(imagem)
+    return lido[0] if lido else ""
 
 
 def criar_questoes(api, n=5) -> list[int]:

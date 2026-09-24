@@ -92,6 +92,12 @@ uvicorn app.main:app --reload
 | `GET` | `/api/avaliacoes/{id}/versoes/{codigo}/qrcode.png` | ✅ | Imagem PNG do QR Code da versão, para a prova impressa. |
 | `GET` | `/api/avaliacoes/{id}/versoes/{codigo}/folha.pdf` e `.png` | ✅ | Folha de respostas da versão (A4, com QR Code e marcadores) para imprimir (RF27). |
 | `POST` | `/api/correcoes/leitura` | ✅ | Envia a foto da folha (campo `imagem`) e recebe as respostas lidas, **sem registrar** (RF31 a RF36). |
+| `POST` | `/api/correcoes` | ✅ | **Corrige e registra**: foto (campo `imagem`) + `aluno_id` opcional → nota e resultado (RF37 a RF40). |
+| `POST` | `/api/correcoes/manual` | ✅ | Registra respostas conferidas pelo professor: `{"codigo", "respostas": {"1": "A", "2": null, "3": "*"}, "aluno_id"}`. |
+| `GET` | `/api/avaliacoes/{id}/resultados` | ✅ | Resultados da avaliação, com nota e situação de cada questão (RF41 a RF43). |
+| `GET` / `DELETE` | `/api/resultados/{id}` | ✅ | Um resultado: questão, marcada, correta, situação e nota / exclui o resultado. |
+| `GET` | `/api/avaliacoes/{id}/estatisticas` | ✅ | Por questão (escolhas por alternativa, mais escolhida) e da turma (média, distribuição) (RF44 a RF46). |
+| `GET` | `/api/avaliacoes/{id}/resultados.xlsx` | ✅ | Relatório Excel: resultados, questões e resumo (RF47, RF48). |
 | `GET` | `/student/gabarito/{codigo}` | — | Rota pública do aluno (é o link dentro do QR Code). |
 
 ### Orientações para o front-end
@@ -154,6 +160,14 @@ Colunas das questões: `enunciado`, `alternativa_a` … `alternativa_d` (`altern
 * `confiavel: false` = alguma marcação ficou duvidosa (rasura, marca fraca, "X"): mostrar `mensagem` e pedir nova foto ou conferência (RN15). Em branco e mais de uma marcação (anulada) não impedem o registro, só aparecem como aviso.
 * Folha que não dá para ler responde `422` com `{"codigo", "detail"}`. Códigos: `imagem_invalida`, `folha_fora_do_padrao`, `qrcode_nao_lido`, `prova_desconhecida`.
 
+**Corrigir e registrar a nota.**
+* `POST /api/correcoes` (multipart: `imagem` + `aluno_id` opcional) lê a folha, calcula a nota e grava. Resposta `201`: `{"resultado": {..., "nota", "acertos", "erros", "em_branco", "anuladas", "questoes": [{"numero", "marcada", "correta", "situacao"}]}, "leitura": {...}}`.
+* Leitura duvidosa **não grava nada** (RN15): `422` com `{"codigo": "leitura_duvidosa", "detail", "ilegiveis": [3], "respostas": {...}, "codigo_versao"}`. Mostre a folha lida, peça nova foto ou deixe o professor conferir e enviar em `POST /api/correcoes/manual`.
+* Regra da nota: todas as questões valem o mesmo; `nota = acertos / questões × nota_maxima`. Em branco e mais de uma marcação (`"*"`, anulada) não pontuam.
+* O mesmo aluno corrigido de novo na mesma avaliação **substitui** o resultado anterior. Com `turma_id` na avaliação, o aluno precisa ser dessa turma.
+* Estatísticas contam pela **questão e letra originais** do banco, mesmo com versões embaralhadas.
+* Com `SUPABASE_URL`/`SUPABASE_KEY`, a foto de cada folha corrigida fica guardada no Storage (bucket `SUPABASE_BUCKET`).
+
 **Tela do aluno.** `/student/gabarito/{codigo}` devolve **JSON**, sem login:
 
 ```json
@@ -163,68 +177,22 @@ Colunas das questões: `enunciado`, `alternativa_a` … `alternativa_d` (`altern
 * O gabarito fica **bloqueado até o professor liberar** (`PATCH /api/avaliacoes/{id}/gabarito`): o QR Code está impresso na prova e, sem isso, o aluno veria as respostas durante a prova. Enquanto bloqueado, a rota responde `403` com a mensagem para exibir.
 * Código inexistente responde `404`. A página visual do aluno é do card [N1-FE-06].
 
-**Novas rotas administrativas.** Proteja o router inteiro com a dependência de login:
+**Novas rotas administrativas.** Receba o id do professor logado com `Depends(professor_id)`: a rota passa a exigir login (`401` sem ele) e o id serve para filtrar os dados daquele professor.
 
 ```python
 from fastapi import APIRouter, Depends
-from app.core.security import require_professor
+from app.core.security import professor_id
 
-router = APIRouter(prefix="/api/semestres", dependencies=[Depends(require_professor)])
+router = APIRouter(prefix="/api/exemplo")
+
+@router.get("")
+def listar(prof: int = Depends(professor_id)):
+    ...
 ```
 
 Depois registre o router em `app/main.py` (`app.include_router(...)`).
 
 **Camadas.** Cada funcionalidade segue `controllers/` → `services/` → `repositories/`: o controller só trata HTTP, o service aplica as regras e o repository fala com o banco. Erros de regra são lançados como `ErroDeNegocio` / `NaoEncontrado` / `AcessoNegado` / `Conflito` (`app/services/errors.py`) e viram respostas `422` / `404` / `403` / `409` com `{"detail": "..."}`.
-
----
-
-## 🤝 Pontos a Combinar entre Back-end e Equipe
-
-> Lista viva: quem resolver um item marca `[x]` e anota a decisão ao lado (ou o link da ADR/PR). Dúvidas sobre o back-end: **Luan Eliseu**.
-
-### Decisões já tomadas no back-end (para todos seguirem)
-
-* **Gabarito bloqueado até o professor liberar.** O QR Code vai impresso na prova; se a consulta ficasse aberta, o aluno veria as respostas durante a prova. O professor libera em `PATCH /api/avaliacoes/{id}/gabarito`.
-* **QR Code com código aleatório por versão** (`/student/gabarito/{codigo}`), e não com o id sequencial: ninguém consegue adivinhar o link de outra versão. O código identifica a avaliação e a versão — é ele que a correção automática (OMR) vai ler.
-* **Banco de dados: Supabase (PostgreSQL)**, decisão da equipe (o RNF08 do documento cita MySQL; justificativa vai em ADR).
-* **Login por cookie de sessão** (`sessao_professor`, `SameSite=Lax`), não por token.
-* **Gabarito calculado pela posição da alternativa**, nunca pelo texto (alternativas com texto repetido não quebram o gabarito). Cada questão da versão guarda `ordem_original`, que liga a alternativa exibida à letra original do banco — necessário para as estatísticas por alternativa.
-
-### 🎨 Com o Gabriel (Front-end)
-
-- [ ] **Quem serve as telas:** o FastAPI (templates Jinja2 + arquivos estáticos) ou um front separado? Como o login é por cookie `SameSite=Lax`, front e API precisam ficar **no mesmo domínio**. Recomendação do back-end: FastAPI servindo as telas.
-- [ ] **Destino do código Node/Express** (`server.js`, `src/core.js`, `views/*.ejs`, `package.json`): migrar as telas para o FastAPI e remover o Node, ou manter só como protótipo até a migração?
-- [ ] **`node_modules/` está versionado no git.** Adicionar ao `.gitignore` e remover do repositório.
-- [ ] **[N1-BE-02] Provedor mock:** proteger `/api/semestres`, `/api/turmas`, `/api/questoes` com `Depends(require_professor)` (ver exemplo acima) e usar os mesmos campos de questão da API: `id`, `enunciado`, `alternativas` (lista), `correta` (letra).
-- [ ] **Criação de avaliação (N2):** o front passa a enviar `questao_ids` (ids do banco de questões) e `turma_id`, em vez das questões completas. Ver exemplo acima.
-- [ ] **[N1-FE-06] Tela do aluno:** consome o JSON de `/student/gabarito/{codigo}` e trata `403` (gabarito ainda não liberado) e `404` (QR Code inválido).
-- [ ] **[N1-FE-05] Botão "Liberar gabarito"** na tela da avaliação, chamando o `PATCH /api/avaliacoes/{id}/gabarito`.
-- [ ] **[N1-FE-06] Folha de respostas:** usar a folha gerada pelo back-end (`GET /api/avaliacoes/{id}/versoes/{codigo}/folha.pdf`) em vez de diagramar em HTML — a leitura automática depende do layout exato. O front só precisa de um botão "Imprimir folha de respostas" por versão. A prova com os enunciados continua sendo HTML (`@media print`).
-
-### 🚀 Com o Diego (Infraestrutura e Deploy)
-
-- [ ] **Deploy no mesmo domínio** para front e API (ver item do cookie acima). Se o front for para a Vercel e a API para o Render, avisar o back-end para ajustar a sessão.
-- [ ] **Leitor de QR Code no servidor:** o `pyzbar` precisa da biblioteca do sistema `libzbar0`. Se o Render permitir (ex.: deploy com Docker, `apt-get install -y libzbar0`), instalar; se não, a API usa sozinha o leitor do OpenCV (um pouco menos tolerante a fotos ruins).
-- [ ] **Comando de start no Render:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`; build: `pip install -r requirements.txt`; health check: `/api/health`.
-- [ ] **Variáveis de produção:** `SECRET_KEY` (valor aleatório e fixo), `SESSION_HTTPS_ONLY=true`, `PUBLIC_BASE_URL` (URL pública do sistema, usada no QR Code), `PROFESSOR_USERNAME`/`PROFESSOR_PASSWORD`.
-- [ ] **Versão do Python:** o README cita 3.11; o back-end foi testado no 3.14. Fixar a mesma versão no Render (`PYTHON_VERSION`) e no ambiente local.
-- [ ] **`schema.sql` proposto pelo back-end:** já existe em [`app/database/schema.sql`](app/database/schema.sql) com todas as tabelas que a API usa. Revisar, ajustar e usar como base do [N2-INF-01] (em vez de `src/database/`, que é do código Node). Rodar no Supabase com `python -m app.database.migrate`.
-- [ ] **[N2-INF-01] `schema.sql` precisa ter:** `codigo` único na tabela de versões; `gabarito_liberado` (boolean, padrão `false`) na avaliação; `ordem_original` na questão da versão; cópia do enunciado e das alternativas na versão (ver RN14 abaixo).
-- [ ] **[N1-INF-02] Script do .zip:** excluir também `.venv/`, `.pytest_cache/` e `.env`.
-
-### 📐 Com a Eloisa (Requisitos, MER e Testes)
-
-- [ ] **[N2-MER-01] / [N2-MER-02] MER e dicionário de dados:** incluir `codigo` da versão, `gabarito_liberado` da avaliação e `ordem_original` da questão na versão.
-- [ ] **RN14 (resultados não mudam se a questão for editada):** a versão deve guardar uma **cópia** do enunciado, das alternativas e do gabarito no momento da geração, em vez de só apontar para a questão do banco. Refletir isso no MER.
-- [ ] **[N1-REQ-02] Roteiro de testes:** incluir o caso "aluno escaneia o QR Code antes da liberação → vê a mensagem de gabarito não liberado" e "depois da liberação → vê só as letras corretas".
-- [ ] **Card [N1-BE-03] cita a regra RN25**, que não existe no documento de requisitos (as regras vão até RN15). Corrigir no backlog.
-
-### 📄 Com o Alyson (Documentação e Arquitetura)
-
-- [ ] **ADR do banco de dados:** a equipe decidiu usar **Supabase (PostgreSQL)**. Como o requisito **RNF08** do documento cita MySQL, registrar em ADR [N2-DOC-01] o motivo da escolha (banco gerenciado em nuvem gratuito, Storage para as fotos das folhas, cliente `supabase-py`).
-- [ ] **ADRs das decisões do back-end** listadas acima: gabarito bloqueado até liberar, QR Code com código aleatório e sessão por cookie.
-- [ ] **[N1-DOC-02] README v1:** manter as seções "Back-end (API Python)" e "Pontos a Combinar" ao reescrever o README.
-- [ ] **Contagem de cards:** o README e o backlog falam em 32 atividades, mas o quadro Kanban tem 36. Ajustar.
 
 ---
 
