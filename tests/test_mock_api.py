@@ -96,6 +96,19 @@ class MockApiTest(unittest.TestCase):
         self.assertEqual(len(self.client.get("/api/avaliacoes").json()["data"]), 1)
         other.close()
 
+    def test_batch_import_validates_atomically(self):
+        original = len(self.client.get("/api/alunos").json()["data"])
+        payload = {"classId": "c2", "students": [{"name": "Novo", "registration": "001"}, {"name": "Duplicado", "registration": "2024001"}]}
+        self.assertEqual(self.client.post("/api/alunos/import", json=payload).status_code, 409)
+        self.assertEqual(len(self.client.get("/api/alunos").json()["data"]), original)
+        payload["students"][1]["registration"] = "002"
+        result = self.client.post("/api/alunos/import", json=payload)
+        self.assertEqual(result.status_code, 201)
+        self.assertTrue(all(a["classId"] == "c2" for a in result.json()["data"]))
+        self.assertEqual(result.json()["data"][0]["registration"], "001")
+        self.assertEqual(self.client.post("/api/alunos/import", json=payload).status_code, 409)
+        self.assertEqual(self.client.post("/api/alunos/import", json={"classId": "missing", "students": [{"name": "A", "registration": "003"}]}).status_code, 400)
+
     def test_recovery_is_explicitly_simulated(self):
         response = self.client.post("/api/auth/recovery", json={"email": "professor@example.com"})
         self.assertIn("simulada", response.json()["data"]["message"])

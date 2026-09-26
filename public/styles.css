@@ -1052,3 +1052,6 @@ dialog::backdrop {
   .question-bank-side { border-left:0; border-top:1px solid var(--border); padding:24px 0 0; }
 }
 .semester-layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:24px}.semester-list{align-self:start}.semester-card{display:grid;grid-template-columns:1fr auto;gap:8px;padding:15px 12px;margin:10px 0;border:1px solid var(--border);border-radius:8px;color:var(--text)}.semester-card small{grid-column:1/-1}.semester-card.selected{background:var(--tint);border-color:var(--primary)}.class-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}.class-card h3{margin-top:16px}.class-counts{display:flex;gap:24px;margin:20px 0;color:var(--muted)}.class-counts strong{color:var(--text)}.breadcrumb{display:inline-block;margin-bottom:20px}@media(max-width:800px){.semester-layout{grid-template-columns:1fr}.class-grid{grid-template-columns:1fr}}
+.import-preview{overflow:auto;max-height:360px}.import-preview table{min-width:490px}.invalid-row{background:#fff1f1;color:var(--danger)}#import-summary{font-size:13px;margin:0}#student-count{margin-top:16px}#student-list td{overflow-wrap:anywhere}
+
+dialog .section-heading{flex-direction:row;align-items:flex-start}dialog .section-heading button{flex-shrink:0}
