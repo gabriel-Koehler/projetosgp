@@ -95,7 +95,7 @@ function create() {
   screen.innerHTML = head('Nova avaliação', 'Crie e configure uma avaliação em 4 etapas') + '<div class="steps">' + ['Configurar', 'Questões', 'Gabarito', 'Versões'].map((name, i) => '<span class="' + (step === i + 1 ? 'active' : '') + '">' + (i + 1) + ' · ' + name + '</span>').join('') + '</div><form id="evaluation-form" class="panel"><div id="step-body"></div><p id="wizard-error" role="alert" hidden></p><div class="actions">' + (step > 1 ? button('← Voltar', 'previous', 'secondary') : '') + '<a class="btn secondary" href="#dashboard">Cancelar</a><button type="submit">' + (step === 4 ? 'Gerar avaliação' : 'Próxima →') + '</button></div></form>';
   const body = $('step-body');
   if (step === 1) body.innerHTML = '<div class="grid-two">' + input('Nome da avaliação', 'name', 'text', draft.name || '') + select('Turma', 'classId', state.classes, draft.classId) + '</div>';
-  if (step === 2) body.innerHTML = '<h2>Selecione as questões</h2>' + state.questions.map(q => '<label class="check-row"><input type="checkbox" name="questionIds" value="' + q.id + '" ' + (draft.questionIds?.includes(q.id) ? 'checked' : '') + '><span>' + esc(q.statement) + '<small> · ' + esc(q.subject) + '</small></span></label>').join('') + (state.questions.length ? '' : '<p>Cadastre questões no banco antes de continuar.</p>');
+  if (step === 2) questionWorkspace(body);
   if (step === 3) body.innerHTML = '<h2>Confira o gabarito</h2>' + draft.questionIds.map(id => {
     const q = state.questions.find(q => q.id === id);
     return '<p>' + esc(q.statement) + '<br><span class="badge">' + q.answer + ' · ' + esc(q.options[q.answer.charCodeAt(0) - 65]) + '</span></p>';
@@ -110,7 +110,7 @@ function create() {
       if (!draft.classId) return notice('Cadastre uma turma antes de continuar.');
     }
     if (step === 2) {
-      draft.questionIds = f.getAll('questionIds');
+      draft.questionIds ||= [];
       if (!draft.questionIds.length) return notice('Selecione pelo menos uma questão.');
     }
     if (step < 4) {
@@ -138,6 +138,81 @@ function create() {
       $('wizard-error').textContent = err.message;
     } finally {
       submit.disabled = false;
+    }
+  };
+}
+
+// Separate form ownership avoids nesting forms inside the evaluation wizard.
+let questionEntry = {};
+let questionSaving = false;
+function questionWorkspace(body) {
+  draft.questionIds ||= [];
+  body.innerHTML = '<div class="question-workspace"><section class="question-editor" aria-labelledby="new-question-title"><h2 id="new-question-title">Criar questões para esta prova</h2><p class="muted">Cada questão salva entra na prova e no banco geral. Você pode criar várias em sequência.</p><div id="question-entry-fields"><label>Enunciado<textarea form="question-entry-form" name="statement" required maxlength="2000" placeholder="Escreva o enunciado da questão"></textarea></label><div class="option-grid"><label>Disciplina<input form="question-entry-form" name="subject" required maxlength="100" placeholder="Ex.: Direito Civil"></label><label>Dificuldade<select form="question-entry-form" name="difficulty"><option>Fácil</option><option>Médio</option><option>Difícil</option></select></label></div><div class="option-grid">' + ['A', 'B', 'C', 'D'].map(a => '<label>Alternativa ' + a + '<input form="question-entry-form" name="option' + a + '" required maxlength="500"></label>').join('') + '</div><label>Resposta correta<select form="question-entry-form" name="answer"><option>A</option><option>B</option><option>C</option><option>D</option></select></label><p id="question-entry-error" role="alert" hidden></p><button form="question-entry-form" type="submit" id="save-question-entry">Salvar e criar outra questão</button></div></section><section class="question-bank-side" aria-labelledby="question-bank-title"><div class="section-heading"><div><h2 id="question-bank-title">Banco de questões</h2><p>Adicione questões existentes à prova.</p></div><span id="bank-total" class="badge"></span></div><label>Buscar no banco<input id="wizard-bank-search" type="search" placeholder="Enunciado ou disciplina"></label><p id="selected-total" role="status"></p><div id="wizard-bank-list"></div></section></div>';
+  // The owner form lives outside the wizard; an empty editor never blocks Próxima.
+  const owner = document.createElement('form');
+  owner.id = 'question-entry-form';
+  $('evaluation-form').after(owner);
+  const fields = $('question-entry-fields');
+  fields.querySelectorAll('[name]').forEach(field => {
+    if (questionEntry[field.name] !== undefined) field.value = questionEntry[field.name];
+    field.oninput = () => { questionEntry[field.name] = field.value; };
+  });
+  function renderBank() {
+    const term = $('wizard-bank-search').value.trim().toLocaleLowerCase('pt-BR');
+    const matches = state.questions.filter(q => (q.statement + ' ' + q.subject).toLocaleLowerCase('pt-BR').includes(term));
+    $('bank-total').textContent = state.questions.length + ' no banco';
+    $('selected-total').textContent = draft.questionIds.length + ' questão(ões) adicionada(s) à prova';
+    $('wizard-bank-list').innerHTML = matches.map(q => '<label class="wizard-bank-item"><input type="checkbox" name="questionIds" value="' + esc(q.id) + '" ' + (draft.questionIds.includes(q.id) ? 'checked' : '') + '><span><strong>' + esc(q.statement) + '</strong><small>' + esc(q.subject) + ' · ' + esc(q.difficulty) + '</small><small>' + (draft.questionIds.includes(q.id) ? 'Adicionada à prova' : 'Adicionar à prova') + '</small></span></label>').join('') || '<p class="empty">Nenhuma questão encontrada. Crie uma ao lado ou ajuste a busca.</p>';
+    $('wizard-bank-list').querySelectorAll('input').forEach(input => {
+      input.onchange = () => {
+        if (input.checked) draft.questionIds = [...new Set([...draft.questionIds, input.value])];
+        else draft.questionIds = draft.questionIds.filter(id => id !== input.value);
+        renderBank();
+      };
+    });
+  }
+  $('wizard-bank-search').oninput = renderBank;
+  renderBank();
+  owner.onsubmit = async event => {
+    event.preventDefault();
+    if (questionSaving) return;
+    questionSaving = true;
+    const save = $('save-question-entry');
+    const navigation = $('evaluation-form').querySelectorAll('.actions button');
+    save.disabled = true;
+    navigation.forEach(button => { button.disabled = true; });
+    save.textContent = 'Salvando questão…';
+    $('question-entry-error').hidden = true;
+    const formData = new FormData(owner);
+    try {
+      const question = await api('/questions', { method: 'POST', body: {
+        statement: formData.get('statement'), subject: formData.get('subject'),
+        difficulty: formData.get('difficulty'), answer: formData.get('answer'),
+        options: ['A', 'B', 'C', 'D'].map(a => formData.get('option' + a))
+      } });
+      state.questions.push(question);
+      draft.questionIds = [...new Set([...draft.questionIds, question.id])];
+      questionEntry = { subject: formData.get('subject'), difficulty: formData.get('difficulty') };
+      owner.reset();
+      owner.elements.subject.value = questionEntry.subject;
+      owner.elements.difficulty.value = questionEntry.difficulty;
+      // Clear the filter to make the new bank entry visible immediately.
+      if (document.contains(body)) {
+        $('wizard-bank-search').value = '';
+        renderBank();
+        owner.elements.statement.focus();
+      }
+      notice('Questão salva no banco geral e adicionada à prova. Você já pode criar a próxima.');
+    } catch (error) {
+      if (document.contains(body)) {
+        $('question-entry-error').textContent = error.message;
+        $('question-entry-error').hidden = false;
+      }
+    } finally {
+      questionSaving = false;
+      save.disabled = false;
+      navigation.forEach(button => { button.disabled = false; });
+      save.textContent = 'Salvar e criar outra questão';
     }
   };
 }
