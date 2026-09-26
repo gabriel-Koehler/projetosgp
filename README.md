@@ -63,3 +63,6 @@ python scripts/create_github_issues_kanban.py SEU_TOKEN_GITHUB_AQUI
 ├── app/                            # Backend em Python (FastAPI)
 └── README.md                       # Documentação principal
 ```
+## MVP AvaliaSystem
+
+Instruções de execução, conta demo, escopo e validação: [N1-FE-01](docs/N1-FE-01.md).
