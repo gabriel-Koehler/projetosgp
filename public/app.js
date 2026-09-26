@@ -25,7 +25,9 @@ const input = (label, name, type = 'text', value = '') => '<label>' + label + '<
 const select = (label, name, items, chosen) => '<label>' + label + '<select name="' + name + '">' + options(items, chosen) + '</select></label>';
 const findName = (list, id) => esc(list.find(x => x.id === id)?.name || '—');
 async function refresh() {
-  state = await api('/workspace');
+  const collections = ['semesters', 'classes', 'students', 'questions', 'evaluations', 'results'];
+  const values = await Promise.all(collections.map(name => api('/' + name)));
+  state = Object.fromEntries(collections.map((name, index) => [name, values[index]]));
 }
 
 function page() {

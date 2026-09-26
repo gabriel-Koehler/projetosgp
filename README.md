@@ -66,3 +66,9 @@ python scripts/create_github_issues_kanban.py SEU_TOKEN_GITHUB_AQUI
 ## MVP AvaliaSystem
 
 Instruções de execução, conta demo, escopo e validação: [N1-FE-01](docs/N1-FE-01.md).
+
+## API Python integrada — N1-BE-02
+
+Nesta branch, execute `npm run dev:all` após instalar as dependências Python.
+O servidor web usa a API Python em memória, sem o adaptador Node da branch anterior.
+Veja [execução, contrato e testes](docs/N1-BE-02.md).

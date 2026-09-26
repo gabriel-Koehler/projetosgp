@@ -41,9 +41,12 @@ $('auth-form').onsubmit = async event => {
   button.textContent = 'Aguarde…';
   $('auth-feedback').hidden = true;
   try {
+    const body = Object.fromEntries(new FormData(event.target));
+    if (mode !== 'register') delete body.name;
+    if (mode === 'recovery') delete body.password;
     const data = await api('/auth/' + mode, {
       method: 'POST',
-      body: Object.fromEntries(new FormData(event.target))
+      body
     });
     if (mode === 'recovery') feedback(data.message);
     else location.assign('/dashboard');
