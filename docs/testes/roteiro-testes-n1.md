@@ -1,14 +1,11 @@
 # Roteiro e Relatório de Testes Navegáveis — N1
-
+ 
 **Issue:** N1-REQ-02 (#) · **Etapa:** N1 – Passo 04 (Telas Navegáveis com Mock)
 **Critério avaliado:** C2 — Sistema Hospedado (link funcionando, telas construídas e navegáveis)
 **Responsável:** Eloisa Fazzio da Silva Rocha
-**Ambiente testado:** `<URL do sistema hospedado>`
-**Data da execução:** `<preencher>`
-**Navegador/dispositivo:** `<preencher>`
-
-> ⚠️ Escopo da N1: as telas usam dados estáticos/mock, sem conexão com banco de dados. Este roteiro valida **navegação de ponta a ponta** (toda tela alcançável, sem pontas soltas), não regras de negócio reais — essas entram na N2. Os passos seguem o documento `docs/requisitos/fluxos-de-usuario.md`.
-
+ 
+> ⚠️ Escopo da N1: as telas usam dados estáticos/mock, sem conexão com banco de dados. Este roteiro valida **navegação de ponta a ponta** (toda tela alcançável, sem pontas soltas), não regras de negócio reais — essas entram na N2. Os passos seguem o documento `docs/requisitos/fluxos-de-usuario.md` e o protótipo em Figma.
+ 
 ---
 
 ## Como usar este documento
@@ -29,9 +26,9 @@ Cada caso de teste tem: pré-condição, passos, resultado esperado e uma coluna
 | Passo | Ação | Resultado esperado | Status |
 |---|---|---|---|
 | 1 | A partir do Painel, conferir estatísticas gerais, gráfico da semana e lista de avaliações recentes | Elementos são exibidos (com dados mock) | |
-| 2 | Clicar em "Corrigir prova" | Navega para a tela de Escanear QR Code (correção) | |
+| 2 | Clicar em "Corrigir prova" | Navega para `CorrecaoScreen` | |
 | 3 | Voltar ao Painel e clicar em "Nova avaliação" | Navega para `CriarAvaliacaoScreen` — Passo 1 (Configurar) | |
-| 4 | Voltar ao Painel e clicar em "Ver resultados" | Navega para a tela Resultados | |
+| 4 | Voltar ao Painel e clicar em "Ver resultados" | Navega para `ResultadosScreen` | |
 | 5 | Em qualquer tela do professor, usar o menu lateral fixo | Todos os itens (Painel, Semestres & Turmas, Banco de Questões, Nova Avaliação, Versões & QR Code, Correção Automática, Resultados, Sair da conta) levam à tela correspondente | |
 
 ### CT03 — Semestres, Turmas e Alunos
@@ -44,6 +41,12 @@ Cada caso de teste tem: pré-condição, passos, resultado esperado e uma coluna
 | 5 | Clicar "Editar" em uma turma existente | Abre formulário preenchido; ao salvar, volta à lista | |
 | 6 | Na aba Alunos, clicar "Importar alunos" | Abre fluxo de importação (prévia e confirmação) | |
 | 7 | Concluir ou cancelar a importação | Retorna à lista de alunos | |
+| 8 | Na lista de semestres, clicar "Editar" em um semestre existente| Botão "Editar" presente em cada card de semestre; abre formulário/modal para alterar os dados |
+| 9 | Alterar um campo no formulário de edição e salvar | Lista de semestres atualiza com o novo valor | |
+| 10 | Clicar "Excluir" em um semestre **sem** turmas/alunos vinculados (ex.: 2025.1, 0 turmas) | Botão "Excluir" presente; semestre é removido sem erro  |
+| 11 | Clicar "Excluir" em um semestre **com** turmas/alunos vinculados (ex.: 2026.1, 5 turmas · 8 alunos) | Sistema avisa/impede a exclusão, ou explica o que acontece com os dados vinculados — não deve apagar silenciosamente | |
+| 12 | Clicar "Editar" em um semestre com status "Ativo" e, no formulário, alterar o status para "Encerrado" (ou vice-versa), depois salvar | O card do semestre passa a exibir o novo status (badge "Ativo"/"Encerrado" atualizado) | |
+| 13 | Abrir um semestre diferente daquele em que um aluno já está cadastrado e clicar em "Importar alunos" (ou "Novo aluno"), tentando cadastrar o mesmo aluno (mesmo nome/matrícula) nesse outro semestre | Sistema permite o cadastro — matrícula deve ser única por turma/semestre, não bloqueada globalmente | |
 
 ### CT04 — Banco de Questões
 | Passo | Ação | Resultado esperado | Status |
@@ -75,32 +78,35 @@ Cada caso de teste tem: pré-condição, passos, resultado esperado e uma coluna
 | 4 | Abrir aba "Gabarito" | Exibe o gabarito da versão selecionada | |
 | 5 | Clicar "Baixar QR (.png)" | Arquivo é baixado; usuário permanece na mesma tela | |
 | 6 | Clicar "Baixar tudo (PDF)" | Arquivo é baixado (prova, folha de respostas, gabarito impresso); usuário permanece na mesma tela | |
-| 7 | Clicar "Iniciar correção automática" | Navega para a tela de Escanear QR Code (correção) | |
+| 7 | Clicar "Iniciar correção automática" | Navega para `CorrecaoScreen` | |
 
 ### CT07 — Correção automática (fluxo feliz)
+> Atualizado: no protótipo, a correção acontece em uma única tela (`CorrecaoScreen`), com um passo a passo numerado e um botão único "Iniciar correção" — não em três telas separadas.
+
 | Passo | Ação | Resultado esperado | Status |
 |---|---|---|---|
-| 1 | Painel → "Corrigir prova" (ou via `VersoesScreen`) | Abre tela "Escanear QR Code" | |
-| 2 | Simular leitura de um QR Code válido | Versão é identificada, gabarito carregado; avança para "Escanear Folha de Respostas" | |
-| 3 | Simular leitura confiável da folha de respostas | Sistema compara com o gabarito, calcula a nota e salva o resultado | |
-| 4 | Ao concluir, verificar a tela "Resultado da Correção" | Resultado salvo é exibido | |
-| 5 | Clicar "Corrigir outra folha" | Retorna à tela "Escanear QR Code" | |
-| 6 | Voltar ao "Resultado da Correção" e clicar "Ver resultados" | Navega para a tela Resultados | |
+| 1 | Painel → "Corrigir prova" (ou via `VersoesScreen`) | Abre `CorrecaoScreen`, mostrando os passos numerados (01 Escanear QR Code, 02 Identificar o aluno, 03 Escanear folha de respostas, 04 Correção automática, 05 Resultado salvo) e a lista "Correções recentes" | |
+| 2 | Clicar "Iniciar correção" e simular leitura de um QR Code válido | Versão é identificada e o gabarito é carregado | |
+| 3 | Identificar o aluno (buscar por nome ou matrícula) | Aluno é associado à correção em andamento | |
+| 4 | Simular leitura confiável da folha de respostas | Sistema compara com o gabarito e calcula a nota | |
+| 5 | Verificar o resultado salvo | Resultado aparece na lista "Correções recentes", dentro da própria `CorrecaoScreen` | |
+| 6 | A partir da `CorrecaoScreen`, ir para "Resultados" (menu lateral ou atalho) | Navega para `ResultadosScreen` e o novo resultado aparece na lista | |
 
 ### CT08 — Correção automática (casos de erro)
 | Passo | Ação | Resultado esperado | Status |
 |---|---|---|---|
-| 1 | Simular QR Code ausente, múltiplo, ilegível ou fora do padrão | Exibe mensagem de erro e permanece/retorna à tela "Escanear QR Code" | |
-| 2 | Simular leitura duvidosa da folha de respostas | Exibe mensagem de erro pedindo nova leitura e retorna à tela "Escanear Folha de Respostas" | |
+| 1 | Simular QR Code ausente, múltiplo, ilegível ou fora do padrão | Exibe mensagem de erro e permanece na `CorrecaoScreen`, permitindo nova tentativa | |
+| 2 | Simular leitura duvidosa da folha de respostas | Exibe mensagem de erro pedindo nova leitura, sem gerar um resultado definitivo | |
+| 3 | Tentar avançar sem identificar o aluno | Sistema impede ou sinaliza que o passo "Identificar o aluno" está pendente | |
 
 ### CT09 — Resultados e estatísticas
+> Atualizado: no protótipo, resultados e estatísticas ficam na mesma tela (`ResultadosScreen`) — não há telas separadas de "Detalhe do resultado" e "Estatísticas".
+
 | Passo | Ação | Resultado esperado | Status |
 |---|---|---|---|
-| 1 | Painel → "Ver resultados" (ou menu lateral) | Abre a tela Resultados com lista de resultados | |
-| 2 | Abrir um resultado da lista | Abre "Detalhe do resultado" (respostas e nota) | |
-| 3 | No Detalhe, clicar "Voltar" | Retorna à tela Resultados | |
-| 4 | Acessar "Estatísticas" | Exibe estatísticas por questão e da turma | |
-| 5 | Nas Estatísticas, clicar "Voltar" | Retorna à tela Resultados | |
+| 1 | Painel → "Ver resultados" (ou menu lateral) | Abre `ResultadosScreen`, exibindo no topo os cards de estatística (Média da turma, Maior nota, Aprovados, Reprovados) e, abaixo, a tabela de alunos com nota e acertos | |
+| 2 | Clicar "Detalhar" em um aluno da tabela | Exibe o detalhe das respostas e da nota daquele aluno (modal ou expansão, a confirmar no protótipo) | |
+| 3 | Fechar/voltar do detalhe | Retorna à `ResultadosScreen` sem perder os filtros aplicados | |
 
 ### CT10 — Sair da conta
 | Passo | Ação | Resultado esperado | Status |
@@ -146,8 +152,15 @@ Cada caso de teste tem: pré-condição, passos, resultado esperado e uma coluna
 
 | Total de casos | Passou | Falhou | Bloqueado | % de aprovação |
 |---|---|---|---|---|
-| 14 | `<preencher>` | `<preencher>` | `<preencher>` | `<preencher>` |
+| 16 | `<preencher>` | `<preencher>` | `<preencher>` | `<preencher>` |
 
+**Critério de aceite:** 100% dos testes aprovados no ambiente online.
+
+> Os passos 8 e 9 do CT03 (editar/excluir semestre, RF02) devem Falhar/ficar Bloqueados até que essa funcionalidade seja desenhada no Figma e implementada no código — reportar isso separadamente, não travar a entrega desta issue por uma pendência que não é de documentação/teste.
+
+### Falhas encontradas (se houver)
+| ID do caso | Descrição da falha | Severidade | Status da correção |
+|---|---|---|---|
 **Critério de aceite:** 100% dos testes aprovados no ambiente online.
 
 ### Falhas encontradas (se houver)
