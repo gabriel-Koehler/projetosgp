@@ -74,8 +74,9 @@ class AvaliacaoOut(BaseModel):
 
 
 def url_publica(request: Request, settings: Settings, caminho: str) -> str:
-    base = settings.public_base_url or str(request.base_url)
-    return base.rstrip("/") + caminho
+    if settings.public_base_url:
+        return settings.public_base_url.rstrip("/") + caminho
+    return str(request.url.replace(path=request.scope.get("root_path", "").rstrip("/") + caminho, query=""))
 
 
 def _serializar(avaliacao: Avaliacao, request: Request, settings: Settings) -> AvaliacaoOut:
@@ -90,7 +91,7 @@ def _serializar(avaliacao: Avaliacao, request: Request, settings: Settings) -> A
                 nome=a.versao.nome,
                 codigo=a.codigo,
                 url_aluno=url_publica(request, settings, f"/student/gabarito/{a.codigo}"),
-                url_qrcode=f"/api/avaliacoes/{avaliacao.id}/versoes/{a.codigo}/qrcode.png",
+                url_qrcode=request.scope.get("root_path", "").rstrip("/") + f"/api/avaliacoes/{avaliacao.id}/versoes/{a.codigo}/qrcode.png",
                 questoes=[QuestaoVersaoOut(**vars(q)) for q in a.versao.questoes],
                 gabarito=a.versao.gabarito,
             )
