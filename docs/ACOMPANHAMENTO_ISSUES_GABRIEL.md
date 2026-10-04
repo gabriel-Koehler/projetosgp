@@ -94,3 +94,15 @@ Impressão A4 de prova, folha com QR/bolhas A–D e gabarito do professor. Liber
 - Árvore da main comparada com a integração local validada: nenhuma diferença.
 - Validação do conjunto: 12 testes Python e 8 testes Node aprovados.
 - Permanecem pendentes a auditoria N1-INF-03 (#3) e as quatro integrações N2 (#22, #23, #25 e #28).
+
+## Demais PRs N1 integrados — 2026-10-04
+- PR #37: setup da API Python e autenticação modular.
+- PR #38: embaralhamento e gabaritos próprios por versão.
+- PR #39: QR Code e consulta pública restrita do gabarito.
+- PR #47: roteiro e relatório de testes de aceitação.
+- PR #50: histórico dos fluxos e casos de uso (sem alteração líquida de arquivos nesta integração).
+- PR #55: classes de domínio.
+- Todos os seis PRs estão merged na main. Consulta final: nenhum PR N1 aberto; nove PRs N2 continuam abertos.
+- Conflitos de contratos de API resolvidos mantendo /api do MVP e disponibilizando o backend modular em /n1 na porta 8000; detalhes em INTEGRACAO_N1.md.
+- Validação: 116 testes Python e 8 testes JavaScript aprovados, incluindo isolamento de sessões, links QR sob /n1 e consulta pública.
+- O merge desses PRs não conclui a auditoria da issue #3 nem implementa as integrações N2 pendentes.
