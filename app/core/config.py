@@ -6,6 +6,8 @@ import warnings
 from dataclasses import dataclass, field
 from functools import lru_cache
 
+from dotenv import load_dotenv
+
 
 def _bool(valor: str | None, padrao: bool = False) -> bool:
     if valor is None:
@@ -28,10 +30,17 @@ class Settings:
     cors_origins: list[str] = field(default_factory=list)
     # URL pública usada no QR Code. Vazio = endereço de quem fez a requisição.
     public_base_url: str | None = None
+    # PostgreSQL do Supabase (Project Settings > Database > Connection string).
+    database_url: str | None = None
+    # Supabase Storage para as fotos das folhas (opcional).
+    supabase_url: str | None = None
+    supabase_key: str | None = None
+    supabase_bucket: str = "folhas-resposta"
 
 
 @lru_cache
 def get_settings() -> Settings:
+    load_dotenv()
     secret_key = os.getenv("SECRET_KEY")
     if not secret_key:
         # Sem chave fixa, as sessões expiram a cada reinício do servidor.
@@ -46,4 +55,8 @@ def get_settings() -> Settings:
         session_https_only=_bool(os.getenv("SESSION_HTTPS_ONLY")),
         cors_origins=_lista(os.getenv("CORS_ORIGINS")),
         public_base_url=os.getenv("PUBLIC_BASE_URL") or None,
+        database_url=os.getenv("DATABASE_URL") or None,
+        supabase_url=os.getenv("SUPABASE_URL") or None,
+        supabase_key=os.getenv("SUPABASE_KEY") or None,
+        supabase_bucket=os.getenv("SUPABASE_BUCKET", "folhas-resposta"),
     )
