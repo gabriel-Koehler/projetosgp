@@ -123,6 +123,25 @@ class MockApiTest(unittest.TestCase):
         self.assertEqual(self.client.post("/api/questoes/import", json=payload).status_code, 201)
         self.assertEqual(self.client.post("/api/questoes/import", json={"questions": [{**question, "answer": "Z"}]}).status_code, 400)
 
+    def test_named_versions_validation_order_and_correction(self):
+        body = {"name": "Prova", "classId": "c1", "questionIds": ["Q-047", "Q-046"],
+                "versionCount": 2, "versionNames": ["Azul", "Versão Verde"],
+                "shuffleQuestions": False, "shuffleAlternatives": False}
+        for names in [["A"], ["Azul", "azul"], ["", "B"], ["A/B", "C"]]:
+            self.assertEqual(self.client.post("/api/avaliacoes", json={**body, "versionNames": names}).status_code, 400)
+        result = self.client.post("/api/avaliacoes", json=body)
+        self.assertEqual(result.status_code, 201)
+        evaluation = result.json()["data"]
+        self.assertEqual([v["name"] for v in evaluation["versions"]], ["Azul", "Versão Verde"])
+        for version in evaluation["versions"]:
+            self.assertEqual([q["id"] for q in version["questions"]], body["questionIds"])
+            self.assertEqual([q["answerLetter"] for q in version["questions"]], ["B", "A"])
+            self.assertTrue(all(q["versionName"] == version["name"] for q in version["questions"]))
+        from urllib.parse import quote
+        self.assertEqual(self.client.get("/api/avaliacoes/" + evaluation["id"] + "/qr/" + quote("Versão Verde")).status_code, 200)
+        corrected = self.client.post("/api/resultados", json={"evaluationId": evaluation["id"], "studentId": "a1", "version": "Versão Verde", "answers": ["B", "A"]})
+        self.assertEqual(corrected.json()["data"]["grade"], 10)
+
     def test_recovery_is_explicitly_simulated(self):
         response = self.client.post("/api/auth/recovery", json={"email": "professor@example.com"})
         self.assertIn("simulada", response.json()["data"]["message"])

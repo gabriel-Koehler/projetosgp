@@ -13,7 +13,7 @@ import qrcode
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator, model_validator
 
 from app.mocks.data_provider import MemoryProvider
 
@@ -95,12 +95,22 @@ class Evaluation(Payload):
     versionCount: int = Field(ge=1, le=5, strict=True)
     shuffleQuestions: bool = False
     shuffleAlternatives: bool = False
+    versionNames: list[Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=30, pattern=r"^[\w -]+$")]] | None = Field(default=None, min_length=1, max_length=5)
+
+    @model_validator(mode="after")
+    def validate_version_names(self):
+        if self.versionNames is not None:
+            if len(self.versionNames) != self.versionCount:
+                raise ValueError("Informe um nome para cada versão.")
+            if len({name.casefold() for name in self.versionNames}) != len(self.versionNames):
+                raise ValueError("Os nomes das versões devem ser diferentes.")
+        return self
 
 
 class Result(Payload):
     evaluationId: Identifier
     studentId: Identifier
-    version: Annotated[str, StringConstraints(pattern="^[A-E]$")]
+    version: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=30)]
     answers: list[Letter] = Field(min_length=1, max_length=100)
 
 
@@ -331,6 +341,7 @@ def add_evaluation(body: Evaluation, state=Depends(current_state)):
             raise HTTPException(400, "Selecione questões existentes e sem repetições.")
         versions = []
         for index in range(body.versionCount):
+            version_name = body.versionNames[index] if body.versionNames else chr(65 + index)
             selected = [deepcopy(bank[i]) for i in body.questionIds]
             if body.shuffleQuestions:
                 random.shuffle(selected)
@@ -343,13 +354,14 @@ def add_evaluation(body: Evaluation, state=Depends(current_state)):
                 letter = chr(65 + next(i for i, (original, _) in enumerate(indexed) if original == correct_index))
                 correct = question["options"][correct_index]
                 question.update(options=[text for _, text in indexed], answer=correct, correctAnswer=correct,
-                                answerLetter=letter, originalQuestionId=question["id"], versionName=chr(65 + index))
-            versions.append({"name": chr(65 + index), "questions": selected, "answerKey": [
+                                answerLetter=letter, originalQuestionId=question["id"], versionName=version_name)
+            versions.append({"name": version_name, "questions": selected, "answerKey": [
                 {"questionId": q["id"], "position": i, "correct": q["correctAnswer"]}
                 for i, q in enumerate(selected)
             ]})
         item = {"id": str(uuid4()), "name": body.name, "classId": body.classId,
-                "createdAt": datetime.now(timezone.utc).isoformat(), "versions": versions}
+                "createdAt": datetime.now(timezone.utc).isoformat(), "versions": versions,
+                "configuration": {"shuffleQuestions": body.shuffleQuestions, "shuffleAlternatives": body.shuffleAlternatives}}
         state["evaluations"].append(item)
         return data(item)
 
