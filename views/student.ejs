@@ -3,10 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Consulta do Gabarito</title>
+    <title>Consulta do Gabarito · ProvaFácil</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
+    <%- include('partials/header', { username: null }) %>
+
     <main class="student-page">
       <div class="student-card">
         <h1>Consulta do Gabarito</h1>
@@ -28,5 +30,7 @@
         <a href="/dashboard" class="back-link">Voltar ao painel</a>
       </div>
     </main>
+
+    <%- include('partials/footer') %>
   </body>
 </html>
