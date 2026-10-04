@@ -7,9 +7,10 @@ Este é o arquivo de acompanhamento oficial para atualizar ao concluir cada issu
 ## Visão geral
 - Total de issues atribuídas: **13**.
 - Issues encerradas no GitHub nesta consulta: **0**.
-- Entregas publicadas: FE-01, BE-02, FE-02, FE-03 e FE-04, com PRs abertos.
+- **6 issues implementadas e publicadas**, com PRs abertos: FE-01, BE-02, FE-02, FE-03, FE-04 e FE-05.
 - FE-04: publicada no PR #56; commit 75327b2.
-- FE-05: implementada e validada, derivada da FE-04; publicação em andamento.
+- FE-05: publicada no PR #57; commit e227db5, derivado de FE-04.
+- **7 issues restantes para concluir a implementação**: #3, #13, #14, #22, #23, #25 e #28 (incluindo as parciais do MVP e a infraestrutura a auditar).
 - Nenhum PR aberto equivale a merge ou encerramento automático já realizado.
 
 ## Controle das entregas
@@ -22,7 +23,7 @@ Este é o arquivo de acompanhamento oficial para atualizar ao concluir cada issu
 | [#7 N1-FE-02 — Semestres e turmas](https://github.com/gabriel-Koehler/projetosgp/issues/7) | Entregue | Aberta, PR aberto | `feat/n1-fe-02-semestres-turmas`, `be20064`; [PR #52](https://github.com/gabriel-Koehler/projetosgp/pull/52) | Revisão e merge após #51 |
 | [#8 N1-FE-03 — Alunos e importação](https://github.com/gabriel-Koehler/projetosgp/issues/8) | Entregue | Aberta, PR aberto | `feat/n1-fe-03-alunos-importacao`, `dc475ef`; [PR #53](https://github.com/gabriel-Koehler/projetosgp/pull/53) | Revisão e merge após #52 |
 | [#9 N1-FE-04 — Banco de questões](https://github.com/gabriel-Koehler/projetosgp/issues/9) | Entregue | Aberta, PR aberto | `feat/n1-fe-04-banco-questoes`, `75327b2`; [PR #56](https://github.com/gabriel-Koehler/projetosgp/pull/56) | Revisão e merge após #53 |
-| [#12 N1-FE-05 — Assistente de avaliações](https://github.com/gabriel-Koehler/projetosgp/issues/12) | Implementada e validada; publicando | Aberta | `feat/n1-fe-05-criacao-avaliacoes-versoes`, derivada de FE-04 | Commit, push e PR desta entrega |
+| [#12 N1-FE-05 — Assistente de avaliações](https://github.com/gabriel-Koehler/projetosgp/issues/12) | Entregue | Aberta, PR aberto | `feat/n1-fe-05-criacao-avaliacoes-versoes`, `e227db5`; [PR #57](https://github.com/gabriel-Koehler/projetosgp/pull/57) | Revisão e merge após #56 |
 | [#13 N1-FE-06 — Impressão e tela aluno](https://github.com/gabriel-Koehler/projetosgp/issues/13) | Parcial no MVP; issue não concluída | Aberta | Há consulta de versões e QR no MVP | Executar os critérios de impressão de provas, folha de respostas e tela aluno |
 | [#14 N1-FE-07 — Correção e estatísticas simuladas](https://github.com/gabriel-Koehler/projetosgp/issues/14) | Parcial no MVP; issue não concluída | Aberta | Há respostas manuais, notas, gráfico e CSV | Validar e completar o fluxo específico da issue |
 | [#22 N2-FE-01 — Autenticação e turmas com API real](https://github.com/gabriel-Koehler/projetosgp/issues/22) | Sem entrega específica identificada | Aberta | Cliente usa API mock Python | Integrar e validar API real |
@@ -68,3 +69,7 @@ Em 2026-10-04, atualizado o campo Revisor de 32 issues para Gabriel Koehler da S
 
 ## Evidências FE-05
 Assistente de 3 etapas, nomes únicos, rascunho por usuário, contadores, confirmação por cards, gabaritos e QR de nomes personalizados. 10 testes Python aprovados e fluxo desktop/mobile validado.
+
+## Sequência de branches e PRs
+FE-03 (PR #53) → FE-04 (PR #56, 75327b2) → FE-05 (PR #57, e227db5).
+A próxima issue deve criar sua branch a partir da versão mais recente de feat/n1-fe-05-criacao-avaliacoes-versoes, incluindo as atualizações deste acompanhamento. A próxima interface N1 pendente é a FE-06 (#13); não foi iniciada nesta entrega.
