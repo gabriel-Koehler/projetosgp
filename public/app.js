@@ -31,13 +31,13 @@ async function refresh() {
 }
 
 function page() {
-  return location.hash.slice(1) || 'dashboard';
+  return location.hash.slice(1).split('?')[0] || 'dashboard';
 }
 
 function render() {
   const current = page();
   document.querySelectorAll('nav a').forEach(a => {
-    const active = a.hash === '#' + current;
+    const active = a.hash === '#' + (current === 'class' ? 'classes' : current);
     a.classList.toggle('active', active);
     if (active) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
@@ -47,6 +47,7 @@ function render() {
   const pages = {
     dashboard,
     classes,
+    class: classDetails,
     questions,
     create,
     versions,
@@ -70,14 +71,36 @@ function dashboard() {
     '<section class="panel"><div class="section-heading"><div><h2>Visão geral</h2><p>Acompanhe o progresso das suas avaliações</p></div><span class="badge">Média geral: ' + average + '</span></div>' + (state.evaluations.length ? '<div class="table-wrap"><table><thead><tr><th>Avaliação</th><th>Turma</th><th>Versões</th><th></th></tr></thead><tbody>' + state.evaluations.map(e => '<tr><td>' + esc(e.name) + '</td><td>' + findName(state.classes, e.classId) + '</td><td>' + e.versions.length + '</td><td><a href="#versions">Ver versões →</a></td></tr>').join('') + '</tbody></table></div>' : '<div class="empty"><h3>Sua primeira avaliação começa aqui</h3><p>As questões de exemplo já estão disponíveis. Crie uma avaliação para gerar versões.</p><a class="btn" href="#create">Criar avaliação</a></div>') + '</section>';
 }
 
+
+function routeParams() { return new URLSearchParams(location.hash.split('?')[1] || ''); }
 function classes() {
+  selectedSemester = routeParams().get('semester') || selectedSemester;
+  if (!state.semesters.some(s => s.id === selectedSemester)) selectedSemester = state.semesters[0]?.id;
+  const semester = state.semesters.find(s => s.id === selectedSemester);
   const filtered = state.classes.filter(c => c.semesterId === selectedSemester);
-  screen.innerHTML = head('Semestres & Turmas', 'Gerencie semestres, turmas e alunos', button('+ Novo semestre', 'semester', 'secondary') + button('+ Nova turma', 'class')) +
-    '<div class="toolbar"><label>Semestre<select id="semester-filter">' + options(state.semesters, selectedSemester) + '</select></label></div><div class="grid-two">' + filtered.map(c => '<section class="panel"><div class="section-heading"><div><h2>' + esc(c.name) + '</h2><span class="badge">' + esc(c.code) + '</span></div>' + button('+ Aluno', 'student:' + c.id, 'secondary') + '</div><div class="table-wrap"><table><thead><tr><th>Aluno</th><th>Matrícula</th></tr></thead><tbody>' + state.students.filter(a => a.classId === c.id).map(a => '<tr><td>' + esc(a.name) + '</td><td>' + esc(a.registration) + '</td></tr>').join('') + '</tbody></table></div>' + (state.students.some(a => a.classId === c.id) ? '' : '<p class="empty">Nenhum aluno cadastrado.</p>') + '</section>').join('') + '</div>' + (filtered.length ? '' : empty('Nenhuma turma neste semestre', 'Crie uma turma para começar.'));
-  $('semester-filter').onchange = e => {
-    selectedSemester = e.target.value;
-    classes();
-  };
+  screen.innerHTML = head('Semestres & Turmas', 'Organize seus períodos letivos e acompanhe as turmas', button('+ Novo semestre', 'semester', 'secondary') + (semester ? button('+ Nova turma', 'class') : '')) +
+    '<div class="semester-layout"><aside class="panel semester-list" aria-label="Semestres"><h2>Semestres</h2>' + state.semesters.map(s => {
+      const rooms = state.classes.filter(c => c.semesterId === s.id);
+      const students = state.students.filter(a => rooms.some(c => c.id === a.classId)).length;
+      return '<a class="semester-card ' + (s.id === selectedSemester ? 'selected' : '') + '" href="#classes?semester=' + encodeURIComponent(s.id) + '" ' + (s.id === selectedSemester ? 'aria-current="true"' : '') + '><strong>' + esc(s.name) + '</strong><span class="badge">' + (s.active ? 'Ativo' : 'Inativo') + '</span><small>' + rooms.length + ' turmas · ' + students + ' alunos</small></a>';
+    }).join('') + (state.semesters.length ? '' : '<p>Nenhum semestre cadastrado.</p>') + '</aside><section aria-label="Turmas do semestre"><div class="section-heading"><div><h2>Turmas — ' + esc(semester?.name || 'Selecione um semestre') + '</h2><p>' + filtered.length + ' turmas neste semestre</p></div></div><div class="class-grid">' +
+    filtered.map(c => {
+      const students = state.students.filter(a => a.classId === c.id).length;
+      const exams = state.evaluations.filter(e => e.classId === c.id).length;
+      return '<article class="panel class-card"><span class="badge">' + esc(c.code) + '</span><h3>' + esc(c.name) + '</h3><div class="class-counts"><span><strong>' + students + '</strong> alunos</span><span><strong>' + exams + '</strong> avaliações</span></div><a class="btn secondary" href="#class?id=' + encodeURIComponent(c.id) + '">Ver turma e alunos →</a></article>';
+    }).join('') + '</div>' + (filtered.length ? '' : empty('Nenhuma turma neste semestre', 'Use Nova turma para cadastrar a primeira turma vinculada a este semestre.')) + '</section></div>';
+}
+function classDetails() {
+  const room = state.classes.find(c => c.id === routeParams().get('id'));
+  if (!room) {
+    screen.innerHTML = head('Turma não encontrada', 'A turma pode não estar disponível nesta conta.') + '<a class="btn" href="#classes">Voltar aos semestres</a>';
+    return;
+  }
+  selectedSemester = room.semesterId;
+  const students = state.students.filter(a => a.classId === room.id);
+  screen.innerHTML = '<a class="breadcrumb" href="#classes?semester=' + encodeURIComponent(room.semesterId) + '">← Semestres & Turmas · ' + findName(state.semesters, room.semesterId) + '</a>' +
+    head(esc(room.name), esc(room.code) + ' · ' + students.length + ' alunos', button('+ Adicionar aluno', 'student:' + room.id)) +
+    '<section class="panel"><h2>Alunos da turma</h2>' + (students.length ? '<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Matrícula</th></tr></thead><tbody>' + students.map(a => '<tr><td>' + esc(a.name) + '</td><td>' + esc(a.registration) + '</td></tr>').join('') + '</tbody></table></div>' : '<p class="empty">Nenhum aluno cadastrado nesta turma.</p>') + '</section>';
 }
 
 function questions() {
