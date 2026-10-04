@@ -109,6 +109,20 @@ class MockApiTest(unittest.TestCase):
         self.assertEqual(self.client.post("/api/alunos/import", json=payload).status_code, 409)
         self.assertEqual(self.client.post("/api/alunos/import", json={"classId": "missing", "students": [{"name": "A", "registration": "003"}]}).status_code, 400)
 
+    def test_question_edit_and_import_preserve_snapshots(self):
+        evaluation = self.create_evaluation()
+        question = {"statement": "Editada", "subject": "Teste", "difficulty": "Médio", "options": ["Um", "Dois", "Três", "Quatro"], "answer": "D"}
+        self.assertEqual(self.client.put("/api/questoes/Q-047", json=question).status_code, 200)
+        self.assertEqual(self.client.get("/api/avaliacoes").json()["data"][0], evaluation)
+        self.assertEqual(self.client.put("/api/questoes/missing", json=question).status_code, 404)
+        payload = {"questions": [{**question, "statement": "Nova"}, question]}
+        before = len(self.client.get("/api/questoes").json()["data"])
+        self.assertEqual(self.client.post("/api/questoes/import", json=payload).status_code, 409)
+        self.assertEqual(len(self.client.get("/api/questoes").json()["data"]), before)
+        payload["questions"].pop()
+        self.assertEqual(self.client.post("/api/questoes/import", json=payload).status_code, 201)
+        self.assertEqual(self.client.post("/api/questoes/import", json={"questions": [{**question, "answer": "Z"}]}).status_code, 400)
+
     def test_recovery_is_explicitly_simulated(self):
         response = self.client.post("/api/auth/recovery", json={"email": "professor@example.com"})
         self.assertIn("simulada", response.json()["data"]["message"])

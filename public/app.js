@@ -1,3 +1,4 @@
+import { parseQuestionsCsv } from './question-csv.js';
 import { parseStudentsCsv } from './student-csv.js';
 import {
   api
@@ -173,15 +174,103 @@ function importStudents(classId) {
   dialog.showModal();
 }
 
+
+let questionFilters = { text: '', subject: '', difficulty: '' };
 function questions() {
-  screen.innerHTML = head('Banco de Questões', state.questions.length + ' questões cadastradas', button('+ Nova questão', 'question')) + '<div class="toolbar"><label>Buscar questão<input id="search-question" type="search" placeholder="Buscar por enunciado ou disciplina"></label></div><div id="question-list"></div>';
+  const subjects = [...new Set(state.questions.map(q => q.subject))].sort();
+  if (!subjects.includes(questionFilters.subject)) questionFilters.subject = '';
+  screen.innerHTML = head('Banco de Questões', state.questions.length + ' questões cadastradas', button('Importar questões', 'import-questions', 'secondary') + button('+ Nova questão', 'question')) +
+    '<div class="toolbar question-filters"><label>Buscar questão<input id="search-question" type="search" placeholder="Enunciado ou disciplina" value="' + esc(questionFilters.text) + '"></label><label>Disciplina<select id="filter-subject"><option value="">Todas as disciplinas</option>' + subjects.map(subject => '<option ' + (subject === questionFilters.subject ? 'selected' : '') + '>' + esc(subject) + '</option>').join('') + '</select></label><label>Dificuldade<select id="filter-difficulty"><option value="">Todas as dificuldades</option>' + ['Fácil','Médio','Difícil'].map(d => '<option ' + (d === questionFilters.difficulty ? 'selected' : '') + '>' + d + '</option>').join('') + '</select></label></div><p id="question-count" class="muted" role="status"></p><div id="question-list"></div>';
   const list = () => {
-    const term = $('search-question').value.toLocaleLowerCase('pt-BR');
-    const matches = state.questions.filter(q => (q.statement + ' ' + q.subject).toLocaleLowerCase('pt-BR').includes(term));
-    $('question-list').innerHTML = matches.map(q => '<article class="question-card"><div class="question-meta"><span>' + esc(q.subject) + ' · ' + esc(q.id.slice(0, 8)) + '</span><span class="badge">' + esc(q.difficulty) + '</span></div><h3>' + esc(q.statement) + '</h3><div class="question-options">' + q.options.map((o, i) => '<div class="' + (q.answer === String.fromCharCode(65 + i) ? 'correct' : '') + '">' + String.fromCharCode(65 + i) + ' &nbsp; ' + esc(o) + '</div>').join('') + '</div><div class="question-footer"><small>Gabarito: <span class="badge">' + q.answer + '</span></small>' + button('Excluir', 'delete-question:' + q.id, 'danger') + '</div></article>').join('') || empty('Nenhuma questão encontrada', 'Cadastre uma questão ou ajuste a busca.');
+    questionFilters = { text: $('search-question').value, subject: $('filter-subject').value, difficulty: $('filter-difficulty').value };
+    const term = questionFilters.text.trim().toLocaleLowerCase('pt-BR');
+    const matches = state.questions.filter(q => (q.statement + ' ' + q.subject).toLocaleLowerCase('pt-BR').includes(term) && (!questionFilters.subject || q.subject === questionFilters.subject) && (!questionFilters.difficulty || q.difficulty === questionFilters.difficulty));
+    $('question-count').textContent = matches.length + ' questões encontradas';
+    $('question-list').innerHTML = matches.map(q => '<article class="question-card"><div class="question-meta"><span>' + esc(q.subject) + ' · ' + esc(q.id.slice(0,8)) + '</span><span class="badge">' + esc(q.difficulty) + '</span></div><h3>' + esc(q.statement) + '</h3><details class="question-alternatives"><summary>Ver alternativas A–D</summary><div class="question-options">' + q.options.map((o,i) => '<div class="' + (q.answer === String.fromCharCode(65+i) ? 'correct' : '') + '">' + String.fromCharCode(65+i) + ' · ' + esc(o) + '</div>').join('') + '</div></details><div class="question-footer"><span>Gabarito: <strong class="badge">' + q.answer + '</strong></span><div class="actions">' + button('Editar', 'edit-question:' + q.id, 'secondary') + button('Excluir', 'delete-question:' + q.id, 'danger') + '</div></div></article>').join('') || empty('Nenhuma questão encontrada', 'Cadastre uma questão ou ajuste os filtros.');
   };
   $('search-question').oninput = list;
+  $('filter-subject').onchange = list;
+  $('filter-difficulty').onchange = list;
   list();
+}
+
+function editQuestion(id) {
+  const question = id ? state.questions.find(q => q.id === id) : null;
+  if (id && !question) return notice('Questão não encontrada.');
+  const fields = '<label>Enunciado<textarea name="statement" required maxlength="2000"></textarea></label>' +
+    input('Disciplina','subject') + select('Dificuldade','difficulty',['Fácil','Médio','Difícil'].map(name => ({id:name,name}))) +
+    '<div class="option-grid">' + ['A','B','C','D'].map(a => '<label data-option="' + a + '">Alternativa ' + a + '<input name="option' + a + '" required maxlength="500"></label>').join('') + '</div>' +
+    select('Resposta correta','answer',['A','B','C','D'].map(name => ({id:name,name}))) + '<p id="answer-highlight" class="badge" role="status"></p>';
+  modal(id ? 'Editar questão' : 'Nova questão', fields, async form => {
+    const body = { statement: form.get('statement'), subject: form.get('subject'), difficulty: form.get('difficulty'), options: ['A','B','C','D'].map(a => form.get('option'+a)), answer: form.get('answer') };
+    await api('/questions' + (id ? '/' + id : ''), { method: id ? 'PUT' : 'POST', body });
+  });
+  const form = $('modal-form');
+  if (question) {
+    for (const key of ['statement','subject','difficulty','answer']) form.elements[key].value = question[key];
+    question.options.forEach((option, i) => { form.elements['option'+String.fromCharCode(65+i)].value = option; });
+  }
+  const highlight = () => {
+    const answer = form.elements.answer.value;
+    $('answer-highlight').textContent = 'Gabarito: ' + answer;
+    form.querySelectorAll('[data-option]').forEach(label => label.classList.toggle('answer-choice', label.dataset.option === answer));
+  };
+  form.elements.answer.onchange = highlight;
+  highlight();
+}
+
+function importQuestions() {
+  const dialog = $('modal'), form = $('modal-form');
+  $('modal-title').textContent = 'Importar questões';
+  $('modal-error').hidden = true;
+  $('modal-fields').innerHTML = '<p class="muted">Envie CSV UTF-8 de até 1 MB e 500 questões. Confira enunciado, alternativas e gabarito antes de confirmar.</p><a href="/modelo_questoes.csv" download="modelo_questoes.csv">↓ Baixar modelo_questoes.csv</a><label>Arquivo CSV<input id="questions-file" type="file" accept=".csv,text/csv" required></label><p id="question-import-summary" role="status">Nenhum arquivo selecionado.</p><div id="question-import-preview" class="import-preview"></div>';
+  const submit = form.querySelector('[type=submit]');
+  submit.hidden = false; submit.disabled = true; submit.textContent = 'Importar questões válidas';
+  let rows = [], reading = 0;
+  $('questions-file').onchange = async event => {
+    const ticket = ++reading;
+    rows = []; submit.disabled = true; $('modal-error').hidden = true;
+    $('question-import-preview').innerHTML = ''; $('question-import-summary').textContent = 'Validando arquivo…';
+    const file = event.target.files[0];
+    if (!file) { $('question-import-summary').textContent = 'Nenhum arquivo selecionado.'; return; }
+    try {
+      if (!file.name.toLowerCase().endsWith('.csv') || file.size > 1024*1024) throw new Error('Selecione um arquivo .csv de até 1 MB.');
+      const content = await file.text();
+      if (ticket !== reading || !dialog.open) return;
+      rows = parseQuestionsCsv(content, state.questions);
+      const valid = rows.filter(r => !r.error);
+      $('question-import-summary').textContent = valid.length + ' válidas · ' + (rows.length-valid.length) + ' inválidas. Somente as válidas serão importadas.';
+      $('question-import-preview').innerHTML = rows.map(r => '<article class="import-question ' + (r.error ? 'invalid-row' : '') + '"><small>Linha ' + r.line + ' · ' + esc(r.question.subject) + ' · ' + esc(r.question.difficulty) + '</small><p>' + esc(r.question.statement) + '</p><details><summary>Ver alternativas</summary>' + r.question.options.map((o,i) => '<p>' + String.fromCharCode(65+i) + ' · ' + esc(o) + '</p>').join('') + '</details><strong>Gabarito: ' + esc(r.question.answer || '—') + '</strong><p>' + esc(r.error || '✓ Válida') + '</p></article>').join('');
+      submit.disabled = !valid.length; submit.textContent = 'Importar ' + valid.length + ' questões válidas';
+    } catch(error) {
+      if (ticket !== reading || !dialog.open) return;
+      $('modal-error').textContent = error.message; $('modal-error').hidden = false;
+      $('question-import-summary').textContent = 'Não foi possível validar o arquivo.';
+    }
+  };
+  form.onsubmit = async event => {
+    event.preventDefault();
+    if (submit.disabled) return;
+    const valid = rows.filter(r => !r.error);
+    if (!valid.length) return;
+    submit.disabled = true; submit.textContent = 'Importando…';
+    $('questions-file').disabled = true; $('close-modal').disabled = true;
+    const preventClose = event => event.preventDefault();
+    dialog.addEventListener('cancel', preventClose);
+    try {
+      const imported = await api('/questions/import', { method:'POST', body: { questions: valid.map(r => r.question) } });
+      state.questions.push(...imported);
+      questionFilters = {text:'',subject:'',difficulty:''};
+      dialog.close(); render(); notice(imported.length + ' questões importadas.');
+    } catch(error) {
+      $('modal-error').textContent = error.message; $('modal-error').hidden = false; submit.disabled = false;
+    } finally {
+      dialog.removeEventListener('cancel', preventClose);
+      $('questions-file').disabled = false; $('close-modal').disabled = false;
+      submit.textContent = 'Importar questões válidas';
+    }
+  };
+  dialog.showModal();
 }
 
 function create() {
@@ -425,22 +514,9 @@ document.addEventListener('click', async event => {
         classId: id
       }
     }));
-    if (action === 'question') modal('Nova questão', '<label>Enunciado<textarea name="statement" required maxlength="2000"></textarea></label>' + input('Disciplina', 'subject') + select('Dificuldade', 'difficulty', ['Fácil', 'Médio', 'Difícil'].map(n => ({
-      id: n,
-      name: n
-    }))) + '<div class="option-grid">' + ['A', 'B', 'C', 'D'].map(a => input('Alternativa ' + a, 'option' + a)).join('') + '</div>' + select('Gabarito', 'answer', ['A', 'B', 'C', 'D'].map(n => ({
-      id: n,
-      name: n
-    }))), f => api('/questions', {
-      method: 'POST',
-      body: {
-        statement: f.get('statement'),
-        subject: f.get('subject'),
-        difficulty: f.get('difficulty'),
-        answer: f.get('answer'),
-        options: ['A', 'B', 'C', 'D'].map(a => f.get('option' + a))
-      }
-    }));
+    if (action === 'question') editQuestion();
+    if (action === 'edit-question') editQuestion(id);
+    if (action === 'import-questions') importQuestions();
     if (action === 'delete-question' && confirm('Excluir esta questão do banco? As versões já geradas serão preservadas.')) {
       await api('/questions/' + id, {
         method: 'DELETE'
