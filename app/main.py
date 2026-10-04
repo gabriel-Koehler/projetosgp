@@ -84,6 +84,10 @@ class Question(Payload):
     answer: Letter
 
 
+class QuestionImport(Payload):
+    questions: list[Question] = Field(min_length=1, max_length=500)
+
+
 class Evaluation(Payload):
     name: Text
     classId: Identifier
@@ -267,6 +271,36 @@ def add_question(body: Question, state=Depends(current_state)):
         item = {"id": str(uuid4()), **body.model_dump()}
         state["questions"].append(item)
         return data(item)
+
+
+@app.put("/api/questoes/{question_id}")
+@app.put("/api/questions/{question_id}", include_in_schema=False)
+def update_question(question_id: str, body: Question, state=Depends(current_state)):
+    with provider.lock:
+        question = next((q for q in state["questions"] if q["id"] == question_id), None)
+        if question is None:
+            missing("Questão não encontrada.")
+        question.update(body.model_dump())
+        return data(deepcopy(question))
+
+
+@app.post("/api/questoes/import", status_code=201)
+@app.post("/api/questions/import", status_code=201, include_in_schema=False)
+def import_questions(body: QuestionImport, state=Depends(current_state)):
+    def fingerprint(question):
+        return (question["statement"], question["subject"], tuple(question["options"]), question["answer"])
+    with provider.lock:
+        seen = {fingerprint(q) for q in state["questions"]}
+        items = []
+        for question in body.questions:
+            item = question.model_dump()
+            key = fingerprint(item)
+            if key in seen:
+                raise HTTPException(409, "Questão duplicada no banco ou no lote. Atualize o banco e revise o arquivo.")
+            seen.add(key)
+            items.append({"id": str(uuid4()), **item})
+        state["questions"].extend(items)
+        return data(items)
 
 
 @app.delete("/api/questoes/{question_id}")
