@@ -66,5 +66,10 @@ app.get('/dashboard', async (req, res) => {
     username: user.name
   });
 });
+app.get('/print', async (req, res) => {
+  if (!(await sessionUser(req))) return res.redirect('/');
+  res.render('print');
+});
+app.get('/student', (req, res) => res.render('student'));
 const port = process.env.PORT || 3000;
 app.listen(port, '127.0.0.1', () => console.log('AvaliaSystem em http://localhost:' + port + ' → API Python ' + backend));

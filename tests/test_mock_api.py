@@ -142,6 +142,24 @@ class MockApiTest(unittest.TestCase):
         corrected = self.client.post("/api/resultados", json={"evaluationId": evaluation["id"], "studentId": "a1", "version": "Versão Verde", "answers": ["B", "A"]})
         self.assertEqual(corrected.json()["data"]["grade"], 10)
 
+    def test_public_answer_key_is_explicit_restricted_and_revocable(self):
+        evaluation = self.create_evaluation()
+        endpoint = "/api/avaliacoes/" + evaluation["id"] + "/versoes/A/publicar"
+        anonymous = TestClient(app)
+        self.assertEqual(anonymous.post(endpoint).status_code, 401)
+        self.assertEqual(anonymous.get("/api/avaliacoes/" + evaluation["id"]).status_code, 401)
+        self.assertEqual(anonymous.get("/api/public/gabaritos/missing").status_code, 404)
+        published = self.client.post(endpoint).json()["data"]["path"]
+        token = published.split("token=")[1]
+        content = anonymous.get("/api/public/gabaritos/" + token).json()["data"]
+        self.assertEqual(set(content), {"name", "version", "questions"})
+        self.assertEqual(set(content["questions"][0]), {"position", "statement", "answerLetter", "correctAnswer"})
+        self.assertEqual(content["questions"][0]["answerLetter"], evaluation["versions"][0]["questions"][0]["answerLetter"])
+        self.assertEqual(self.client.post(endpoint).json()["data"]["path"], published)
+        self.assertEqual(self.client.delete(endpoint).status_code, 200)
+        self.assertEqual(anonymous.get("/api/public/gabaritos/" + token).status_code, 404)
+        anonymous.close()
+
     def test_recovery_is_explicitly_simulated(self):
         response = self.client.post("/api/auth/recovery", json={"email": "professor@example.com"})
         self.assertIn("simulada", response.json()["data"]["message"])
