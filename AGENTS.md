@@ -8,3 +8,4 @@ Instruções do responsável pelo projeto:
 - Atualize docs/ACOMPANHAMENTO_ISSUES_GABRIEL.md a cada issue realizada: implementação, validação, branch, commit/PR e pendências. Consulte o estado real do GitHub antes de marcar merge/encerramento.
 - Diferencie implementação entregue, PR aberto, merge e issue encerrada. Não marque concluída uma issue apenas porque há um fluxo parcial no MVP.
 
+- Respeite o revisor indicado na descrição atual da issue: em 2026-10-04, o usuário definiu Gabriel Koehler da Silva (@gabriel-Koehler) como revisor de todas as issues, exceto as atribuídas a EloisaFazzio. Não restaure revisores antigos a partir do backlog.

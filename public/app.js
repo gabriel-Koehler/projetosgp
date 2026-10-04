@@ -39,7 +39,7 @@ function page() {
 function render() {
   const current = page();
   document.querySelectorAll('nav a').forEach(a => {
-    const active = a.hash === '#' + (current === 'class' ? 'classes' : current);
+    const active = a.hash === '#' + (current === 'class' ? 'classes' : current === 'evaluation' ? 'versions' : current);
     a.classList.toggle('active', active);
     if (active) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
@@ -53,6 +53,7 @@ function render() {
     questions,
     create,
     versions,
+    evaluation: evaluationConfirmation,
     correction,
     results
   };
@@ -273,55 +274,93 @@ function importQuestions() {
   dialog.showModal();
 }
 
+
+function draftKey() { return 'avalia-draft:' + user.id; }
+function persistDraft() {
+  try { sessionStorage.setItem(draftKey(), JSON.stringify({ step, draft, questionEntry })); } catch {}
+}
+function captureWizard() {
+  const form = $('evaluation-form');
+  if (!form) return;
+  const data = new FormData(form);
+  if (step === 1) {
+    draft.name = data.get('name') || '';
+    draft.semesterId = data.get('semesterId') || '';
+    draft.classId = data.get('classId') || '';
+  } else if (step === 3) {
+    draft.versionCount = Number(data.get('versionCount')) || 3;
+    draft.versionNames = data.getAll('versionName');
+    draft.shuffleQuestions = data.has('shuffleQuestions');
+    draft.shuffleAlternatives = data.has('shuffleAlternatives');
+  }
+  persistDraft();
+}
+function clearDraft() {
+  draft = {}; questionEntry = {}; step = 1;
+  try { sessionStorage.removeItem(draftKey()); } catch {}
+}
 function create() {
-  screen.innerHTML = head('Nova avaliação', 'Crie e configure uma avaliação em 4 etapas') + '<div class="steps">' + ['Configurar', 'Questões', 'Gabarito', 'Versões'].map((name, i) => '<span class="' + (step === i + 1 ? 'active' : '') + '">' + (i + 1) + ' · ' + name + '</span>').join('') + '</div><form id="evaluation-form" class="panel"><div id="step-body"></div><p id="wizard-error" role="alert" hidden></p><div class="actions">' + (step > 1 ? button('← Voltar', 'previous', 'secondary') : '') + '<a class="btn secondary" href="#dashboard">Cancelar</a><button type="submit">' + (step === 4 ? 'Gerar avaliação' : 'Próxima →') + '</button></div></form>';
-  const body = $('step-body');
-  if (step === 1) body.innerHTML = '<div class="grid-two">' + input('Nome da avaliação', 'name', 'text', draft.name || '') + select('Turma', 'classId', state.classes, draft.classId) + '</div>';
+  draft.questionIds = (draft.questionIds || []).filter(id => state.questions.some(q => q.id === id));
+  if (step > 1 && !state.classes.some(c => c.id === draft.classId)) step = 1;
+  if (step > 2 && !draft.questionIds.length) step = 2;
+  screen.innerHTML = head('Nova avaliação', 'Crie sua avaliação em 3 etapas') +
+    '<ol class="steps wizard-steps">' + ['Turma','Questões','Versões'].map((name,i) => '<li class="' + (step === i+1 ? 'active' : '') + '" ' + (step === i+1 ? 'aria-current="step"' : '') + '>' + (i+1) + ' · ' + name + '</li>').join('') +
+    '</ol><form id="evaluation-form" class="panel"><div id="step-body"></div><p id="wizard-error" role="alert" hidden></p><div class="actions">' +
+    (step > 1 ? button('← Voltar','previous','secondary') : '') + button('Cancelar','cancel-evaluation','secondary') + '<button type="submit">' + (step === 3 ? 'Gerar avaliação' : 'Próxima →') + '</button></div></form>';
+  const body = $('step-body'), form = $('evaluation-form');
+  if (step === 1) {
+    draft.semesterId ||= state.classes.find(c => c.id === draft.classId)?.semesterId || selectedSemester || state.semesters[0]?.id;
+    body.innerHTML = '<div class="grid-two">' + input('Nome da avaliação','name','text',draft.name || '') + select('Semestre','semesterId',state.semesters,draft.semesterId) + '</div><h2 class="wizard-subheading">Selecione a turma</h2><div id="wizard-classes" class="class-grid"></div>';
+    const rooms = () => {
+      const matches = state.classes.filter(c => c.semesterId === form.elements.semesterId.value);
+      $('wizard-classes').innerHTML = matches.map(c => '<label class="class-choice"><input type="radio" name="classId" value="' + esc(c.id) + '" required ' + (draft.classId === c.id ? 'checked' : '') + '><span><strong>' + esc(c.name) + '</strong><small>' + esc(c.code) + ' · ' + state.students.filter(a => a.classId === c.id).length + ' alunos</small></span></label>').join('') || '<p class="empty">Este semestre não tem turmas. <a href="#classes">Cadastrar turma</a></p>';
+    };
+    form.elements.semesterId.onchange = () => { draft.classId = ''; rooms(); captureWizard(); };
+    rooms();
+  }
   if (step === 2) questionWorkspace(body);
-  if (step === 3) body.innerHTML = '<h2>Confira o gabarito</h2>' + draft.questionIds.map(id => {
-    const q = state.questions.find(q => q.id === id);
-    return '<p>' + esc(q.statement) + '<br><span class="badge">' + q.answer + ' · ' + esc(q.options[q.answer.charCodeAt(0) - 65]) + '</span></p>';
-  }).join('');
-  if (step === 4) body.innerHTML = '<h2>Versões e embaralhamento</h2><label>Quantidade de versões<select name="versionCount">' + [1, 2, 3, 4, 5].map(n => '<option ' + (n === (draft.versionCount || 3) ? 'selected' : '') + '>' + n + '</option>').join('') + '</select></label><br><label class="check-row"><input type="checkbox" name="shuffleQuestions" ' + (draft.shuffleQuestions !== false ? 'checked' : '') + '>Embaralhar questões</label><label class="check-row"><input type="checkbox" name="shuffleAlternatives" ' + (draft.shuffleAlternatives !== false ? 'checked' : '') + '>Embaralhar alternativas e ajustar o gabarito</label><p class="muted">' + esc(draft.name) + ' · ' + draft.questionIds.length + ' questões · ' + findName(state.classes, draft.classId) + '</p>';
-  $('evaluation-form').onsubmit = async e => {
-    e.preventDefault();
-    const f = new FormData(e.target);
-    if (step === 1) {
-      draft.name = f.get('name');
-      draft.classId = f.get('classId');
-      if (!draft.classId) return notice('Cadastre uma turma antes de continuar.');
+  if (step === 3) {
+    const names = draft.versionNames || ['A','B','C'];
+    body.innerHTML = '<div class="wizard-summary"><strong>' + esc(draft.name) + '</strong><span>' + findName(state.classes,draft.classId) + ' · ' + draft.questionIds.length + ' questões</span></div>' +
+      '<div class="grid-two"><section><h2>Configurar versões</h2><label>Quantidade de versões<select name="versionCount">' + [1,2,3,4,5].map(n => '<option '+(n === (draft.versionCount || 3) ? 'selected' : '')+'>'+n+'</option>').join('') + '</select></label><div id="version-names" class="version-name-fields"></div><p class="muted">Nomes únicos, com até 30 caracteres: letras, números, espaços, hífen ou sublinhado.</p><label class="check-row"><input type="checkbox" name="shuffleQuestions" ' + (draft.shuffleQuestions !== false ? 'checked' : '') + '>Embaralhar questões</label><label class="check-row"><input type="checkbox" name="shuffleAlternatives" ' + (draft.shuffleAlternatives !== false ? 'checked' : '') + '>Embaralhar alternativas e ajustar o gabarito</label><p class="muted">Todas as versões usam as mesmas questões selecionadas.</p></section><section><h2>Confira as questões e gabaritos</h2><ol class="wizard-answer-review">' +
+      draft.questionIds.map(id => { const q=state.questions.find(q=>q.id===id);return '<li>'+esc(q.statement)+'<p><span class="badge">Gabarito '+q.answer+' · '+esc(q.options[q.answer.charCodeAt(0)-65])+'</span></p></li>'; }).join('') + '</ol></section></div>';
+    const renderNames = values => {
+      $('version-names').innerHTML = Array.from({length:Number(form.elements.versionCount.value)},(_,i) => '<label>Nome da versão '+(i+1)+'<input name="versionName" value="'+esc(values[i] ?? String.fromCharCode(65+i))+'" required maxlength="30"></label>').join('');
+    };
+    renderNames(names);
+    form.elements.versionCount.onchange = () => { const values=Array.from(form.querySelectorAll('[name=versionName]')).map(e=>e.value);renderNames(values);captureWizard(); };
+  }
+  form.addEventListener('input', event => { if(event.target.form === form)captureWizard(); });
+  form.addEventListener('change', event => { if(event.target.form === form)captureWizard(); });
+  form.onsubmit = async event => {
+    event.preventDefault(); captureWizard();
+    if (step === 1 && (!draft.name.trim() || !draft.classId)) return notice('Informe o nome e selecione uma turma.');
+    if (step === 2 && !draft.questionIds.length) return notice('Selecione pelo menos uma questão.');
+    if (step === 2 && draft.questionIds.length > 100) return notice('Selecione no máximo 100 questões por avaliação.');
+    if (step < 3) { step++;persistDraft();create();return; }
+    const names=draft.versionNames.map(name=>name.trim());
+    if (names.some(name=>!name || !/^[\p{L}\p{N}_ -]+$/u.test(name)) || new Set(names.map(name=>name.toLocaleLowerCase('pt-BR'))).size !== names.length) {
+      $('wizard-error').hidden=false;$('wizard-error').textContent='Informe nomes válidos e diferentes para todas as versões.';return;
     }
-    if (step === 2) {
-      draft.questionIds ||= [];
-      if (!draft.questionIds.length) return notice('Selecione pelo menos uma questão.');
-    }
-    if (step < 4) {
-      step++;
-      create();
-      return;
-    }
-    draft.versionCount = Number(f.get('versionCount'));
-    draft.shuffleQuestions = f.has('shuffleQuestions');
-    draft.shuffleAlternatives = f.has('shuffleAlternatives');
-    const submit = e.submitter;
-    submit.disabled = true;
+    const buttons=form.querySelectorAll('.actions button');
+    buttons.forEach(button=>{button.disabled=true;});
+    event.submitter.textContent='Gerando avaliação…';
+    $('wizard-error').hidden=true;
     try {
-      await api('/evaluations', {
-        method: 'POST',
-        body: draft
-      });
-      await refresh();
-      draft = {};
-      step = 1;
-      location.hash = 'versions';
-      notice('Avaliação gerada com sucesso.');
-    } catch (err) {
-      $('wizard-error').hidden = false;
-      $('wizard-error').textContent = err.message;
-    } finally {
-      submit.disabled = false;
-    }
+      const evaluation=await api('/evaluations',{method:'POST',body:{
+        name:draft.name.trim(),classId:draft.classId,questionIds:draft.questionIds,
+        versionCount:draft.versionCount,versionNames:names,
+        shuffleQuestions:draft.shuffleQuestions,shuffleAlternatives:draft.shuffleAlternatives
+      }});
+      state.evaluations.push(evaluation);
+      clearDraft();
+      location.hash='evaluation?id='+encodeURIComponent(evaluation.id)+'&created=1';
+      notice('Avaliação criada. Selecione uma versão para conferir questões e gabarito.');
+    } catch(error) {
+      if(document.contains(form)){ $('wizard-error').hidden=false;$('wizard-error').textContent=error.message; }
+    } finally { buttons.forEach(button=>{button.disabled=false;});event.submitter.textContent='Gerar avaliação'; }
   };
+  persistDraft();
 }
 
 // Separate form ownership avoids nesting forms inside the evaluation wizard.
@@ -337,7 +376,7 @@ function questionWorkspace(body) {
   const fields = $('question-entry-fields');
   fields.querySelectorAll('[name]').forEach(field => {
     if (questionEntry[field.name] !== undefined) field.value = questionEntry[field.name];
-    field.oninput = () => { questionEntry[field.name] = field.value; };
+    field.oninput = () => { questionEntry[field.name] = field.value; persistDraft(); };
   });
   function renderBank() {
     const term = $('wizard-bank-search').value.trim().toLocaleLowerCase('pt-BR');
@@ -349,6 +388,7 @@ function questionWorkspace(body) {
       input.onchange = () => {
         if (input.checked) draft.questionIds = [...new Set([...draft.questionIds, input.value])];
         else draft.questionIds = draft.questionIds.filter(id => id !== input.value);
+        persistDraft();
         renderBank();
       };
     });
@@ -375,9 +415,12 @@ function questionWorkspace(body) {
       state.questions.push(question);
       draft.questionIds = [...new Set([...draft.questionIds, question.id])];
       questionEntry = { subject: formData.get('subject'), difficulty: formData.get('difficulty') };
-      owner.reset();
-      owner.elements.subject.value = questionEntry.subject;
-      owner.elements.difficulty.value = questionEntry.difficulty;
+      persistDraft();
+      if (document.contains(body)) {
+        owner.reset();
+        owner.elements.subject.value = questionEntry.subject;
+        owner.elements.difficulty.value = questionEntry.difficulty;
+      }
       // Clear the filter to make the new bank entry visible immediately.
       if (document.contains(body)) {
         $('wizard-bank-search').value = '';
@@ -399,9 +442,25 @@ function questionWorkspace(body) {
   };
 }
 
+
+function versionCards(evaluation, activeName = null) {
+  return '<div class="version-grid">' + evaluation.versions.map(version =>
+    '<article class="panel version-choice ' + (version.name === activeName ? 'selected' : '') + '"><h3>Versão ' + esc(version.name) + '</h3><p class="muted">' + version.questions.length + ' questões · gabarito próprio</p><div class="actions"><a class="btn secondary" ' + (version.name === activeName ? 'aria-current="true"' : '') + ' href="#evaluation?id=' + encodeURIComponent(evaluation.id) + '&version=' + encodeURIComponent(version.name) + '">Abrir versão ' + esc(version.name) + '</a>' +
+    button('Ver QR Code','qr:'+evaluation.id+':'+encodeURIComponent(version.name),'secondary') + '</div></article>').join('') + '</div>';
+}
 function versions() {
-  screen.innerHTML = head('Versões & QR Code', 'Consulte questões, gabaritos e QR Codes', '<a class="btn" href="#create">+ Nova avaliação</a>') +
-    (state.evaluations.length ? state.evaluations.map(e => '<section class="panel"><div class="section-heading"><div><h2>' + esc(e.name) + '</h2><p>' + findName(state.classes, e.classId) + '</p></div><a href="#correction">Iniciar correção →</a></div><div class="version-grid">' + e.versions.map(v => '<article class="panel"><h3>Versão ' + esc(v.name) + '</h3><p class="muted">' + v.questions.length + ' questões</p><ol>' + v.questions.map(q => '<li>' + esc(q.statement) + '<p><span class="badge">' + q.answerLetter + ' · ' + esc(q.correctAnswer) + '</span></p></li>').join('') + '</ol>' + button('Ver QR Code', 'qr:' + e.id + ':' + v.name, 'secondary') + '</article>').join('') + '</div></section>').join('') : empty('Nenhuma versão gerada', 'Crie uma avaliação para consultar os gabaritos e QR Codes.'));
+  screen.innerHTML=head('Versões & QR Code','Consulte avaliações, questões e gabaritos','<a class="btn" href="#create">+ Nova avaliação</a>')+
+    (state.evaluations.length ? state.evaluations.map(e=>'<section class="panel"><div class="section-heading"><div><h2>'+esc(e.name)+'</h2><p>'+findName(state.classes,e.classId)+'</p></div><a href="#evaluation?id='+encodeURIComponent(e.id)+'">Consultar avaliação →</a></div>'+versionCards(e)+'</section>').join('') : empty('Nenhuma versão gerada','Crie uma avaliação para consultar os gabaritos e QR Codes.'));
+}
+function evaluationConfirmation() {
+  const params=routeParams(), evaluation=state.evaluations.find(e=>e.id===params.get('id'));
+  if(!evaluation){screen.innerHTML=head('Avaliação não encontrada','Verifique o link ou selecione outra avaliação.')+'<a class="btn" href="#versions">Voltar às avaliações</a>';return;}
+  const version=evaluation.versions.find(v=>v.name===params.get('version')) || evaluation.versions[0];
+  screen.innerHTML='<a class="breadcrumb" href="#versions">← Todas as avaliações</a>'+
+    head(params.get('created') ? 'Avaliação criada com sucesso' : esc(evaluation.name),esc(evaluation.name)+' · '+findName(state.classes,evaluation.classId)+' · '+evaluation.versions.length+' versões',
+      '<a class="btn secondary" href="#create">Criar outra avaliação</a><a class="btn" href="#correction">Ir para correção</a>')+
+    versionCards(evaluation,version.name)+
+    '<section class="panel version-detail"><h2>Questões e gabarito · Versão '+esc(version.name)+'</h2><ol>'+version.questions.map(q=>'<li><h3>'+esc(q.statement)+'</h3><div class="question-options">'+q.options.map((o,i)=>'<div class="'+(String.fromCharCode(65+i)===q.answerLetter?'correct':'')+'">'+String.fromCharCode(65+i)+' · '+esc(o)+'</div>').join('')+'</div><p><span class="badge">Gabarito: '+q.answerLetter+'</span></p></li>').join('')+'</ol></section>';
 }
 
 function correction() {
@@ -494,7 +553,11 @@ document.addEventListener('click', async event => {
   if (!target) return;
   const [action, id, version] = target.dataset.action.split(':');
   try {
+    if (action === 'cancel-evaluation') {
+      if (confirm('Descartar o rascunho da avaliação? As questões já salvas permanecerão no banco.')) { clearDraft(); location.hash = 'dashboard'; }
+    }
     if (action === 'previous') {
+      captureWizard();
       step = Math.max(1, step - 1);
       create();
     }
@@ -526,8 +589,9 @@ document.addEventListener('click', async event => {
       notice('Questão excluída.');
     }
     if (action === 'qr') {
-      const qr = await api('/evaluations/' + id + '/qr/' + version);
-      modal('QR Code · Versão ' + version, '<img class="qr-code" src="' + qr.image + '" alt="QR Code da versão"><p class="muted">Identifica a avaliação e a versão.</p><a class="btn" download="qr-' + version + '.png" href="' + qr.image + '">Baixar PNG</a>', async () => {});
+      const versionName = decodeURIComponent(version);
+      const qr = await api('/evaluations/' + id + '/qr/' + encodeURIComponent(versionName));
+      modal('QR Code · Versão ' + versionName, '<img class="qr-code" src="' + qr.image + '" alt="QR Code da versão"><p class="muted">Identifica a avaliação e a versão.</p><a class="btn" download="qr-' + version + '.png" href="' + qr.image + '">Baixar PNG</a>', async () => {});
       $('modal-form').querySelector('[type=submit]').hidden = true;
     }
     if (action === 'print') window.print();
@@ -570,6 +634,13 @@ try {
   user = await api('/auth/me');
   $('professor-name').textContent = user.name;
   await refresh();
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(draftKey()) || 'null');
+    if (saved && saved.draft && Array.isArray(saved.draft.questionIds)) {
+      draft = saved.draft; step = [1,2,3].includes(saved.step) ? saved.step : 1;
+      questionEntry = saved.questionEntry || {};
+    }
+  } catch {}
   render();
 } catch (e) {
   screen.innerHTML = '<div class="panel"><h1>Não foi possível carregar</h1><p id="load-error"></p><button onclick="location.reload()">Tentar novamente</button> <a href="/">Voltar ao login</a></div>';
