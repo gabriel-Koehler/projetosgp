@@ -7,10 +7,10 @@ Este é o arquivo de acompanhamento oficial para atualizar ao concluir cada issu
 ## Visão geral
 - Total de issues atribuídas: **13**.
 - Issues encerradas no GitHub nesta consulta: **0**.
-- **7 issues implementadas e publicadas**, com PRs abertos: FE-01, BE-02, FE-02, FE-03, FE-04, FE-05 e FE-06.
+- **8 issues implementadas e publicadas**, com PRs abertos: FE-01, BE-02, FE-02, FE-03, FE-04, FE-05, FE-06 e FE-07.
 - FE-04: publicada no PR #56; commit 75327b2.
 - FE-05: publicada no PR #57; commit e227db5, derivado de FE-04.
-- **6 issues restantes para concluir a implementação**: #3, #14, #22, #23, #25 e #28 (incluindo as parciais do MVP e a infraestrutura a auditar).
+- **5 issues restantes para concluir a implementação**: #3, #22, #23, #25 e #28 (incluindo as parciais do MVP e a infraestrutura a auditar).
 - Nenhum PR aberto equivale a merge ou encerramento automático já realizado.
 
 ## Controle das entregas
@@ -25,7 +25,7 @@ Este é o arquivo de acompanhamento oficial para atualizar ao concluir cada issu
 | [#9 N1-FE-04 — Banco de questões](https://github.com/gabriel-Koehler/projetosgp/issues/9) | Entregue | Aberta, PR aberto | `feat/n1-fe-04-banco-questoes`, `75327b2`; [PR #56](https://github.com/gabriel-Koehler/projetosgp/pull/56) | Revisão e merge após #53 |
 | [#12 N1-FE-05 — Assistente de avaliações](https://github.com/gabriel-Koehler/projetosgp/issues/12) | Entregue | Aberta, PR aberto | `feat/n1-fe-05-criacao-avaliacoes-versoes`, `e227db5`; [PR #57](https://github.com/gabriel-Koehler/projetosgp/pull/57) | Revisão e merge após #56 |
 | [#13 N1-FE-06 — Impressão e tela aluno](https://github.com/gabriel-Koehler/projetosgp/issues/13) | Entregue | Aberta, PR aberto | `feat/n1-fe-06-impressao-prova-aluno`, `3f7ce1a`; [PR #58](https://github.com/gabriel-Koehler/projetosgp/pull/58) | Revisão e merge após #57 |
-| [#14 N1-FE-07 — Correção e estatísticas simuladas](https://github.com/gabriel-Koehler/projetosgp/issues/14) | Parcial no MVP; issue não concluída | Aberta | Há respostas manuais, notas, gráfico e CSV | Validar e completar o fluxo específico da issue |
+| [#14 N1-FE-07 — Correção e estatísticas simuladas](https://github.com/gabriel-Koehler/projetosgp/issues/14) | Entregue | Aberta, publicação em andamento | `feat/n1-fe-07-correcao-estatisticas` | Revisão e merge após #58 |
 | [#22 N2-FE-01 — Autenticação e turmas com API real](https://github.com/gabriel-Koehler/projetosgp/issues/22) | Sem entrega específica identificada | Aberta | Cliente usa API mock Python | Integrar e validar API real |
 | [#23 N2-FE-02 — Questões e upload com API real](https://github.com/gabriel-Koehler/projetosgp/issues/23) | Sem entrega específica identificada | Aberta | Importação e CRUD usam estado mock | Integrar persistência e upload reais |
 | [#25 N2-FE-03 — Avaliações e versões persistidas](https://github.com/gabriel-Koehler/projetosgp/issues/25) | Sem entrega específica identificada | Aberta | Avaliações ainda em memória | Integrar criação e persistência reais |
@@ -72,8 +72,16 @@ Assistente de 3 etapas, nomes únicos, rascunho por usuário, contadores, confir
 
 ## Sequência de branches e PRs
 FE-03 (PR #53) → FE-04 (PR #56, 75327b2) → FE-05 (PR #57, e227db5).
-FE-06 parte da FE-05; a próxima branch FE-07 deve partir da última revisão da FE-06.
+FE-06 (PR #58, 3f7ce1a) parte da FE-05. FE-07 parte da FE-06 em 3cfa132. A próxima issue deve partir da revisão mais recente de feat/n1-fe-07-correcao-estatisticas.
 
 ## Evidências FE-06
 Impressão A4 de prova, folha com QR/bolhas A–D e gabarito do professor. Liberação explícita e revogável do gabarito público, com página do aluno responsiva. 11 testes Python aprovados. Navegador: prova de 45 questões, PDFs de 10/2/5 páginas, revisão visual e acesso anônimo/revogação em 390 px. Dados permanecem em memória.
 
+
+## Evidências FE-07
+- Upload local de PNG/JPEG/PDF com validação de formato e limite de 10 MB; feedback por etapas e prévia de imagem.
+- Leitura explicitamente simulada, respostas editáveis, confirmação obrigatória, entrada manual e proteção contra duplicidade.
+- Notas por aluno, conferência de respostas, filtros de avaliação/aluno, relatório imprimível e CSV do filtro.
+- Percentual de acertos e alternativas mais marcadas, com empates e identificação original preservada entre versões embaralhadas.
+- 12 testes Python e 8 testes Node aprovados. Navegador: upload, revisão, notas 10/0, estatística 50%, filtros, CSV, estado vazio, duplicidade e viewport 390 px sem overflow.
+- Dados permanecem em memória e não há OCR real. Implementação entregue não significa issue encerrada; merge depende de revisão.
