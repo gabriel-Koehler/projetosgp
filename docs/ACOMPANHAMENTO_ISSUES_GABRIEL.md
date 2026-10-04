@@ -25,7 +25,7 @@ Este é o arquivo de acompanhamento oficial para atualizar ao concluir cada issu
 | [#9 N1-FE-04 — Banco de questões](https://github.com/gabriel-Koehler/projetosgp/issues/9) | Entregue | Aberta, PR aberto | `feat/n1-fe-04-banco-questoes`, `75327b2`; [PR #56](https://github.com/gabriel-Koehler/projetosgp/pull/56) | Revisão e merge após #53 |
 | [#12 N1-FE-05 — Assistente de avaliações](https://github.com/gabriel-Koehler/projetosgp/issues/12) | Entregue | Aberta, PR aberto | `feat/n1-fe-05-criacao-avaliacoes-versoes`, `e227db5`; [PR #57](https://github.com/gabriel-Koehler/projetosgp/pull/57) | Revisão e merge após #56 |
 | [#13 N1-FE-06 — Impressão e tela aluno](https://github.com/gabriel-Koehler/projetosgp/issues/13) | Entregue | Aberta, PR aberto | `feat/n1-fe-06-impressao-prova-aluno`, `3f7ce1a`; [PR #58](https://github.com/gabriel-Koehler/projetosgp/pull/58) | Revisão e merge após #57 |
-| [#14 N1-FE-07 — Correção e estatísticas simuladas](https://github.com/gabriel-Koehler/projetosgp/issues/14) | Entregue | Aberta, publicação em andamento | `feat/n1-fe-07-correcao-estatisticas` | Revisão e merge após #58 |
+| [#14 N1-FE-07 — Correção e estatísticas simuladas](https://github.com/gabriel-Koehler/projetosgp/issues/14) | Entregue | Aberta, PR aberto | `feat/n1-fe-07-correcao-estatisticas`, `3c2d899`; [PR #59](https://github.com/gabriel-Koehler/projetosgp/pull/59) | Revisão e merge após #58 |
 | [#22 N2-FE-01 — Autenticação e turmas com API real](https://github.com/gabriel-Koehler/projetosgp/issues/22) | Sem entrega específica identificada | Aberta | Cliente usa API mock Python | Integrar e validar API real |
 | [#23 N2-FE-02 — Questões e upload com API real](https://github.com/gabriel-Koehler/projetosgp/issues/23) | Sem entrega específica identificada | Aberta | Importação e CRUD usam estado mock | Integrar persistência e upload reais |
 | [#25 N2-FE-03 — Avaliações e versões persistidas](https://github.com/gabriel-Koehler/projetosgp/issues/25) | Sem entrega específica identificada | Aberta | Avaliações ainda em memória | Integrar criação e persistência reais |
@@ -85,3 +85,4 @@ Impressão A4 de prova, folha com QR/bolhas A–D e gabarito do professor. Liber
 - Percentual de acertos e alternativas mais marcadas, com empates e identificação original preservada entre versões embaralhadas.
 - 12 testes Python e 8 testes Node aprovados. Navegador: upload, revisão, notas 10/0, estatística 50%, filtros, CSV, estado vazio, duplicidade e viewport 390 px sem overflow.
 - Dados permanecem em memória e não há OCR real. Implementação entregue não significa issue encerrada; merge depende de revisão.
+
