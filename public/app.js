@@ -1,3 +1,4 @@
+import { parseStudentsCsv } from './student-csv.js';
 import {
   api
 } from './api.js';
@@ -99,8 +100,77 @@ function classDetails() {
   selectedSemester = room.semesterId;
   const students = state.students.filter(a => a.classId === room.id);
   screen.innerHTML = '<a class="breadcrumb" href="#classes?semester=' + encodeURIComponent(room.semesterId) + '">← Semestres & Turmas · ' + findName(state.semesters, room.semesterId) + '</a>' +
-    head(esc(room.name), esc(room.code) + ' · ' + students.length + ' alunos', button('+ Adicionar aluno', 'student:' + room.id)) +
-    '<section class="panel"><h2>Alunos da turma</h2>' + (students.length ? '<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Matrícula</th></tr></thead><tbody>' + students.map(a => '<tr><td>' + esc(a.name) + '</td><td>' + esc(a.registration) + '</td></tr>').join('') + '</tbody></table></div>' : '<p class="empty">Nenhum aluno cadastrado nesta turma.</p>') + '</section>';
+    head(esc(room.name), esc(room.code) + ' · ' + students.length + ' alunos', button('Importar alunos', 'import-students:' + room.id, 'secondary') + button('+ Adicionar aluno', 'student:' + room.id)) +
+
+    '<section class="panel"><h2>Alunos da turma</h2><label>Buscar aluno<input id="student-search" type="search" placeholder="Nome ou matrícula"></label><p id="student-count" class="muted" role="status"></p><div id="student-list"></div></section>';
+  const renderStudents = () => {
+    const term = $('student-search').value.trim().toLocaleLowerCase('pt-BR');
+    const found = students.filter(a => (a.name + ' ' + a.registration).toLocaleLowerCase('pt-BR').includes(term));
+    $('student-count').textContent = found.length + ' de ' + students.length + ' alunos';
+    $('student-list').innerHTML = found.length ? '<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Matrícula</th></tr></thead><tbody>' + found.map(a => '<tr><td>' + esc(a.name) + '</td><td>' + esc(a.registration) + '</td></tr>').join('') + '</tbody></table></div>' : '<p class="empty">' + (students.length ? 'Nenhum aluno encontrado para essa busca.' : 'Nenhum aluno cadastrado. Adicione um aluno ou importe o modelo CSV.') + '</p>';
+  };
+  $('student-search').oninput = renderStudents;
+  renderStudents();
+}
+
+function importStudents(classId) {
+  const room = state.classes.find(c => c.id === classId);
+  if (!room) return notice('Turma não encontrada.');
+  const dialog = $('modal'), form = $('modal-form');
+  $('modal-title').textContent = 'Importar alunos · ' + room.name;
+  $('modal-error').hidden = true;
+  $('modal-fields').innerHTML = '<p class="muted">Envie uma planilha salva como CSV UTF-8 (até 500 alunos e 1 MB). Confira a prévia antes de confirmar. Matrículas devem ser únicas em todo o banco.</p><a href="/modelo_alunos.csv" download="modelo_alunos.csv">↓ Baixar modelo_alunos.csv</a><label>Arquivo CSV<input id="students-file" type="file" accept=".csv,text/csv" required></label><p id="import-summary" role="status">Nenhum arquivo selecionado.</p><div id="import-preview" class="import-preview"></div>';
+  const submit = form.querySelector('[type=submit]');
+  submit.hidden = false; submit.disabled = true; submit.textContent = 'Importar alunos válidos';
+  let rows = [], reading = 0;
+  const preview = () => {
+    const valid = rows.filter(r => !r.error);
+    $('import-summary').textContent = valid.length + ' válidos · ' + (rows.length - valid.length) + ' inválidos. Somente as linhas válidas serão importadas.';
+    $('import-preview').innerHTML = '<table><thead><tr><th>Linha</th><th>Nome</th><th>Matrícula</th><th>Validação</th></tr></thead><tbody>' + rows.map(r => '<tr class="' + (r.error ? 'invalid-row' : '') + '"><td>' + r.line + '</td><td>' + esc(r.name) + '</td><td>' + esc(r.registration) + '</td><td>' + (r.error ? esc(r.error) : '✓ Válido') + '</td></tr>').join('') + '</tbody></table>';
+    submit.disabled = !valid.length;
+    submit.textContent = 'Importar ' + valid.length + ' alunos válidos';
+  };
+  $('students-file').onchange = async event => {
+    const current = ++reading;
+    rows = []; submit.disabled = true; $('modal-error').hidden = true;
+    $('import-preview').innerHTML = ''; $('import-summary').textContent = 'Lendo arquivo…';
+    const file = event.target.files[0];
+    if (!file) { $('import-summary').textContent = 'Nenhum arquivo selecionado.'; return; }
+    try {
+      if (!file.name.toLowerCase().endsWith('.csv') || file.size > 1024 * 1024) throw new Error('Selecione um arquivo .csv de até 1 MB.');
+      const content = await file.text();
+      if (current !== reading || !dialog.open) return;
+      rows = parseStudentsCsv(content, state.students);
+      preview();
+    } catch (error) {
+      if (current !== reading || !dialog.open) return;
+      $('modal-error').textContent = error.message; $('modal-error').hidden = false;
+      $('import-summary').textContent = 'Não foi possível validar o arquivo.';
+    }
+  };
+  form.onsubmit = async event => {
+    event.preventDefault();
+    const valid = rows.filter(r => !r.error);
+    if (!valid.length || submit.disabled) return;
+    submit.disabled = true; submit.textContent = 'Importando…'; $('modal-error').hidden = true;
+    $('students-file').disabled = true; $('close-modal').disabled = true;
+    const preventClose = event => event.preventDefault();
+    dialog.addEventListener('cancel', preventClose);
+    try {
+      const result = await api('/students/import', { method: 'POST', body: { classId, students: valid.map(({ name, registration }) => ({ name, registration })) } });
+      state.students.push(...result);
+      dialog.close(); render();
+      notice(result.length + ' alunos importados para ' + room.name + '.');
+    } catch (error) {
+      $('modal-error').textContent = error.message; $('modal-error').hidden = false;
+      submit.disabled = false;
+    } finally {
+      dialog.removeEventListener('cancel', preventClose);
+      $('students-file').disabled = false; $('close-modal').disabled = false;
+      submit.textContent = 'Importar alunos válidos';
+    }
+  };
+  dialog.showModal();
 }
 
 function questions() {
@@ -305,6 +375,8 @@ function results() {
 }
 
 function modal(title, fields, onSave) {
+  $('modal-form').querySelector('[type=submit]').disabled = false;
+  $('modal-form').querySelector('[type=submit]').textContent = 'Salvar';
   $('modal-title').textContent = title;
   $('modal-fields').innerHTML = fields;
   $('modal-error').hidden = true;
@@ -345,6 +417,7 @@ document.addEventListener('click', async event => {
       method: 'POST',
       body: Object.fromEntries(f)
     }));
+    if (action === 'import-students') importStudents(id);
     if (action === 'student') modal('Novo aluno', input('Nome completo', 'name') + input('Matrícula', 'registration'), f => api('/students', {
       method: 'POST',
       body: {

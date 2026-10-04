@@ -66,6 +66,16 @@ class Student(Payload):
     classId: Identifier
 
 
+class ImportedStudent(Payload):
+    name: Text
+    registration: Text
+
+
+class StudentImport(Payload):
+    classId: Identifier
+    students: list[ImportedStudent] = Field(min_length=1, max_length=500)
+
+
 class Question(Payload):
     statement: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=2000)]
     subject: Text
@@ -225,6 +235,23 @@ def add_student(body: Student, state=Depends(current_state)):
         item = {"id": str(uuid4()), **body.model_dump()}
         state["students"].append(item)
         return data(item)
+
+
+@app.post("/api/alunos/import", status_code=201)
+@app.post("/api/students/import", status_code=201, include_in_schema=False)
+def import_students(body: StudentImport, state=Depends(current_state)):
+    # Revalidate on confirmation; a stale preview must never create duplicates.
+    with provider.lock:
+        if not any(c["id"] == body.classId for c in state["classes"]):
+            raise HTTPException(400, "Turma não encontrada.")
+        registrations = {a["registration"] for a in state["students"]}
+        for student in body.students:
+            if student.registration in registrations:
+                raise HTTPException(409, "Matrícula duplicada: " + student.registration + ". Atualize a lista e selecione o arquivo novamente.")
+            registrations.add(student.registration)
+        items = [{"id": str(uuid4()), "classId": body.classId, **student.model_dump()} for student in body.students]
+        state["students"].extend(items)
+        return data(items)
 
 
 @app.get("/api/questoes")
