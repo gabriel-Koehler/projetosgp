@@ -26,6 +26,8 @@ class Settings:
     session_https_only: bool = False
     session_max_age: int = 60 * 60 * 8
     cors_origins: list[str] = field(default_factory=list)
+    # URL pública usada no QR Code. Vazio = endereço de quem fez a requisição.
+    public_base_url: str | None = None
 
 
 @lru_cache
@@ -43,4 +45,5 @@ def get_settings() -> Settings:
         professor_nome=os.getenv("PROFESSOR_NOME", "Professor"),
         session_https_only=_bool(os.getenv("SESSION_HTTPS_ONLY")),
         cors_origins=_lista(os.getenv("CORS_ORIGINS")),
+        public_base_url=os.getenv("PUBLIC_BASE_URL") or None,
     )

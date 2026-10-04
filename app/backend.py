@@ -5,14 +5,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import Settings, get_settings
-from app.routers import auth, painel
+from app.routers import aluno, auth, avaliacoes, painel
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
 
     app = FastAPI(
-        title="Sistema de GeraÃ§Ã£o e CorreÃ§Ã£o AutomÃ¡tica de AvaliaÃ§Ãµes",
+        title="Sistema de Geração e Correção Automática de Avaliações",
         version="0.1.0",
     )
 
@@ -37,6 +37,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.include_router(auth.router)
     app.include_router(painel.router)
+    app.include_router(avaliacoes.router)
+    app.include_router(aluno.router)
 
     @app.get("/api/health", tags=["infra"])
     def health():
