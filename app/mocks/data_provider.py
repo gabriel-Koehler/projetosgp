@@ -57,6 +57,7 @@ class MemoryProvider:
         self.users = {}
         self.states = {}
         self.sessions = {}
+        self.publications = {}
         self.add_user("Prof. Dr. Carlos Silva", "professor@avaliasystem.com", "123456", "professor")
 
     def add_user(self, name, email, password, user_id=None):

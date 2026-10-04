@@ -452,6 +452,13 @@ function versions() {
   screen.innerHTML=head('Versões & QR Code','Consulte avaliações, questões e gabaritos','<a class="btn" href="#create">+ Nova avaliação</a>')+
     (state.evaluations.length ? state.evaluations.map(e=>'<section class="panel"><div class="section-heading"><div><h2>'+esc(e.name)+'</h2><p>'+findName(state.classes,e.classId)+'</p></div><a href="#evaluation?id='+encodeURIComponent(e.id)+'">Consultar avaliação →</a></div>'+versionCards(e)+'</section>').join('') : empty('Nenhuma versão gerada','Crie uma avaliação para consultar os gabaritos e QR Codes.'));
 }
+
+function documentActions(evaluation, version) {
+  const params = new URLSearchParams({evaluation: evaluation.id, version: version.name});
+  return '<section class="panel document-actions"><h2>Documentos · Versão ' + esc(version.name) + '</h2><div class="actions">' +
+    [['exam','Imprimir prova'],['answers','Imprimir folha de respostas'],['key','Imprimir gabarito']].map(([type,label]) => '<a class="btn secondary" target="_blank" rel="noopener" href="/print?' + params.toString() + '&type=' + type + '">' + label + '</a>').join('') +
+    button('Liberar gabarito ao aluno','publish-key:' + evaluation.id + ':' + encodeURIComponent(version.name)) + '</div></section>';
+}
 function evaluationConfirmation() {
   const params=routeParams(), evaluation=state.evaluations.find(e=>e.id===params.get('id'));
   if(!evaluation){screen.innerHTML=head('Avaliação não encontrada','Verifique o link ou selecione outra avaliação.')+'<a class="btn" href="#versions">Voltar às avaliações</a>';return;}
@@ -459,7 +466,7 @@ function evaluationConfirmation() {
   screen.innerHTML='<a class="breadcrumb" href="#versions">← Todas as avaliações</a>'+
     head(params.get('created') ? 'Avaliação criada com sucesso' : esc(evaluation.name),esc(evaluation.name)+' · '+findName(state.classes,evaluation.classId)+' · '+evaluation.versions.length+' versões',
       '<a class="btn secondary" href="#create">Criar outra avaliação</a><a class="btn" href="#correction">Ir para correção</a>')+
-    versionCards(evaluation,version.name)+
+    versionCards(evaluation,version.name)+documentActions(evaluation,version)+
     '<section class="panel version-detail"><h2>Questões e gabarito · Versão '+esc(version.name)+'</h2><ol>'+version.questions.map(q=>'<li><h3>'+esc(q.statement)+'</h3><div class="question-options">'+q.options.map((o,i)=>'<div class="'+(String.fromCharCode(65+i)===q.answerLetter?'correct':'')+'">'+String.fromCharCode(65+i)+' · '+esc(o)+'</div>').join('')+'</div><p><span class="badge">Gabarito: '+q.answerLetter+'</span></p></li>').join('')+'</ol></section>';
 }
 
@@ -593,6 +600,26 @@ document.addEventListener('click', async event => {
       const qr = await api('/evaluations/' + id + '/qr/' + encodeURIComponent(versionName));
       modal('QR Code · Versão ' + versionName, '<img class="qr-code" src="' + qr.image + '" alt="QR Code da versão"><p class="muted">Identifica a avaliação e a versão.</p><a class="btn" download="qr-' + version + '.png" href="' + qr.image + '">Baixar PNG</a>', async () => {});
       $('modal-form').querySelector('[type=submit]').hidden = true;
+    }
+
+    if (action === 'publish-key') {
+      if (!confirm('Liberar o gabarito desta versão? Qualquer pessoa com o link poderá ver as respostas corretas.')) return;
+      const name = decodeURIComponent(version);
+      const link = await api('/evaluations/' + id + '/versoes/' + encodeURIComponent(name) + '/publicar', {method:'POST'});
+      const url = location.origin + link.path;
+      modal('Gabarito liberado · ' + name,
+        '<p>Compartilhe este link quando os alunos puderem consultar as respostas. O link não mostra alunos, notas ou respostas individuais.</p><label>Link público<input id="public-key-link" readonly value="' + esc(url) + '"></label><div class="actions"><a class="btn secondary" target="_blank" rel="noopener" href="' + esc(link.path) + '">Abrir tela do aluno</a>' + button('Copiar link','copy-key','secondary') + button('Revogar acesso','revoke-key:' + id + ':' + version,'danger') + '</div>', async()=>{});
+      $('modal-form').querySelector('[type=submit]').hidden=true;
+    }
+    if (action === 'copy-key') {
+      const input=$('public-key-link');
+      try { await navigator.clipboard.writeText(input.value); notice('Link copiado.'); }
+      catch { input.focus(); input.select(); notice('Selecione e copie o link exibido.'); }
+    }
+    if (action === 'revoke-key') {
+      if(!confirm('Revogar o link público deste gabarito?'))return;
+      await api('/evaluations/' + id + '/versoes/' + encodeURIComponent(decodeURIComponent(version)) + '/publicar',{method:'DELETE'});
+      $('modal').close(); notice('Acesso público revogado.');
     }
     if (action === 'print') window.print();
     if (action === 'export') {

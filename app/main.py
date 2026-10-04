@@ -4,6 +4,7 @@ import io
 import json
 import random
 import re
+from secrets import token_urlsafe
 from copy import deepcopy
 from datetime import datetime, timezone
 from typing import Annotated, Literal
@@ -328,6 +329,55 @@ def delete_question(question_id: str, state=Depends(current_state)):
 @app.get("/api/evaluations", include_in_schema=False)
 def evaluations(state=Depends(current_state)):
     return data(deepcopy(state["evaluations"]))
+
+
+@app.get("/api/avaliacoes/{evaluation_id}")
+def evaluation_details(evaluation_id: str, state=Depends(current_state)):
+    evaluation = next((e for e in state["evaluations"] if e["id"] == evaluation_id), None)
+    if evaluation is None:
+        missing("Avaliação não encontrada.")
+    return data(deepcopy(evaluation))
+
+
+@app.post("/api/avaliacoes/{evaluation_id}/versoes/{version}/publicar")
+def publish_answer_key(evaluation_id: str, version: str, user=Depends(current_user)):
+    with provider.lock:
+        evaluation = next((e for e in provider.states[user["id"]]["evaluations"] if e["id"] == evaluation_id), None)
+        if not evaluation or not any(v["name"] == version for v in evaluation["versions"]):
+            missing("Versão não encontrada.")
+        target = {"owner": user["id"], "evaluation": evaluation_id, "version": version}
+        token = next((token for token, value in provider.publications.items() if value == target), None)
+        if token is None:
+            token = token_urlsafe(32)
+            provider.publications[token] = target
+        return data({"path": "/student?token=" + token})
+
+
+@app.delete("/api/avaliacoes/{evaluation_id}/versoes/{version}/publicar")
+def revoke_answer_key(evaluation_id: str, version: str, user=Depends(current_user)):
+    with provider.lock:
+        target = {"owner": user["id"], "evaluation": evaluation_id, "version": version}
+        for token in [key for key, value in provider.publications.items() if value == target]:
+            del provider.publications[token]
+    return data(None)
+
+
+@app.get("/api/public/gabaritos/{token}")
+def public_answer_key(token: str):
+    with provider.lock:
+        target = provider.publications.get(token)
+        if not target:
+            missing("Link inválido, revogado ou expirado.")
+        state = provider.states.get(target["owner"], {})
+        evaluation = next((e for e in state.get("evaluations", []) if e["id"] == target["evaluation"]), None)
+        version = next((v for v in evaluation["versions"] if v["name"] == target["version"]), None) if evaluation else None
+        if not version:
+            missing("Gabarito não disponível.")
+        # Public output is deliberately whitelisted: no students, grades or responses.
+        return data({"name": evaluation["name"], "version": version["name"], "questions": [
+            {"position": index + 1, "statement": q["statement"], "answerLetter": q["answerLetter"], "correctAnswer": q["correctAnswer"]}
+            for index, q in enumerate(version["questions"])
+        ]})
 
 
 @app.post("/api/avaliacoes", status_code=201)
