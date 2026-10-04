@@ -1,3 +1,4 @@
+import { renderCorrection, renderResults } from './post-exam.js';
 import { parseQuestionsCsv } from './question-csv.js';
 import { parseStudentsCsv } from './student-csv.js';
 import {
@@ -36,7 +37,10 @@ function page() {
   return location.hash.slice(1).split('?')[0] || 'dashboard';
 }
 
+let cleanupPage = () => {};
 function render() {
+  cleanupPage();
+  cleanupPage = () => {};
   const current = page();
   document.querySelectorAll('nav a').forEach(a => {
     const active = a.hash === '#' + (current === 'class' ? 'classes' : current === 'evaluation' ? 'versions' : current);
@@ -470,64 +474,8 @@ function evaluationConfirmation() {
     '<section class="panel version-detail"><h2>Questões e gabarito · Versão '+esc(version.name)+'</h2><ol>'+version.questions.map(q=>'<li><h3>'+esc(q.statement)+'</h3><div class="question-options">'+q.options.map((o,i)=>'<div class="'+(String.fromCharCode(65+i)===q.answerLetter?'correct':'')+'">'+String.fromCharCode(65+i)+' · '+esc(o)+'</div>').join('')+'</div><p><span class="badge">Gabarito: '+q.answerLetter+'</span></p></li>').join('')+'</ol></section>';
 }
 
-function correction() {
-  screen.innerHTML = head('Correção Automática', 'Simulação: informe as alternativas lidas para calcular a nota') +
-    (state.evaluations.length ? '<form id="correction-form" class="panel"><p class="muted">A leitura óptica por câmera será integrada à API real. Neste MVP, as respostas são informadas manualmente.</p>' + select('Avaliação', 'evaluationId', state.evaluations) + '<div id="correction-details"></div><button type="submit">Corrigir e salvar resultado</button><p id="correction-error" role="alert" hidden></p></form>' : empty('Crie uma avaliação primeiro', 'A correção precisa de uma versão e de um aluno da turma.'));
-  if (!state.evaluations.length) return;
-  const form = $('correction-form');
-  const details = () => {
-    const evaluation = state.evaluations.find(e => e.id === form.elements.evaluationId.value);
-    $('correction-details').innerHTML = '<div class="grid-two">' + select('Aluno', 'studentId', state.students.filter(a => a.classId === evaluation.classId)) + select('Versão', 'version', evaluation.versions.map(v => ({
-      id: v.name,
-      name: 'Versão ' + v.name
-    }))) + '</div><br><div id="answers"></div>';
-    const answers = () => {
-      const version = evaluation.versions.find(v => v.name === form.elements.version.value);
-      $('answers').innerHTML = version.questions.map((q, i) => '<label>Resposta da questão ' + (i + 1) + '<select name="answer" required><option value="">Selecione</option>' + ['A', 'B', 'C', 'D'].map(a => '<option>' + a + '</option>').join('') + '</select></label><br>').join('');
-    };
-    form.elements.version.onchange = answers;
-    answers();
-  };
-  form.elements.evaluationId.onchange = details;
-  details();
-  form.onsubmit = async e => {
-    e.preventDefault();
-    const f = new FormData(form);
-    e.submitter.disabled = true;
-    try {
-      const result = await api('/results', {
-        method: 'POST',
-        body: {
-          evaluationId: f.get('evaluationId'),
-          studentId: f.get('studentId'),
-          version: f.get('version'),
-          answers: f.getAll('answer')
-        }
-      });
-      await refresh();
-      location.hash = 'results';
-      notice('Correção salva. Nota: ' + result.grade.toFixed(1));
-    } catch (err) {
-      $('correction-error').hidden = false;
-      $('correction-error').textContent = err.message;
-    } finally {
-      e.submitter.disabled = false;
-    }
-  };
-}
-
-function results() {
-  const rows = state.results,
-    avg = rows.length ? (rows.reduce((n, r) => n + r.grade, 0) / rows.length).toFixed(1) : '—';
-  screen.innerHTML = head('Resultados', 'Notas e desempenho das avaliações', rows.length ? button('Exportar CSV', 'export', 'secondary') + button('Imprimir relatório', 'print', 'secondary') : '') +
-    '<div class="metrics">' + [
-      ['Média geral', avg],
-      ['Provas corrigidas', rows.length],
-      ['Aprovados', rows.filter(r => r.grade >= 6).length],
-      ['Reprovados', rows.filter(r => r.grade < 6).length]
-    ].map(([label, n]) => '<div class="metric"><small>' + label + '</small><strong>' + n + '</strong></div>').join('') + '</div>' +
-    (rows.length ? '<section class="panel"><h2>Notas por aluno</h2><div class="chart">' + rows.map(r => '<div class="chart-column"><small>' + r.grade.toFixed(1) + '</small><div class="chart-bar" style="height:' + r.grade * 12 + 'px"></div><small>' + findName(state.students, r.studentId).split(' ')[0] + '</small></div>').join('') + '</div></section><section class="panel table-wrap"><table><thead><tr><th>Aluno</th><th>Avaliação</th><th>Versão</th><th>Acertos</th><th>Nota</th></tr></thead><tbody>' + rows.map(r => '<tr><td>' + findName(state.students, r.studentId) + '</td><td>' + findName(state.evaluations, r.evaluationId) + '</td><td>' + esc(r.version) + '</td><td>' + r.correct + '/' + r.total + '</td><td><span class="badge">' + r.grade.toFixed(1) + '</span></td></tr>').join('') + '</tbody></table></section>' : empty('Ainda não há resultados', 'Corrija uma avaliação para acompanhar o desempenho dos alunos.'));
-}
+function correction() { cleanupPage = renderCorrection(screen, state, refresh, notice); }
+function results() { cleanupPage = renderResults(screen, state); }
 
 function modal(title, fields, onSave) {
   $('modal-form').querySelector('[type=submit]').disabled = false;

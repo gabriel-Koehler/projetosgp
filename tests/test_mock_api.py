@@ -36,6 +36,41 @@ class MockApiTest(unittest.TestCase):
         self.assertEqual(self.client.post("/api/alunos", json={"name": "Aluno", "registration": "123", "classId": classroom["id"]}).status_code, 409)
         self.assertEqual(self.client.post("/api/turmas", json={"name": "Inválida", "code": "INV", "semesterId": "missing"}).status_code, 400)
 
+    def test_statistics_track_original_alternatives_across_versions(self):
+        # Equal text must not collapse two distinct alternative identities.
+        q = self.client.post("/api/questoes", json={"statement": "Duplicadas", "subject": "QA", "difficulty": "Fácil",
+            "options": ["Igual", "Igual", "Três", "Quatro"], "answer": "B"}).json()["data"]
+        evaluation = self.client.post("/api/avaliacoes", json={"name": "Estatísticas", "classId": "c1",
+            "questionIds": [q["id"], "Q-047"], "versionCount": 3, "shuffleQuestions": True,
+            "shuffleAlternatives": True}).json()["data"]
+        path = "/api/avaliacoes/" + evaluation["id"] + "/estatisticas"
+        empty = self.client.get(path).json()["data"]
+        self.assertEqual(empty["count"], 0)
+        self.assertIsNone(empty["average"])
+        self.assertTrue(all(x["hitRate"] is None and x["mostSelected"] == [] for x in empty["questions"]))
+        for index, version in enumerate(evaluation["versions"]):
+            original = [1, 0, 2][index]
+            answers = [chr(65 + item["optionOriginalIndices"].index(original)) if item["id"] == q["id"]
+                       else item["answerLetter"] for item in version["questions"]]
+            response = self.client.post("/api/resultados", json={"evaluationId": evaluation["id"],
+                "studentId": "a" + str(index + 1), "version": version["name"], "answers": answers})
+            self.assertEqual(response.status_code, 201)
+            self.assertEqual(response.json()["data"]["grade"], 10 if index == 0 else 5)
+        # Statistics depend on evaluation snapshots, not the current question bank.
+        self.client.delete("/api/questoes/" + q["id"])
+        stats = self.client.get(path).json()["data"]
+        self.assertEqual((stats["count"], stats["average"]), (3, 6.7))
+        question = next(x for x in stats["questions"] if x["id"] == q["id"])
+        self.assertEqual((question["correct"], question["total"], question["hitRate"]), (1, 3, 33.3))
+        self.assertEqual([a["count"] for a in question["alternatives"]], [1, 1, 1, 0])
+        self.assertEqual(question["mostSelected"], [0, 1, 2])
+        self.assertEqual(self.client.get(path + "?student_id=a1").json()["data"]["average"], 10)
+        self.assertEqual(self.client.get(path + "?student_id=unknown").json()["data"]["count"], 0)
+        with TestClient(app) as other:
+            self.assertEqual(other.get(path).status_code, 401)
+            other.post("/api/auth/register", json={"name": "Isolado", "email": "stats-" + str(time()) + "@test.com", "password": "123456"})
+            self.assertEqual(other.get(path).status_code, 404)
+
     def test_session_expiration_and_logout(self):
         anonymous = TestClient(app)
         self.assertEqual(anonymous.get("/api/questoes").status_code, 401)

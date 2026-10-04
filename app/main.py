@@ -403,7 +403,7 @@ def add_evaluation(body: Evaluation, state=Depends(current_state)):
                     random.shuffle(indexed)
                 letter = chr(65 + next(i for i, (original, _) in enumerate(indexed) if original == correct_index))
                 correct = question["options"][correct_index]
-                question.update(options=[text for _, text in indexed], answer=correct, correctAnswer=correct,
+                question.update(options=[text for _, text in indexed], optionOriginalIndices=[original for original, _ in indexed], answer=correct, correctAnswer=correct,
                                 answerLetter=letter, originalQuestionId=question["id"], versionName=version_name)
             versions.append({"name": version_name, "questions": selected, "answerKey": [
                 {"questionId": q["id"], "position": i, "correct": q["correctAnswer"]}
@@ -432,6 +432,37 @@ def qr(evaluation_id: str, version: str, state=Depends(current_state)):
 @app.get("/api/results", include_in_schema=False)
 def results(state=Depends(current_state)):
     return data(deepcopy(state["results"]))
+
+
+@app.get("/api/avaliacoes/{evaluation_id}/estatisticas")
+def statistics(evaluation_id: str, student_id: str | None = None, state=Depends(current_state)):
+    with provider.lock:
+        evaluation = next((e for e in state["evaluations"] if e["id"] == evaluation_id), None)
+        if not evaluation:
+            missing("Avaliação não encontrada.")
+        rows = [r for r in state["results"] if r["evaluationId"] == evaluation_id
+                and (student_id is None or r["studentId"] == student_id)]
+        questions = {}
+        for q in evaluation["versions"][0]["questions"]:
+            indices = q["optionOriginalIndices"]
+            alternatives = sorted([{"index": original, "text": q["options"][i], "count": 0}
+                                   for i, original in enumerate(indices)], key=lambda a: a["index"])
+            questions[q["originalQuestionId"]] = {"id": q["originalQuestionId"], "statement": q["statement"],
+                "correct": 0, "total": 0, "alternatives": alternatives}
+        for row in rows:
+            version = next(v for v in evaluation["versions"] if v["name"] == row["version"])
+            for q, answer in zip(version["questions"], row["answers"]):
+                item = questions[q["originalQuestionId"]]
+                item["total"] += 1
+                item["correct"] += int(answer == q["answerLetter"])
+                original = q["optionOriginalIndices"][ord(answer) - 65]
+                item["alternatives"][original]["count"] += 1
+        for item in questions.values():
+            item["hitRate"] = round(100 * item["correct"] / item["total"], 1) if item["total"] else None
+            peak = max(a["count"] for a in item["alternatives"])
+            item["mostSelected"] = [a["index"] for a in item["alternatives"] if peak and a["count"] == peak]
+        return data({"count": len(rows), "average": round(sum(r["grade"] for r in rows) / len(rows), 1) if rows else None,
+                     "questions": list(questions.values())})
 
 
 @app.post("/api/resultados", status_code=201)
