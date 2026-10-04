@@ -485,3 +485,8 @@ def add_result(body: Result, state=Depends(current_state)):
         state["results"].append(item)
         return data(item)
 
+
+
+# Preserve the frontend contract while exposing the modular N1 backend.
+from app.backend import create_app
+app.mount("/n1", create_app())
