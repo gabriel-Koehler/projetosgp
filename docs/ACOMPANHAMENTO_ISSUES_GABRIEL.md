@@ -24,7 +24,7 @@ Este é o arquivo de acompanhamento oficial para atualizar ao concluir cada issu
 | [#8 N1-FE-03 — Alunos e importação](https://github.com/gabriel-Koehler/projetosgp/issues/8) | Entregue | Aberta, PR aberto | `feat/n1-fe-03-alunos-importacao`, `dc475ef`; [PR #53](https://github.com/gabriel-Koehler/projetosgp/pull/53) | Revisão e merge após #52 |
 | [#9 N1-FE-04 — Banco de questões](https://github.com/gabriel-Koehler/projetosgp/issues/9) | Entregue | Aberta, PR aberto | `feat/n1-fe-04-banco-questoes`, `75327b2`; [PR #56](https://github.com/gabriel-Koehler/projetosgp/pull/56) | Revisão e merge após #53 |
 | [#12 N1-FE-05 — Assistente de avaliações](https://github.com/gabriel-Koehler/projetosgp/issues/12) | Entregue | Aberta, PR aberto | `feat/n1-fe-05-criacao-avaliacoes-versoes`, `e227db5`; [PR #57](https://github.com/gabriel-Koehler/projetosgp/pull/57) | Revisão e merge após #56 |
-| [#13 N1-FE-06 — Impressão e tela aluno](https://github.com/gabriel-Koehler/projetosgp/issues/13) | Entregue | Aberta, publicação em andamento | `feat/n1-fe-06-impressao-prova-aluno` | Revisão e merge após #57 |
+| [#13 N1-FE-06 — Impressão e tela aluno](https://github.com/gabriel-Koehler/projetosgp/issues/13) | Entregue | Aberta, PR aberto | `feat/n1-fe-06-impressao-prova-aluno`, `3f7ce1a`; [PR #58](https://github.com/gabriel-Koehler/projetosgp/pull/58) | Revisão e merge após #57 |
 | [#14 N1-FE-07 — Correção e estatísticas simuladas](https://github.com/gabriel-Koehler/projetosgp/issues/14) | Parcial no MVP; issue não concluída | Aberta | Há respostas manuais, notas, gráfico e CSV | Validar e completar o fluxo específico da issue |
 | [#22 N2-FE-01 — Autenticação e turmas com API real](https://github.com/gabriel-Koehler/projetosgp/issues/22) | Sem entrega específica identificada | Aberta | Cliente usa API mock Python | Integrar e validar API real |
 | [#23 N2-FE-02 — Questões e upload com API real](https://github.com/gabriel-Koehler/projetosgp/issues/23) | Sem entrega específica identificada | Aberta | Importação e CRUD usam estado mock | Integrar persistência e upload reais |
@@ -76,3 +76,4 @@ FE-06 parte da FE-05; a próxima branch FE-07 deve partir da última revisão da
 
 ## Evidências FE-06
 Impressão A4 de prova, folha com QR/bolhas A–D e gabarito do professor. Liberação explícita e revogável do gabarito público, com página do aluno responsiva. 11 testes Python aprovados. Navegador: prova de 45 questões, PDFs de 10/2/5 páginas, revisão visual e acesso anônimo/revogação em 390 px. Dados permanecem em memória.
+
