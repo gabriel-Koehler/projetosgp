@@ -1,0 +1,63 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 15
+actor Professor as P
+participant "Interface" as UI <<boundary>>
+participant "API" as API <<control>>
+participant "ServicoCorrecao" as S <<control>>
+participant "OMR" as OMR <<control>>
+participant "Repositorio" as R <<repository>>
+database "PostgreSQL" as DB <<database>>
+participant "Supabase Storage" as ST <<external>>
+P -> UI : Selecionar aluno e enviar imagem
+UI -> API : POST correção (imagem, aluno)
+API -> API : Validar sessão e entrada
+break [Sessão/entrada inválida]
+API --> UI : 401/400 — erro de entrada
+UI --> P : Exibir erro; encerrar tentativa
+end
+API -> S : corrigir(professor, aluno, imagem)
+S -> OMR : Decodificar QR da imagem
+OMR --> S : Código da versão ou falha
+break [QR inválido]
+S --> API : 422 — QR inválido
+API --> UI : Solicitar nova imagem; encerrar
+end
+S -> R : Consultar versão e vínculos
+R -> DB : SELECT por código e professor
+DB --> R : Snapshot, gabarito e vínculos
+R --> S : Versão autorizada ou ausência
+break [Versão/aluno fora do escopo]
+S --> API : 404/403 — acesso negado
+API --> UI : Exibir erro; encerrar tentativa
+end
+S -> OMR : Alinhar e ler marcações
+OMR --> S : Respostas, rasuras e confiança
+break [Leitura não confiável]
+S --> API : 422 — imagem insuficiente
+API --> UI : Solicitar nova imagem; encerrar
+end
+S -> S : Classificar e calcular nota
+S -> ST : Gravar imagem privada
+ST --> S : Caminho da imagem ou falha
+break [Falha de Storage]
+S --> API : 503 — resultado não salvo
+API --> UI : Exibir falha; encerrar tentativa
+end
+S -> R : Persistir resultado e imagemPath
+R -> DB : BEGIN; INSERT/UPSERT; COMMIT
+DB --> R : ID confirmado ou erro
+R --> S : Resultado confirmado ou falha
+break [Falha na transação SQL]
+S -> ST : Tentar excluir imagem recém-gravada
+ST --> S : Limpeza OK ou falha para log
+S --> API : 503 — não confirmar resultado
+API --> UI : Exibir erro; encerrar tentativa
+end
+S --> API : Resultado confirmado + nota
+API --> UI : 201 — resultado salvo
+UI --> P : Exibir nota e confirmação
+
+@enduml
