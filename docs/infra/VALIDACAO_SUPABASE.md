@@ -44,3 +44,5 @@ Nenhuma issue encerrada, nenhum merge feito. Publicação deste trabalho em PR d
 ## Integridade local
 
 A pasta original apresentou arquivos 0xFF e um objeto Git corrompido. O trabalho foi executado em clone temporário íntegro das branches publicadas; fontes SQL conferidas antes de aplicação. A recuperação local não altera o histórico remoto.
+
+PR publicado: [#63 — validação real do Supabase e proteção do pacote](https://github.com/gabriel-Koehler/projetosgp/pull/63), commit f7c61f1. Revisão formal solicitada a Gabriel (@gabriel-Koehler). Base: docs/n2-parte1-diagramas-backlog; depende dos PRs #61/#62. Nenhuma issue encerrada e nenhum merge realizado.

@@ -66,3 +66,13 @@ Os registros anteriores de ausência de push/PR são históricos. Análise e val
 Projeto projetosgp criado; schema aplicado/reaplicado, 12 tabelas com RLS. Seed idempotente/constraints e bloqueio anon/authenticated validados em transação revertida; zero professores de teste remanescentes. Bucket correcoes privado criado. Testes: 8 Node e 2 Python específicos aprovados. Empacotador exclui metadados .temp/.branches da CLI. Evidências e limites: [validação Supabase](infra/VALIDACAO_SUPABASE.md).
 
 Branch infra/diego-validacao-supabase, baseada na última entrega docs/n2-parte1-diagramas-backlog. Backend #40–#45, MER #48–#49 e arquitetura #54 ainda abertos. Vercel responde / com 200, mas health da API 404. Hospedagem N2 e pacote final dependem dessas integrações; nenhuma issue declarada concluída. Trabalho para validação de Gabriel, sem merge.
+
+PR publicado: [#63 — validação real do Supabase e proteção do pacote](https://github.com/gabriel-Koehler/projetosgp/pull/63), commit f7c61f1. Revisão formal solicitada a Gabriel (@gabriel-Koehler). Base: docs/n2-parte1-diagramas-backlog; depende dos PRs #61/#62. Nenhuma issue encerrada e nenhum merge realizado.
+
+## Projeto Supabase criado — 05/10/2026
+
+Por autorização do usuário, foi criado o projeto projetosgp na organização tusnorhekltyfuyvcsqf, região São Paulo (sa-east-1). Referência: veyofappfyaoejcjwxky. A criação retornou ACTIVE_HEALTHY.
+
+Painel: https://supabase.com/dashboard/project/veyofappfyaoejcjwxky
+
+A senha gerada foi guardada em .env.supabase.local, ignorado pelo Git. Os projetos existentes não foram alterados. Schema/seed, bucket privado, políticas de acesso e integração ao aplicativo/Vercel ainda não foram executados nesta etapa. Criar o projeto não conclui a issue #31 nem comprova persistência real.
