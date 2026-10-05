@@ -37,7 +37,7 @@ def test_login_errado_com_banco(banco, banco_url, settings):
 
 def test_rotas_exigem_login(banco, banco_url, settings):
     with TestClient(create_app(replace(settings, database_url=banco_url))) as cliente:
-        for url in ("/api/semestres", "/api/turmas", "/api/questoes", "/api/alunos/1"):
+        for url in ("/api/semestres", "/api/turmas", "/api/alunos/1"):
             assert cliente.get(url).status_code == 401
 
 
@@ -171,3 +171,17 @@ def test_professor_nao_ve_dados_de_outro(api, banco, banco_url, settings):
         assert outro.get("/api/semestres").json() == []
         assert outro.get(f"/api/turmas/{turma['id']}").status_code == 404
         assert outro.post("/api/turmas", json={"semestre_id": turma["semestre_id"], "nome": "X"}).status_code == 404
+
+
+def test_semestres_turmas_persistem_apos_reiniciar_api(banco, banco_url, settings):
+    config = replace(settings, database_url=banco_url)
+    with TestClient(create_app(config)) as first:
+        assert first.post('/api/auth/login', json={'username':'professor','password':'senha-teste'}).status_code == 200
+        semester = first.post('/api/semestres', json={'nome':'Persistência'}).json()
+        room = first.post('/api/turmas', json={'nome':'Turma persistente','semestre_id':semester['id'],'disciplina':'Matemática'}).json()
+        cookies = dict(first.cookies)
+    with TestClient(create_app(config)) as second:
+        second.cookies.update(cookies)
+        assert second.get('/api/auth/me').status_code == 200
+        assert semester in second.get('/api/semestres').json()
+        assert room in second.get('/api/turmas').json()

@@ -1,4 +1,10 @@
+import {
+  requestBody,
+  responseData,
+  errorMessage
+} from './api-contract.js';
 const base = (window.APP_CONFIG?.apiBaseUrl || '/api').replace(/\/$/, '');
+const real = window.APP_CONFIG?.dataMode === 'real';
 const resources = {
   semesters: 'semestres',
   classes: 'turmas',
@@ -22,17 +28,23 @@ export async function api(path, {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: body === undefined ? undefined : JSON.stringify(body)
+      body: body === undefined ? undefined : JSON.stringify(requestBody(path, body, real))
     });
-    const payload = await response.json();
-    if (!response.ok) {
-      if (response.status === 401 && (!path.startsWith('/auth/') || path === '/auth/me')) location.assign('/');
-      throw new Error(payload.error?.message || 'Não foi possível concluir a operação.');
+    const text = await response.text();
+    let payload;
+    try {
+      payload = text ? JSON.parse(text) : null;
+    } catch {
+      throw new Error(errorMessage(null, response.status >= 400 ? response.status : 502));
     }
-    return payload.data;
-  } catch (e) {
-    if (e.name === 'AbortError' || e instanceof TypeError) throw new Error('Não foi possível conectar. Tente novamente.');
-    throw e;
+    if (!response.ok) {
+      if (response.status === 401 && (!path.startsWith('/auth/') || path === '/auth/me')) location.assign('/?expired=1');
+      throw new Error(errorMessage(payload, response.status));
+    }
+    return response.status === 204 ? null : responseData(path, payload, real);
+  } catch (error) {
+    if (error.name === 'AbortError' || error instanceof TypeError) throw new Error('Não foi possível conectar. Tente novamente.');
+    throw error;
   } finally {
     clearTimeout(timeout);
   }

@@ -1,6 +1,6 @@
 # Acompanhamento das issues — Gabriel Koehler
 
-Última atualização: 2026-10-04. Responsável GitHub: `gabriel-Koehler`.
+Última atualização: 2026-10-05. Responsável GitHub: `gabriel-Koehler`.
 Fonte: issues atribuídas e PRs de `gabriel-Koehler/projetosgp`.
 Este é o arquivo de acompanhamento oficial para atualizar ao concluir cada issue.
 
@@ -10,7 +10,7 @@ Este é o arquivo de acompanhamento oficial para atualizar ao concluir cada issu
 - **8 issues implementadas e integradas na main**, com PRs merged: FE-01, BE-02, FE-02, FE-03, FE-04, FE-05, FE-06 e FE-07.
 - FE-04: publicada no PR #56; commit 75327b2.
 - FE-05: publicada no PR #57; commit e227db5, derivado de FE-04.
-- **5 issues restantes para concluir a implementação**: #3, #22, #23, #25 e #28 (incluindo as parciais do MVP e a infraestrutura a auditar).
+- **4 issues sem implementação final**: #3, #23, #25 e #28. A #22 está implementada e validada com PostgreSQL local; falta validar o projeto Supabase e revisar/integrar o PR.
 - Merges confirmados no GitHub: PRs #51, #52, #53, #56, #57, #58 e #59. Issues #5, #6, #7, #8, #9, #12, #13 e #14 encerradas.
 
 ## Controle das entregas
@@ -26,7 +26,7 @@ Este é o arquivo de acompanhamento oficial para atualizar ao concluir cada issu
 | [#12 N1-FE-05 — Assistente de avaliações](https://github.com/gabriel-Koehler/projetosgp/issues/12) | Integrada na main | Encerrada, PR merged | `feat/n1-fe-05-criacao-avaliacoes-versoes`, `e227db5`; [PR #57](https://github.com/gabriel-Koehler/projetosgp/pull/57) | Nenhuma pendência de integração |
 | [#13 N1-FE-06 — Impressão e tela aluno](https://github.com/gabriel-Koehler/projetosgp/issues/13) | Integrada na main | Encerrada, PR merged | `feat/n1-fe-06-impressao-prova-aluno`, `3f7ce1a`; [PR #58](https://github.com/gabriel-Koehler/projetosgp/pull/58) | Nenhuma pendência de integração |
 | [#14 N1-FE-07 — Correção e estatísticas simuladas](https://github.com/gabriel-Koehler/projetosgp/issues/14) | Integrada na main | Encerrada, PR merged | `feat/n1-fe-07-correcao-estatisticas`, `3c2d899`; [PR #59](https://github.com/gabriel-Koehler/projetosgp/pull/59) | Nenhuma pendência de integração |
-| [#22 N2-FE-01 — Autenticação e turmas com API real](https://github.com/gabriel-Koehler/projetosgp/issues/22) | Sem entrega específica identificada | Aberta | Cliente usa API mock Python | Integrar e validar API real |
+| [#22 N2-FE-01 — Autenticação e turmas com API real](https://github.com/gabriel-Koehler/projetosgp/issues/22) | Implementada; PostgreSQL local validado | Aberta, publicação em andamento | `feat/n2-fe-01-integracao-auth-turmas`, base `feat/n2-api-auth-turmas` ([PR #60](https://github.com/gabriel-Koehler/projetosgp/pull/60)) | Validar no Supabase de desenvolvimento; revisão e merge |
 | [#23 N2-FE-02 — Questões e upload com API real](https://github.com/gabriel-Koehler/projetosgp/issues/23) | Sem entrega específica identificada | Aberta | Importação e CRUD usam estado mock | Integrar persistência e upload reais |
 | [#25 N2-FE-03 — Avaliações e versões persistidas](https://github.com/gabriel-Koehler/projetosgp/issues/25) | Sem entrega específica identificada | Aberta | Avaliações ainda em memória | Integrar criação e persistência reais |
 | [#28 N2-FE-04 — Correção real e Excel](https://github.com/gabriel-Koehler/projetosgp/issues/28) | Sem entrega específica identificada | Aberta | Correção manual simulada e CSV | Integrar correção real e relatório XLSX |
@@ -106,3 +106,9 @@ Impressão A4 de prova, folha com QR/bolhas A–D e gabarito do professor. Liber
 - Conflitos de contratos de API resolvidos mantendo /api do MVP e disponibilizando o backend modular em /n1 na porta 8000; detalhes em INTEGRACAO_N1.md.
 - Validação: 116 testes Python e 8 testes JavaScript aprovados, incluindo isolamento de sessões, links QR sob /n1 e consulta pública.
 - O merge desses PRs não conclui a auditoria da issue #3 nem implementa as integrações N2 pendentes.
+
+## Entrega N2-FE-01 — 2026-10-05
+- API requerida localizada nos PRs #40–42, ainda não integrados. Dependência adaptada na branch feat/n2-api-auth-turmas, PR #60, baseada na main 972a760.
+- Frontend desenvolvido em seguida, na branch feat/n2-fe-01-integracao-auth-turmas, preservando o MVP N1 e conectando login/semestres/turmas à API persistente.
+- 145 testes Python aprovados com PostgreSQL local real; 11 testes JavaScript e fluxo de navegador desktop/mobile aprovados. Persistência após reiniciar API/pool confirmada.
+- Sem .env Supabase fornecido; aceite nesse ambiente externo permanece pendente. Issue #22 aberta, nenhum merge realizado nesta entrega.
