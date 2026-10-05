@@ -52,3 +52,11 @@ Artefatos: [índice N2 Parte 1](n2-parte1/README.md) e [planilha Excel](n2-parte
 Por solicitação do usuário, as entregas foram registradas em commits locais na branch docs/n2-parte1-diagramas-backlog: 345c7e5 (hospedagem), e1aa3cb (empacotamento), efc7353 (banco/DER/UML) e 32ca0e5 (diagramas/backlog). Revisor indicado: Gabriel Koehler da Silva (@gabriel-Koehler); análise e validação ainda pendentes. O commit documental seguinte reúne evidências e roteiro de revisão. Os registros “sem commit” acima são históricos.
 
 Validação antes dos commits: 8 testes Node e 2 testes Python específicos aprovados; diff sem erros de whitespace. Limitações anteriores mantidas, incluindo QR intermitente, ausência de build Docker/execução PostgreSQL e prazo acadêmico provisório. [Roteiro de revisão](infra/REVISAO_GABRIEL.md). Nenhum push, PR, merge ou encerramento de issue foi realizado.
+## Publicação autorizada para revisão de Gabriel
+
+Após autorização explícita do usuário, as branches e os cinco commits de Diego foram enviados ao GitHub. PRs abertos, ambos com revisão formal solicitada a @gabriel-Koehler:
+
+- [PR #61 — infraestrutura, empacotamento e banco/UML](https://github.com/gabriel-Koehler/projetosgp/pull/61): infra/diego-entregas-locais → main; commits 345c7e5, e1aa3cb e efc7353.
+- [PR #62 — diagramas, backlog e evidências](https://github.com/gabriel-Koehler/projetosgp/pull/62): docs/n2-parte1-diagramas-backlog → infra/diego-entregas-locais; commits 32ca0e5 e d8e99e3. Depende do PR #61.
+
+Os registros anteriores de ausência de push/PR são históricos. Análise e validação de Gabriel pendentes; nenhuma issue encerrada, merge ou deploy realizado. Este registro é enviado como commit adicional ao PR #62.
