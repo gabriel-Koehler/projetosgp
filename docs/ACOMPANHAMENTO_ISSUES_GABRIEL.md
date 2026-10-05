@@ -106,3 +106,19 @@ Impressão A4 de prova, folha com QR/bolhas A–D e gabarito do professor. Liber
 - Conflitos de contratos de API resolvidos mantendo /api do MVP e disponibilizando o backend modular em /n1 na porta 8000; detalhes em INTEGRACAO_N1.md.
 - Validação: 116 testes Python e 8 testes JavaScript aprovados, incluindo isolamento de sessões, links QR sob /n1 e consulta pública.
 - O merge desses PRs não conclui a auditoria da issue #3 nem implementa as integrações N2 pendentes.
+
+
+## Preparação local de Diego — 05/10/2026
+
+Base 972a760; branch infra/diego-entregas-locais. Entregas de hospedagem, empacotador, SQL/seed/DER e UML preparadas para #17/#18/#31/#33/#35/#36. Sem commit, push ou PR dessas alterações. Issues abertas e dependências N2 em PRs abertos. Validação: oito testes Node, 118 Python e health 200/503; detalhes em docs/infra/VALIDACAO_LOCAL.md. Diário em docs/DIARIO_DE_BORDO_DIEGO.md. Revisão de Gabriel, implantação e homologação externa pendentes.
+
+Repetição final: uma falha intermitente no teste de leitura QR; caso isolado aprovado. Pendência registrada, sem homologação final declarada.
+
+## N2 Parte 1 — preparação local em 05/10/2026
+
+Quatro diagramas com passo a passo e backlog Excel de 45 tarefas preparados na branch docs/n2-parte1-diagramas-backlog. Nove tarefas por integrante, 184 horas estimadas, prazo provisório 13/11/2026. Índice: [docs/n2-parte1/README.md](n2-parte1/README.md). Revisão do grupo, material da aula e data oficial pendentes; nenhuma issue declarada concluída ou alteração remota realizada. Evidências no diário de Diego.
+## Commits locais para revisão de Gabriel — 05/10/2026
+
+Por solicitação do usuário, as entregas foram registradas em commits locais na branch docs/n2-parte1-diagramas-backlog: 345c7e5 (hospedagem), e1aa3cb (empacotamento), efc7353 (banco/DER/UML) e 32ca0e5 (diagramas/backlog). Revisor indicado: Gabriel Koehler da Silva (@gabriel-Koehler); análise e validação ainda pendentes. O commit documental seguinte reúne evidências e roteiro de revisão. Os registros “sem commit” acima são históricos.
+
+Validação antes dos commits: 8 testes Node e 2 testes Python específicos aprovados; diff sem erros de whitespace. Limitações anteriores mantidas, incluindo QR intermitente, ausência de build Docker/execução PostgreSQL e prazo acadêmico provisório. [Roteiro de revisão](infra/REVISAO_GABRIEL.md). Nenhum push, PR, merge ou encerramento de issue foi realizado.
