@@ -14,3 +14,6 @@ deliveries/
 .env.*
 !.env.example
 *.log
+
+supabase/.temp/
+supabase/.branches/
