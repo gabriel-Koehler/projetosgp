@@ -136,6 +136,10 @@ def validar_questoes(linhas: list[LinhaImportada], enunciados_existentes: list[s
 
         if not enunciado:
             erros.append("Enunciado não informado.")
+        if len(enunciado) > 5000:
+            erros.append('Enunciado deve ter até 5000 caracteres.')
+        if any(len(_campo(d, campo)) > 200 for campo in ('disciplina', 'categoria')):
+            erros.append('Disciplina e categoria devem ter até 200 caracteres.')
         if len(alternativas) < 4 or any(not a for a in alternativas):
             erros.append("Informe as alternativas A, B, C e D (a E é opcional).")
         elif len({normalizar_texto(a) for a in alternativas}) != len(alternativas):

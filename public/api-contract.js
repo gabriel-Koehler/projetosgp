@@ -1,6 +1,14 @@
 // Contract adapters keep the UI's shape stable across N1 and the persistent API.
 export function requestBody(path, body, real) {
   if (!real || body === undefined) return body;
+  if (/^\/questions(?:\/[^/?]+)?$/.test(path)) return {
+    enunciado: body.statement,
+    alternativas: body.options,
+    correta: body.answer,
+    disciplina: body.subject || null,
+    categoria: body.category || null,
+    dificuldade: ({'Fácil':'facil','Médio':'media','Difícil':'dificil'})[body.difficulty] || null
+  };
   if (path === '/auth/login') return {
     username: body.email.trim(),
     password: body.password
@@ -22,8 +30,17 @@ export function requestBody(path, body, real) {
 }
 export function responseData(path, payload, real) {
   if (!real) return payload?.data;
+  if (path.startsWith('/questions/importar')) return payload;
+  if (path.startsWith('/questions') && payload?.itens) return {
+    ...payload, itens: payload.itens.map(value => responseData('/questions/item', value, true))
+  };
   const map = value => {
     if (!value) return value;
+    if (path.startsWith('/questions') && value.enunciado !== undefined) return {
+      id: String(value.id), statement: value.enunciado, options: value.alternativas,
+      answer: value.correta, subject: value.disciplina || '', category: value.categoria || '',
+      difficulty: ({facil:'Fácil',media:'Médio',dificil:'Difícil'})[value.dificuldade] || ''
+    };
     if (path.startsWith('/auth/')) return {
       id: value.username,
       name: value.nome,

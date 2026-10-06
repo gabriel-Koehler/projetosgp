@@ -13,11 +13,12 @@ const resources = {
   evaluations: 'avaliacoes',
   results: 'resultados'
 };
-const route = path => path.replace(/^\/([^/]+)/, (_, name) => '/' + (resources[name] || name));
+const route = path => path.replace(/^\/([^/?]+)/, (_, name) => '/' + (resources[name] || name));
 export async function api(path, {
   method = 'GET',
   body
 } = {}) {
+  const multipart = body instanceof FormData;
   const controller = new AbortController(),
     timeout = setTimeout(() => controller.abort(), 12000);
   try {
@@ -25,10 +26,10 @@ export async function api(path, {
       method,
       credentials: 'include',
       signal: controller.signal,
-      headers: {
+      headers: multipart ? {} : {
         'Content-Type': 'application/json'
       },
-      body: body === undefined ? undefined : JSON.stringify(requestBody(path, body, real))
+      body: multipart ? body : body === undefined ? undefined : JSON.stringify(requestBody(path, body, real))
     });
     const text = await response.text();
     let payload;
@@ -47,5 +48,15 @@ export async function api(path, {
     throw error;
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+export async function allQuestions() {
+  if (!real) return api('/questions');
+  const questions = [];
+  for (let page = 1; ; page++) {
+    const result = await api('/questions?por_pagina=200&pagina=' + page);
+    questions.push(...result.itens);
+    if (result.itens.length < result.por_pagina) return questions;
   }
 }
