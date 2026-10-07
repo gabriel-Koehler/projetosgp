@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import Settings, get_settings
-from app.controllers import auth, cadastros, painel, questoes
+from app.controllers import auth, cadastros, painel, questoes, avaliacoes, aluno
 from app.database.connection import criar_pool
 from app.services.errors import ErroDeNegocio
 
@@ -65,6 +65,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(painel.router)
     app.include_router(cadastros.router)
     app.include_router(questoes.router)
+    app.include_router(avaliacoes.router)
+    app.include_router(aluno.router)
 
     @app.get("/api/health", tags=["infra"])
     def health():

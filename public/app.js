@@ -1,11 +1,12 @@
 import { academic } from './academic.js';
+import { versionNames } from './evaluation-settings.js';
 const real = window.APP_CONFIG?.dataMode === 'real';
 import { renderCorrection, renderResults } from './post-exam.js';
 import { parseQuestionsCsv } from './question-csv.js';
 import { importRealQuestions } from './question-import.js';
 import { parseStudentsCsv } from './student-csv.js';
 import {
-  api, allQuestions
+  api, allQuestions, evaluationQr
 } from './api.js';
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
@@ -31,7 +32,7 @@ const input = (label, name, type = 'text', value = '') => '<label>' + label + '<
 const select = (label, name, items, chosen) => '<label>' + label + '<select name="' + name + '">' + options(items, chosen) + '</select></label>';
 const findName = (list, id) => esc(list.find(x => x.id === id)?.name || '—');
 async function refresh() {
-  const collections = real ? ['semesters', 'classes'] : ['semesters', 'classes', 'students', 'questions', 'evaluations', 'results'];
+  const collections = real ? ['semesters', 'classes', 'evaluations'] : ['semesters', 'classes', 'students', 'questions', 'evaluations', 'results'];
   const values = await Promise.all(collections.map(name => api('/' + name)));
   state = {students:[],questions:[],evaluations:[],results:[],...Object.fromEntries(collections.map((name, index) => [name, values[index]]))};
   if (real) state.questions = await allQuestions();
@@ -47,7 +48,7 @@ function render() {
   cleanupPage();
   cleanupPage = () => {};
   const current = page();
-  if(real && !['dashboard','classes','questions'].includes(current)) { screen.innerHTML=empty('Área ainda não disponível','Volte a Semestres & Turmas ou Banco de Questões para gerenciar seus cadastros.'); return; }
+  if(real && !['dashboard','classes','questions','create','versions','evaluation'].includes(current)) { screen.innerHTML=empty('Área ainda não disponível','Volte às avaliações ou aos cadastros para continuar.'); return; }
   document.querySelectorAll('nav a').forEach(a => {
     const active = a.hash === '#' + (current === 'class' ? 'classes' : current === 'evaluation' ? 'versions' : current);
     a.classList.toggle('active', active);
@@ -73,7 +74,7 @@ function render() {
 
 function dashboard() {
   if(real) {
-    screen.innerHTML=head('Olá, '+esc(user.name),'Organize seus semestres e turmas','<a class="btn" href="#classes">Gerenciar semestres e turmas</a>')+'<div class="metrics">'+[['Semestres',state.semesters.length],['Turmas',state.classes.length]].map(([name,count])=>'<div class="metric"><small>'+name+'</small><strong>'+count+'</strong></div>').join('')+'</div>';
+    screen.innerHTML=head('Olá, '+esc(user.name),'Organize suas turmas, questões e avaliações','<a class="btn" href="#create">+ Nova avaliação</a>')+'<div class="metrics">'+[['Semestres',state.semesters.length],['Turmas',state.classes.length],['Questões',state.questions.length],['Avaliações',state.evaluations.length]].map(([name,count])=>'<div class="metric"><small>'+name+'</small><strong>'+count+'</strong></div>').join('')+'</div><div class="quick-actions"><a href="#classes">Gerenciar semestres e turmas →</a><a href="#questions">Banco de questões →</a><a href="#versions">Consultar versões e QR Codes →</a></div>';
     return;
   }
 
@@ -303,7 +304,7 @@ function importQuestions() {
 }
 
 
-function draftKey() { return 'avalia-draft:' + user.id; }
+function draftKey() { return 'avalia-draft:' + (real ? 'real:' : '') + user.id; }
 function persistDraft() {
   try { sessionStorage.setItem(draftKey(), JSON.stringify({ step, draft, questionEntry })); } catch {}
 }
@@ -320,6 +321,13 @@ function captureWizard() {
     draft.versionNames = data.getAll('versionName');
     draft.shuffleQuestions = data.has('shuffleQuestions');
     draft.shuffleAlternatives = data.has('shuffleAlternatives');
+    if (real) {
+      draft.sameQuestions = data.has('sameQuestions');
+      draft.questionsPerVersion = Number(data.get('questionsPerVersion')) || null;
+      draft.maxGrade = Number(data.get('maxGrade'));
+      draft.naming = data.get('naming');
+      draft.answerOverrides = Object.fromEntries(draft.questionIds.map(id => [id, data.get('answerOverride-' + id)]));
+    }
   }
   persistDraft();
 }
@@ -341,7 +349,7 @@ function create() {
     body.innerHTML = '<div class="grid-two">' + input('Nome da avaliação','name','text',draft.name || '') + select('Semestre','semesterId',state.semesters,draft.semesterId) + '</div><h2 class="wizard-subheading">Selecione a turma</h2><div id="wizard-classes" class="class-grid"></div>';
     const rooms = () => {
       const matches = state.classes.filter(c => c.semesterId === form.elements.semesterId.value);
-      $('wizard-classes').innerHTML = matches.map(c => '<label class="class-choice"><input type="radio" name="classId" value="' + esc(c.id) + '" required ' + (draft.classId === c.id ? 'checked' : '') + '><span><strong>' + esc(c.name) + '</strong><small>' + esc(c.code) + ' · ' + state.students.filter(a => a.classId === c.id).length + ' alunos</small></span></label>').join('') || '<p class="empty">Este semestre não tem turmas. <a href="#classes">Cadastrar turma</a></p>';
+      $('wizard-classes').innerHTML = matches.map(c => '<label class="class-choice"><input type="radio" name="classId" value="' + esc(c.id) + '" required ' + (draft.classId === c.id ? 'checked' : '') + '><span><strong>' + esc(c.name) + '</strong><small>' + esc(c.code) + (real ? '' : ' · ' + state.students.filter(a => a.classId === c.id).length + ' alunos') + '</small></span></label>').join('') || '<p class="empty">Este semestre não tem turmas. <a href="#classes">Cadastrar turma</a></p>';
     };
     form.elements.semesterId.onchange = () => { draft.classId = ''; rooms(); captureWizard(); };
     rooms();
@@ -352,11 +360,36 @@ function create() {
     body.innerHTML = '<div class="wizard-summary"><strong>' + esc(draft.name) + '</strong><span>' + findName(state.classes,draft.classId) + ' · ' + draft.questionIds.length + ' questões</span></div>' +
       '<div class="grid-two"><section><h2>Configurar versões</h2><label>Quantidade de versões<select name="versionCount">' + [1,2,3,4,5].map(n => '<option '+(n === (draft.versionCount || 3) ? 'selected' : '')+'>'+n+'</option>').join('') + '</select></label><div id="version-names" class="version-name-fields"></div><p class="muted">Nomes únicos, com até 30 caracteres: letras, números, espaços, hífen ou sublinhado.</p><label class="check-row"><input type="checkbox" name="shuffleQuestions" ' + (draft.shuffleQuestions !== false ? 'checked' : '') + '>Embaralhar questões</label><label class="check-row"><input type="checkbox" name="shuffleAlternatives" ' + (draft.shuffleAlternatives !== false ? 'checked' : '') + '>Embaralhar alternativas e ajustar o gabarito</label><p class="muted">Todas as versões usam as mesmas questões selecionadas.</p></section><section><h2>Confira as questões e gabaritos</h2><ol class="wizard-answer-review">' +
       draft.questionIds.map(id => { const q=state.questions.find(q=>q.id===id);return '<li>'+esc(q.statement)+'<p><span class="badge">Gabarito '+q.answer+' · '+esc(q.options[q.answer.charCodeAt(0)-65])+'</span></p></li>'; }).join('') + '</ol></section></div>';
+    if (real) {
+      const settings = document.createElement('div');
+      settings.innerHTML = '<label>Nota máxima<input name="maxGrade" type="number" min="0.01" max="1000" step="0.01" required value="'+esc(draft.maxGrade ?? 10)+'"></label><label class="check-row"><input type="checkbox" name="sameQuestions" '+(draft.sameQuestions !== false ? 'checked' : '')+'>Usar as mesmas questões em todas as versões</label><label>Questões por versão<input name="questionsPerVersion" type="number" min="1" max="'+draft.questionIds.length+'" value="'+esc(draft.questionsPerVersion || draft.questionIds.length)+'" required></label><p class="muted">Com conjuntos diferentes, as questões são distribuídas entre as versões.</p>';
+      body.querySelector('section').append(settings);
+      body.querySelector('section > p:last-of-type').textContent='As versões usam as questões selecionadas conforme a distribuição abaixo.';
+      const quantity = document.createElement('input');
+      quantity.type='number'; quantity.name='versionCount'; quantity.min='1'; quantity.max='500'; quantity.required=true;
+      quantity.value=draft.versionCount || 3;
+      form.elements.versionCount.replaceWith(quantity);
+      quantity.parentElement.insertAdjacentHTML('afterend',select('Nomes das versões','naming',[
+        {id:'letters',name:'Letras'},{id:'numbers',name:'Números'},{id:'colors',name:'Cores'},{id:'custom',name:'Personalizados'}
+      ],draft.naming || 'letters'));
+      const updateCount = () => { form.elements.questionsPerVersion.disabled = form.elements.sameQuestions.checked; };
+      form.elements.sameQuestions.addEventListener('change', updateCount); updateCount();
+      body.querySelectorAll('.wizard-answer-review li').forEach((item,index) => {
+        const id = draft.questionIds[index], q = state.questions.find(q => q.id === id);
+        item.insertAdjacentHTML('beforeend', select('Gabarito nesta avaliação','answerOverride-'+id,q.options.map((_,i)=>({id:String.fromCharCode(65+i),name:String.fromCharCode(65+i)})),draft.answerOverrides?.[id] || q.answer));
+      });
+    }
     const renderNames = values => {
-      $('version-names').innerHTML = Array.from({length:Number(form.elements.versionCount.value)},(_,i) => '<label>Nome da versão '+(i+1)+'<input name="versionName" value="'+esc(values[i] ?? String.fromCharCode(65+i))+'" required maxlength="30"></label>').join('');
+      if (real) form.elements.versionCount.value = Math.min(500, Math.max(1, Number(form.elements.versionCount.value) || 1));
+      const defaults=versionNames(real ? form.elements.naming.value : 'letters',Number(form.elements.versionCount.value));
+      $('version-names').innerHTML = Array.from({length:Number(form.elements.versionCount.value)},(_,i) => '<label>Nome da versão '+(i+1)+'<input name="versionName" value="'+esc(values[i] ?? defaults[i])+'" required maxlength="30"></label>').join('');
     };
     renderNames(names);
-    form.elements.versionCount.onchange = () => { const values=Array.from(form.querySelectorAll('[name=versionName]')).map(e=>e.value);renderNames(values);captureWizard(); };
+    form.elements.versionCount.onchange = () => { const values=Array.from(form.querySelectorAll('[name=versionName]')).map(e=>e.value);renderNames(real && form.elements.naming.value !== 'custom' ? [] : values);captureWizard(); };
+    if(real) {
+      form.elements.naming.onchange=()=>{renderNames(form.elements.naming.value==='custom'?draft.versionNames:[]);captureWizard();};
+      $('version-names').addEventListener('input',()=>{form.elements.naming.value='custom';});
+    }
   }
   form.addEventListener('input', event => { if(event.target.form === form)captureWizard(); });
   form.addEventListener('change', event => { if(event.target.form === form)captureWizard(); });
@@ -378,7 +411,9 @@ function create() {
       const evaluation=await api('/evaluations',{method:'POST',body:{
         name:draft.name.trim(),classId:draft.classId,questionIds:draft.questionIds,
         versionCount:draft.versionCount,versionNames:names,
-        shuffleQuestions:draft.shuffleQuestions,shuffleAlternatives:draft.shuffleAlternatives
+        shuffleQuestions:draft.shuffleQuestions,shuffleAlternatives:draft.shuffleAlternatives,
+        sameQuestions:draft.sameQuestions,questionsPerVersion:draft.questionsPerVersion,
+        maxGrade:draft.maxGrade,answerOverrides:draft.answerOverrides
       }});
       state.evaluations.push(evaluation);
       clearDraft();
@@ -402,6 +437,14 @@ function questionWorkspace(body) {
   owner.id = 'question-entry-form';
   $('evaluation-form').after(owner);
   const fields = $('question-entry-fields');
+  if (real) {
+    fields.querySelector('[name=statement]').maxLength=5000;
+    fields.querySelector('[name=subject]').required=false;
+    fields.querySelector('[name=subject]').maxLength=200;
+    fields.querySelector('[name=optionD]').parentElement.insertAdjacentHTML('afterend','<label>Alternativa E (opcional)<input form="question-entry-form" name="optionE" maxlength="500"></label>');
+    fields.querySelector('[name=answer]').insertAdjacentHTML('beforeend','<option>E</option>');
+    fields.querySelector('[name=answer]').parentElement.insertAdjacentHTML('beforebegin','<label>Categoria (opcional)<input form="question-entry-form" name="category" maxlength="200"></label>');
+  }
   fields.querySelectorAll('[name]').forEach(field => {
     if (questionEntry[field.name] !== undefined) field.value = questionEntry[field.name];
     field.oninput = () => { questionEntry[field.name] = field.value; persistDraft(); };
@@ -438,7 +481,8 @@ function questionWorkspace(body) {
       const question = await api('/questions', { method: 'POST', body: {
         statement: formData.get('statement'), subject: formData.get('subject'),
         difficulty: formData.get('difficulty'), answer: formData.get('answer'),
-        options: ['A', 'B', 'C', 'D'].map(a => formData.get('option' + a))
+        options: [...['A', 'B', 'C', 'D'].map(a => formData.get('option' + a)), ...(real && formData.get('optionE')?.trim() ? [formData.get('optionE')] : [])],
+        category: real ? formData.get('category') : undefined
       } });
       state.questions.push(question);
       draft.questionIds = [...new Set([...draft.questionIds, question.id])];
@@ -476,26 +520,55 @@ function versionCards(evaluation, activeName = null) {
     '<article class="panel version-choice ' + (version.name === activeName ? 'selected' : '') + '"><h3>Versão ' + esc(version.name) + '</h3><p class="muted">' + version.questions.length + ' questões · gabarito próprio</p><div class="actions"><a class="btn secondary" ' + (version.name === activeName ? 'aria-current="true"' : '') + ' href="#evaluation?id=' + encodeURIComponent(evaluation.id) + '&version=' + encodeURIComponent(version.name) + '">Abrir versão ' + esc(version.name) + '</a>' +
     button('Ver QR Code','qr:'+evaluation.id+':'+encodeURIComponent(version.name),'secondary') + '</div></article>').join('') + '</div>';
 }
-function versions() {
+async function versions() {
+  if (real) {
+    const requestedHash=location.hash;
+    screen.innerHTML='<div class="panel" role="status">Carregando avaliações…</div>';
+    try {
+      const evaluations=await api('/evaluations');
+      if(location.hash!==requestedHash)return;
+      state.evaluations=evaluations;
+    } catch(error) {
+      if(location.hash===requestedHash)screen.innerHTML=empty('Não foi possível carregar as avaliações',esc(error.message))+button('Tentar novamente','retry-versions','secondary');
+      return;
+    }
+  }
   screen.innerHTML=head('Versões & QR Code','Consulte avaliações, questões e gabaritos','<a class="btn" href="#create">+ Nova avaliação</a>')+
-    (state.evaluations.length ? state.evaluations.map(e=>'<section class="panel"><div class="section-heading"><div><h2>'+esc(e.name)+'</h2><p>'+findName(state.classes,e.classId)+'</p></div><a href="#evaluation?id='+encodeURIComponent(e.id)+'">Consultar avaliação →</a></div>'+versionCards(e)+'</section>').join('') : empty('Nenhuma versão gerada','Crie uma avaliação para consultar os gabaritos e QR Codes.'));
+    (state.evaluations.length ? state.evaluations.map(e=>'<section class="panel"><div class="section-heading"><div><h2>'+esc(e.name)+'</h2><p>'+findName(state.classes,e.classId)+'</p></div><a href="#evaluation?id='+encodeURIComponent(e.id)+'">Consultar avaliação →</a></div>'+(real ? '<p>'+e.versionCount+' versões · '+e.questionCount+' questões selecionadas</p>' : versionCards(e))+'</section>').join('') : empty('Nenhuma versão gerada','Crie uma avaliação para consultar os gabaritos e QR Codes.'));
+  document.title='Versões & QR Code · AvaliaSystem';
 }
 
 function documentActions(evaluation, version) {
   const params = new URLSearchParams({evaluation: evaluation.id, version: version.name});
   return '<section class="panel document-actions"><h2>Documentos · Versão ' + esc(version.name) + '</h2><div class="actions">' +
     [['exam','Imprimir prova'],['answers','Imprimir folha de respostas'],['key','Imprimir gabarito']].map(([type,label]) => '<a class="btn secondary" target="_blank" rel="noopener" href="/print?' + params.toString() + '&type=' + type + '">' + label + '</a>').join('') +
-    button('Liberar gabarito ao aluno','publish-key:' + evaluation.id + ':' + encodeURIComponent(version.name)) + '</div></section>';
+    button(real ? 'Liberar gabaritos da avaliação' : 'Liberar gabarito ao aluno','publish-key:' + evaluation.id + ':' + encodeURIComponent(version.name)) +
+    (real && evaluation.keyPublished ? button('Revogar gabaritos da avaliação','revoke-key:' + evaluation.id + ':' + encodeURIComponent(version.name),'danger') : '') + '</div></section>';
 }
-function evaluationConfirmation() {
-  const params=routeParams(), evaluation=state.evaluations.find(e=>e.id===params.get('id'));
+async function evaluationConfirmation() {
+  const requestedHash = location.hash;
+  const params=routeParams();
+  let evaluation=state.evaluations.find(e=>e.id===params.get('id'));
+  if (real) {
+    screen.innerHTML='<div class="panel" role="status">Carregando avaliação e versões…</div>';
+    try {
+      evaluation = await api('/evaluations/'+encodeURIComponent(params.get('id') || ''));
+      if (location.hash !== requestedHash) return;
+      const index = state.evaluations.findIndex(e => e.id === evaluation.id);
+      if (index < 0) state.evaluations.push(evaluation); else state.evaluations[index] = evaluation;
+    } catch (error) {
+      if (location.hash === requestedHash) screen.innerHTML=empty('Não foi possível carregar a avaliação',esc(error.message))+button('Tentar novamente','retry-evaluation','secondary')+'<a class="btn secondary" href="#versions">Voltar às avaliações</a>';
+      return;
+    }
+  }
   if(!evaluation){screen.innerHTML=head('Avaliação não encontrada','Verifique o link ou selecione outra avaliação.')+'<a class="btn" href="#versions">Voltar às avaliações</a>';return;}
   const version=evaluation.versions.find(v=>v.name===params.get('version')) || evaluation.versions[0];
   screen.innerHTML='<a class="breadcrumb" href="#versions">← Todas as avaliações</a>'+
     head(params.get('created') ? 'Avaliação criada com sucesso' : esc(evaluation.name),esc(evaluation.name)+' · '+findName(state.classes,evaluation.classId)+' · '+evaluation.versions.length+' versões',
-      '<a class="btn secondary" href="#create">Criar outra avaliação</a><a class="btn" href="#correction">Ir para correção</a>')+
+      '<a class="btn secondary" href="#create">Criar outra avaliação</a>'+(real ? '' : '<a class="btn" href="#correction">Ir para correção</a>'))+
     versionCards(evaluation,version.name)+documentActions(evaluation,version)+
     '<section class="panel version-detail"><h2>Questões e gabarito · Versão '+esc(version.name)+'</h2><ol>'+version.questions.map(q=>'<li><h3>'+esc(q.statement)+'</h3><div class="question-options">'+q.options.map((o,i)=>'<div class="'+(String.fromCharCode(65+i)===q.answerLetter?'correct':'')+'">'+String.fromCharCode(65+i)+' · '+esc(o)+'</div>').join('')+'</div><p><span class="badge">Gabarito: '+q.answerLetter+'</span></p></li>').join('')+'</ol></section>';
+  document.title=evaluation.name+' · AvaliaSystem';
 }
 
 function correction() { cleanupPage = renderCorrection(screen, state, refresh, notice); }
@@ -532,6 +605,8 @@ document.addEventListener('click', async event => {
   if (!target) return;
   const [action, id, version] = target.dataset.action.split(':');
   try {
+    if (action === 'retry-evaluation') return evaluationConfirmation();
+    if (action === 'retry-versions') return versions();
     if (action === 'cancel-evaluation') {
       if (confirm('Descartar o rascunho da avaliação? As questões já salvas permanecerão no banco.')) { clearDraft(); location.hash = 'dashboard'; }
     }
@@ -569,15 +644,24 @@ document.addEventListener('click', async event => {
     }
     if (action === 'qr') {
       const versionName = decodeURIComponent(version);
-      const qr = await api('/evaluations/' + id + '/qr/' + encodeURIComponent(versionName));
+      const evaluation = real ? await api('/evaluations/' + id) : state.evaluations.find(e=>e.id===id);
+      const selected = evaluation.versions.find(v=>v.name===versionName);
+      if (!selected) throw new Error('Versão não encontrada.');
+      const qr = await evaluationQr(evaluation, selected);
       modal('QR Code · Versão ' + versionName, '<img class="qr-code" src="' + qr.image + '" alt="QR Code da versão"><p class="muted">Identifica a avaliação e a versão.</p><a class="btn" download="qr-' + version + '.png" href="' + qr.image + '">Baixar PNG</a>', async () => {});
       $('modal-form').querySelector('[type=submit]').hidden = true;
     }
 
     if (action === 'publish-key') {
-      if (!confirm('Liberar o gabarito desta versão? Qualquer pessoa com o link poderá ver as respostas corretas.')) return;
+      if (!confirm(real ? 'Liberar os gabaritos de todas as versões desta avaliação? Qualquer pessoa com um link poderá consultar as letras corretas.' : 'Liberar o gabarito desta versão? Qualquer pessoa com o link poderá ver as respostas corretas.')) return;
       const name = decodeURIComponent(version);
-      const link = await api('/evaluations/' + id + '/versoes/' + encodeURIComponent(name) + '/publicar', {method:'POST'});
+      let link;
+      if (real) {
+        const updated = await api('/evaluations/' + id + '/gabarito', {method:'PATCH',body:{liberado:true}});
+        state.evaluations[state.evaluations.findIndex(e=>e.id===id)] = updated;
+        link = {path:'/student?token='+encodeURIComponent(updated.versions.find(v=>v.name===name).code)};
+        render();
+      } else link = await api('/evaluations/' + id + '/versoes/' + encodeURIComponent(name) + '/publicar', {method:'POST'});
       const url = location.origin + link.path;
       modal('Gabarito liberado · ' + name,
         '<p>Compartilhe este link quando os alunos puderem consultar as respostas. O link não mostra alunos, notas ou respostas individuais.</p><label>Link público<input id="public-key-link" readonly value="' + esc(url) + '"></label><div class="actions"><a class="btn secondary" target="_blank" rel="noopener" href="' + esc(link.path) + '">Abrir tela do aluno</a>' + button('Copiar link','copy-key','secondary') + button('Revogar acesso','revoke-key:' + id + ':' + version,'danger') + '</div>', async()=>{});
@@ -589,8 +673,11 @@ document.addEventListener('click', async event => {
       catch { input.focus(); input.select(); notice('Selecione e copie o link exibido.'); }
     }
     if (action === 'revoke-key') {
-      if(!confirm('Revogar o link público deste gabarito?'))return;
-      await api('/evaluations/' + id + '/versoes/' + encodeURIComponent(decodeURIComponent(version)) + '/publicar',{method:'DELETE'});
+      if(!confirm(real ? 'Revogar os gabaritos de todas as versões desta avaliação?' : 'Revogar o link público deste gabarito?'))return;
+      if (real) {
+        await api('/evaluations/' + id + '/gabarito',{method:'PATCH',body:{liberado:false}});
+        await refresh(); render();
+      } else await api('/evaluations/' + id + '/versoes/' + encodeURIComponent(decodeURIComponent(version)) + '/publicar',{method:'DELETE'});
       $('modal').close(); notice('Acesso público revogado.');
     }
     if (action === 'print') window.print();
@@ -630,8 +717,8 @@ window.addEventListener('hashchange', () => {
   if (state) render();
 });
 if(real) {
-  document.querySelectorAll('nav a').forEach(a=>{if(!['#dashboard','#classes'].includes(a.hash))a.hidden=true;});
-  document.querySelectorAll('nav small').forEach((el,i)=>{if(i>1)el.hidden=true;});
+  document.querySelectorAll('nav a').forEach(a=>{if(!['#dashboard','#classes','#questions','#create','#versions'].includes(a.hash))a.hidden=true;});
+  document.querySelectorAll('nav small').forEach((el,i)=>{if(i>2)el.hidden=true;});
   document.querySelector('.app-footer').textContent='AvaliaSystem';
 }
 screen.innerHTML='<div class="panel" role="status">Carregando seus dados…</div>';
