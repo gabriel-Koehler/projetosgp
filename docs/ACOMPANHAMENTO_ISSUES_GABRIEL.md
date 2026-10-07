@@ -1,6 +1,6 @@
 # Acompanhamento das issues — Gabriel Koehler
 
-Última atualização: 2026-10-06. Responsável GitHub: `gabriel-Koehler`.
+Última atualização: 2026-10-07. Responsável GitHub: `gabriel-Koehler`.
 Fonte: issues atribuídas e PRs de `gabriel-Koehler/projetosgp`.
 Este é o arquivo de acompanhamento oficial para atualizar ao concluir cada issue.
 
@@ -27,7 +27,7 @@ Este é o arquivo de acompanhamento oficial para atualizar ao concluir cada issu
 | [#13 N1-FE-06 — Impressão e tela aluno](https://github.com/gabriel-Koehler/projetosgp/issues/13) | Integrada na main | Encerrada, PR merged | `feat/n1-fe-06-impressao-prova-aluno`, `3f7ce1a`; [PR #58](https://github.com/gabriel-Koehler/projetosgp/pull/58) | Nenhuma pendência de integração |
 | [#14 N1-FE-07 — Correção e estatísticas simuladas](https://github.com/gabriel-Koehler/projetosgp/issues/14) | Integrada na main | Encerrada, PR merged | `feat/n1-fe-07-correcao-estatisticas`, `3c2d899`; [PR #59](https://github.com/gabriel-Koehler/projetosgp/pull/59) | Nenhuma pendência de integração |
 | [#22 N2-FE-01 — Autenticação e turmas com API real](https://github.com/gabriel-Koehler/projetosgp/issues/22) | Implementada; PostgreSQL local validado | Aberta, [PR #64](https://github.com/gabriel-Koehler/projetosgp/pull/64) | `feat/n2-fe-01-integracao-auth-turmas`, `5fd72c1`, base `feat/n2-api-auth-turmas` ([PR #60](https://github.com/gabriel-Koehler/projetosgp/pull/60)) | Validar no Supabase de desenvolvimento; revisão e merge |
-| [#23 N2-FE-02 — Questões e upload com API real](https://github.com/gabriel-Koehler/projetosgp/issues/23) | Implementada; PostgreSQL local validado | Aberta; publicação bloqueada por permissão | `feat/n2-fe-02-integracao-questoes-upload`, `6ab665a`, base da #22 em `121fbdb` | Supabase remoto, navegador desktop/mobile, revisão e merge |
+| [#23 N2-FE-02 — Questões e upload com API real](https://github.com/gabriel-Koehler/projetosgp/issues/23) | Implementada; PostgreSQL local revalidado em 2026-10-07 | Aberta, [PR #65](https://github.com/gabriel-Koehler/projetosgp/pull/65) aberto | `feat/n2-fe-02-integracao-questoes-upload`, `6ab665a`, base da #22 em `121fbdb` | Supabase remoto, navegador desktop/mobile, revisão e merge |
 | [#25 N2-FE-03 — Avaliações e versões persistidas](https://github.com/gabriel-Koehler/projetosgp/issues/25) | Sem entrega específica identificada | Aberta | Avaliações ainda em memória | Integrar criação e persistência reais |
 | [#28 N2-FE-04 — Correção real e Excel](https://github.com/gabriel-Koehler/projetosgp/issues/28) | Sem entrega específica identificada | Aberta | Correção manual simulada e CSV | Integrar correção real e relatório XLSX |
 
@@ -126,3 +126,15 @@ Impressão A4 de prova, folha com QR/bolhas A–D e gabarito do professor. Liber
 - Pendências: configuração e homologação em Supabase de desenvolvimento; navegador desktop/mobile indisponível na sessão; revisão e merge mediante autorização. Não iniciar #25 nesta entrega.
 - Detalhes: docs/N2-FE-02.md.
 - Fluxo HTTP pelo proxy Express validado com API e banco locais: login/cookie, painel/config, CRUD, modelos CSV/XLSX, multipart, prévia/confirmação, duplicadas e logout. Nenhuma migração remota executada.
+
+## Regularização N2-FE-02 — 2026-10-07
+- Bloqueio de publicação resolvido com a conta já configurada `gabriel-Koehler`; push confirmado para a branch da #23.
+- [PR #65](https://github.com/gabriel-Koehler/projetosgp/pull/65) aberto para `feat/n2-fe-01-integracao-auth-turmas`. Dependências #64 e #60, reaproveitamento #42 e pendências de aceite explícitos na descrição.
+- Revisor indicado: @gabriel-Koehler. GitHub não permite solicitar revisão ao próprio autor; indicação preservada na descrição.
+- Revalidação: 183 testes Python e 13 testes JavaScript aprovados. Fluxo HTTP pelo proxy Express novamente aprovado em banco PostgreSQL local separado.
+- API GitHub confirmou PR #65 e issue #23 abertos; nenhum merge ou encerramento realizado.
+- Pendências externas: configurar e autorizar Supabase de desenvolvimento para homologação; disponibilizar navegador conectado para validação visual desktop/mobile. Não há `.env` nem `DATABASE_URL` nesta sessão; inventário de navegadores vazio e navegador integrado indisponível.
+- Próxima implementação na sequência: #25, após concluir o aceite da #23. Branch futura `feat/n2-fe-03-integracao-avaliacoes-versoes`, partindo da versão mais atual da branch da #23. Nenhuma branch da #25 criada.
+- Dependência de Diego consultada no GitHub: issue #31, branch `infra/diego-validacao-supabase` em `f8f16e0`, [PR #63](https://github.com/gabriel-Koehler/projetosgp/pull/63), dependente de #61/#62; PR e issue abertos, sem merge. A documentação dessa branch registra o projeto Supabase `projetosgp` (`veyofappfyaoejcjwxky`) já provisionado e DDL/RLS/seed validados remotamente. Não é necessário criar outro projeto.
+- Compatibilidade conferida: mesmas tabelas/colunas/índices da API, acrescidos de transação e RLS. DDL de Diego aplicado em banco local separado, com 12 tabelas e RLS em todas; fluxo HTTP da #23 aprovado sobre esse schema. Isso não substitui a validação das permissões/conexão do backend remoto.
+- A conexão de Diego está documentada como `.env.supabase.local` não versionado; arquivo indisponível neste workspace. Pendência corrigida: obter acesso ao projeto já provisionado e homologar o fluxo da #23, sem repetir o provisionamento. Detalhes em `docs/N2-FE-02.md`.
