@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.core.config import Settings
-from app.main import create_app
+from app.backend import create_app
 from app.repositories.avaliacao_repository import AvaliacaoRepository, get_avaliacao_repository
 
 
