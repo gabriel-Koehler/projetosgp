@@ -7,6 +7,7 @@ from fastapi import Depends, HTTPException, Request, status
 
 from app.core import passwords
 from app.core.config import Settings
+from app.database.connection import obter_pool
 from app.repositories.cadastros_repository import ProfessorRepository
 
 SESSION_KEY = "professor"
@@ -32,7 +33,7 @@ def autenticar(request: Request, settings: Settings, username: str, password: st
     Com banco configurado, usa a tabela professor (senha em hash). Sem banco
     (desenvolvimento), usa PROFESSOR_USERNAME / PROFESSOR_PASSWORD do .env.
     """
-    pool = getattr(request.app.state, "pool", None)
+    pool = obter_pool(request.app, settings)
     if pool is None:
         if not verificar_credenciais(settings, username, password):
             return None

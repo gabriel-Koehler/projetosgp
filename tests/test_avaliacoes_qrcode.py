@@ -7,14 +7,15 @@ import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import create_app
+from app.backend import create_app
 from app.repositories.avaliacao_repository import AvaliacaoRepository
 from app.services.qrcode_service import gerar_qrcode_png
 
 
 def ler_qrcode(png: bytes) -> str:
     imagem = cv2.imdecode(np.frombuffer(png, np.uint8), cv2.IMREAD_GRAYSCALE)
-    texto, _, _ = cv2.QRCodeDetector().detectAndDecode(imagem)
+    # Detector Aruco: o QRCodeDetector clássico falha em ~13% dos códigos aleatórios.
+    texto, _, _ = cv2.QRCodeDetectorAruco().detectAndDecode(imagem)
     return texto
 
 
