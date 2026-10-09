@@ -1,5 +1,7 @@
 """API modular do back-end (camadas). Montada em `/n1` pelo `app/main.py`."""
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,15 +9,24 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import Settings, get_settings
 from app.controllers import aluno, auth, avaliacoes, painel
+from app.database.connection import obter_pool
 from app.services.errors import ErroDeNegocio
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
 
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        obter_pool(app, settings)  # rodando sozinho, já abre o pool na subida
+        yield
+        if getattr(app.state, "pool", None):
+            app.state.pool.close()
+
     app = FastAPI(
         title="Sistema de Geração e Correção Automática de Avaliações",
-        version="0.1.0",
+        version="0.2.0",
+        lifespan=lifespan,
     )
 
     app.add_middleware(
@@ -48,7 +59,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/api/health", tags=["infra"])
     def health():
-        return {"status": "ok"}
+        pool = obter_pool(app, settings)
+        if pool is None:
+            return {"status": "ok", "banco": "nao_configurado"}
+        try:
+            with pool.connection(timeout=5) as conn:
+                conn.execute("SELECT 1")
+        except Exception:
+            return JSONResponse(status_code=503, content={"status": "erro", "banco": "indisponivel"})
+        return {"status": "ok", "banco": "ok"}
 
     return app
 
