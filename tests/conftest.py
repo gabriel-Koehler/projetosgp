@@ -63,5 +63,17 @@ def banco(banco_url, settings):
             "SELECT string_agg(quote_ident(tablename), ', ') AS t FROM pg_tables WHERE schemaname = 'public'"
         ).fetchone()["t"]
         conn.execute(f"TRUNCATE {tabelas} RESTART IDENTITY CASCADE")
-        migrate.garantir_professor(conn, settings)
+        migrate.garantir_professor(conn, settings, iteracoes=1000)  # hash rápido nos testes
         yield conn
+
+
+@pytest.fixture
+def api(banco, banco_url, settings):
+    """Cliente da API ligado ao banco de teste, com o professor logado."""
+    from dataclasses import replace
+
+    app = create_app(replace(settings, database_url=banco_url))
+    with TestClient(app) as cliente:
+        resposta = cliente.post("/api/auth/login", json={"username": "professor", "password": "senha-teste"})
+        assert resposta.status_code == 200
+        yield cliente

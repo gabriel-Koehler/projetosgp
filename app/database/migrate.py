@@ -20,7 +20,7 @@ def aplicar_schema(conn: psycopg.Connection) -> None:
         conn.execute(SCHEMA.read_text(encoding="utf-8"))
 
 
-def garantir_professor(conn: psycopg.Connection, settings: Settings) -> bool:
+def garantir_professor(conn: psycopg.Connection, settings: Settings, iteracoes: int = passwords.ITERACOES) -> bool:
     """Cria o professor configurado se ainda não existir. Retorna True se criou."""
     cursor = conn.execute(
         """
@@ -28,7 +28,11 @@ def garantir_professor(conn: psycopg.Connection, settings: Settings) -> bool:
         VALUES (%s, %s, %s)
         ON CONFLICT (username) DO NOTHING
         """,
-        (settings.professor_username, settings.professor_nome, passwords.gerar_hash(settings.professor_password)),
+        (
+            settings.professor_username,
+            settings.professor_nome,
+            passwords.gerar_hash(settings.professor_password, iteracoes),
+        ),
     )
     return cursor.rowcount == 1
 
