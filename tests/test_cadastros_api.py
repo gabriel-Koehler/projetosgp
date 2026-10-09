@@ -5,7 +5,7 @@ from dataclasses import replace
 from fastapi.testclient import TestClient
 
 from app.core import passwords
-from app.main import create_app
+from app.backend import create_app
 
 
 def criar_semestre(api, nome="2026/2", **extra):

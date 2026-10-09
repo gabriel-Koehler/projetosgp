@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from app.core.config import Settings
 from app.database import migrate
 from app.database.connection import conectar
-from app.main import create_app
+from app.backend import create_app
 from app.repositories.avaliacao_repository import AvaliacaoRepository, get_avaliacao_repository
 
 # Testes que usam o banco rodam só com TEST_DATABASE_URL definida (um banco

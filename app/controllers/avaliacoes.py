@@ -14,8 +14,14 @@ router = APIRouter(prefix="/api/avaliacoes", tags=["avaliações"], dependencies
 
 
 def url_publica(request: Request, settings: Settings, caminho: str) -> str:
-    base = settings.public_base_url or str(request.base_url)
-    return base.rstrip("/") + caminho
+    if settings.public_base_url:
+        return settings.public_base_url.rstrip("/") + caminho
+    # Inclui o prefixo de montagem (ex.: /n1), para o link funcionar quando a API está montada no app do MVP.
+    return str(request.url.replace(path=_prefixo(request) + caminho, query=""))
+
+
+def _prefixo(request: Request) -> str:
+    return request.scope.get("root_path", "").rstrip("/")
 
 
 def url_do_aluno(request: Request, settings: Settings, codigo: str) -> str:
@@ -34,7 +40,7 @@ def _serializar(avaliacao: Avaliacao, request: Request, settings: Settings) -> A
                 nome=v.versao.nome,
                 codigo=v.codigo,
                 url_aluno=url_do_aluno(request, settings, v.codigo),
-                url_qrcode=f"/api/avaliacoes/{avaliacao.id}/versoes/{v.codigo}/qrcode.png",
+                url_qrcode=_prefixo(request) + f"/api/avaliacoes/{avaliacao.id}/versoes/{v.codigo}/qrcode.png",
                 questoes=[QuestaoVersaoOut(**vars(q)) for q in v.versao.questoes],
                 gabarito=v.versao.gabarito,
             )

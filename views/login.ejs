@@ -1,29 +1,9 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login do Professor</title>
-    <link rel="stylesheet" href="/styles.css" />
-  </head>
-  <body class="auth-page">
-    <main class="auth-card">
-      <h1>Sistema de Avaliações</h1>
-      <h2>Login do professor</h2>
-      <% if (error) { %>
-        <p class="error"><%= error %></p>
-      <% } %>
-      <form method="POST" action="/login">
-        <label>
-          Usuário
-          <input type="text" name="username" placeholder="professor" required />
-        </label>
-        <label>
-          Senha
-          <input type="password" name="password" placeholder="123456" required />
-        </label>
-        <button type="submit">Entrar</button>
-      </form>
-    </main>
-  </body>
-</html>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Entrar · AvaliaSystem</title><link rel="stylesheet" href="/styles.css"><script src="/config.js"></script><script type="module" src="/auth.js"></script></head>
+<body class="login-body"><main class="login-layout">
+<section class="intro"><a class="brand" href="/"><span class="brand-mark">✓</span> AvaliaSystem</a><div class="intro-copy"><h1>Avaliações do <br>início ao fim, <br>sem esforço.</h1><p>O AvaliaSystem centraliza todo o ciclo de avaliações do professor — da criação de questões à nota final — em uma plataforma simples, rápida e confiável.</p></div>
+<div class="features"><div><span>▤</span><p><strong>Banco de Questões</strong>Crie e organize questões por disciplina, dificuldade e competência.</p></div><div><span>▧</span><p><strong>Geração Automática</strong>Monte avaliações com versões únicas e gabaritos em segundos.</p></div><div><span>▦</span><p><strong>Correção por QR Code</strong>Identifique versões e acompanhe a correção das avaliações.</p></div><div><span>▥</span><p><strong>Resultados & Estatísticas</strong>Visualize desempenho por turma, aluno e questão.</p></div></div></section>
+<section class="auth-side"><div class="login-card"><header class="auth-heading"><span class="brand-mark">✓</span><div><h2 id="auth-title">Entrar na conta</h2><p id="auth-subtitle">Acesse sua conta de professor</p></div></header>
+<button class="secondary full" id="google" type="button"><span class="google-mark">G</span> Continuar com o Google</button><div class="divider">ou use seu e-mail</div>
+<form id="auth-form"><label id="name-field" hidden>Nome<input name="name" autocomplete="name" maxlength="100"></label><label>E-mail<input name="email" type="email" autocomplete="username" placeholder="seu@email.com" required maxlength="200"></label><div id="password-field"><div class="label-row"><label for="password">Senha</label><button class="text-button" id="recover" type="button">Esqueceu a senha?</button></div><div class="password-wrap"><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Sua senha" required maxlength="128"><button type="button" id="toggle-password" class="text-button" aria-controls="password" aria-pressed="false">Mostrar</button></div></div><p id="auth-feedback" role="alert" hidden></p><button type="submit" id="submit-auth">Entrar</button></form>
+<p class="auth-switch"><span id="switch-label">Não tem uma conta?</span> <button id="switch-mode" class="text-button" type="button">Crie uma!</button></p><details class="demo-help"><summary>Acesso de demonstração</summary><p>professor@avaliasystem.com<br>Senha: 123456</p><p>Dados fictícios em memória; reiniciam com o servidor.</p></details></div><small class="auth-footer">© <%= new Date().getFullYear() %> AvaliaSystem</small></section>
+</main></body></html>
