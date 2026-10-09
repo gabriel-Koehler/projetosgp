@@ -171,3 +171,14 @@ def test_professor_nao_ve_dados_de_outro(api, banco, banco_url, settings):
         assert outro.get("/api/semestres").json() == []
         assert outro.get(f"/api/turmas/{turma['id']}").status_code == 404
         assert outro.post("/api/turmas", json={"semestre_id": turma["semestre_id"], "nome": "X"}).status_code == 404
+
+
+def test_login_e_cadastros_com_a_api_montada_no_app_do_mvp(banco, banco_url, settings):
+    """Como em produção: app/main.py monta a API em /n1 (sem rodar o lifespan dela)."""
+    from fastapi import FastAPI
+
+    principal = FastAPI()
+    principal.mount("/n1", create_app(replace(settings, database_url=banco_url)))
+    with TestClient(principal) as cliente:
+        assert cliente.post("/n1/api/auth/login", json={"username": "professor", "password": "senha-teste"}).status_code == 200
+        assert cliente.post("/n1/api/semestres", json={"nome": "2026/2"}).status_code == 201

@@ -48,3 +48,13 @@ def test_health_com_banco(settings, banco_url):
 
 def test_health_sem_banco(client):
     assert client.get("/api/health").json() == {"status": "ok", "banco": "nao_configurado"}
+
+
+def test_banco_funciona_com_a_api_montada_em_outro_app(settings, banco_url):
+    """O app do MVP (app/main.py) monta a API em /n1, e o Starlette não roda o lifespan de apps montados."""
+    from fastapi import FastAPI
+
+    principal = FastAPI()
+    principal.mount("/n1", create_app(replace(settings, database_url=banco_url)))
+    with TestClient(principal) as client:
+        assert client.get("/n1/api/health").json() == {"status": "ok", "banco": "ok"}

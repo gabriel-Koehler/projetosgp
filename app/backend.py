@@ -9,7 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import Settings, get_settings
 from app.controllers import aluno, auth, avaliacoes, cadastros, painel, questoes
-from app.database.connection import criar_pool
+from app.database.connection import obter_pool
 from app.services.errors import ErroDeNegocio
 
 
@@ -18,9 +18,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        app.state.pool = criar_pool(settings.database_url) if settings.database_url else None
+        obter_pool(app, settings)  # rodando sozinho, já abre o pool na subida
         yield
-        if app.state.pool:
+        if getattr(app.state, "pool", None):
             app.state.pool.close()
 
     app = FastAPI(
@@ -61,7 +61,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/api/health", tags=["infra"])
     def health():
-        pool = getattr(app.state, "pool", None)
+        pool = obter_pool(app, settings)
         if pool is None:
             return {"status": "ok", "banco": "nao_configurado"}
         try:
