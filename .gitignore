@@ -1,9 +1,12 @@
-# Python
 .venv/
-venv/
 __pycache__/
 *.pyc
-.pytest_cache/
-
-# Ambiente
 .env
+node_modules/
+
+
+mvp-runtime*.log
+# Python
+venv/
+.pytest_cache/
+# Ambiente

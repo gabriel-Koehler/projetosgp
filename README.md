@@ -25,7 +25,11 @@
 
 ---
 
-## ⚙️ Back-end (API Python)
+## Integração N1
+
+O MVP continua em `npm run dev:all` (porta 3000, API em 8000). O backend modular dos PRs BE-01/03/04 está em `http://localhost:8000/n1/docs`, com contratos e sessão próprios. Para executar apenas esse backend na raiz, use `uvicorn app.backend:create_app --factory --port 8001`. Consulte [Integração N1](docs/INTEGRACAO_N1.md).
+
+## ⚙️ Back-end modular (API Python)
 
 ### Como rodar localmente
 
@@ -34,7 +38,7 @@ python -m venv .venv
 .venv\Scripts\activate            # Linux/macOS: source .venv/bin/activate
 pip install -r requirements-dev.txt
 copy .env.example .env            # Linux/macOS: cp .env.example .env  (ajuste os valores)
-uvicorn app.main:app --reload
+uvicorn app.backend:create_app --factory --reload
 ```
 
 * API em `http://localhost:8000` e documentação interativa das rotas em `http://localhost:8000/docs`.
@@ -64,6 +68,8 @@ uvicorn app.main:app --reload
 | `PUBLIC_BASE_URL` | Domínio público usado no link do QR Code (ex.: `https://provafacil.onrender.com`). Vazio = endereço da requisição. |
 
 ### Rotas disponíveis
+
+> Rodando pelo app do MVP (`app.main`), estas rotas ficam com o prefixo **`/n1`** (ex.: `/n1/api/questoes`, `/n1/student/gabarito/{codigo}`). Rodando só o back-end (`uvicorn app.backend:create_app --factory`), ficam na raiz.
 
 | Método | Rota | Login | O que faz |
 | :--- | :--- | :---: | :--- |
@@ -245,3 +251,12 @@ python scripts/create_github_issues_kanban.py SEU_TOKEN_GITHUB_AQUI
 ├── .env.example                    # Modelo das variáveis de ambiente
 └── README.md                       # Documentação principal
 ```
+## MVP AvaliaSystem
+
+Instruções de execução, conta demo, escopo e validação: [N1-FE-01](docs/N1-FE-01.md).
+
+## API Python integrada — N1-BE-02
+
+Nesta branch, execute `npm run dev:all` após instalar as dependências Python.
+O servidor web usa a API Python em memória, sem o adaptador Node da branch anterior.
+Veja [execução, contrato e testes](docs/N1-BE-02.md).
