@@ -1,0 +1,15 @@
+<header class="topbar">
+  <a class="topbar__brand" href="<%= username ? '/dashboard' : '/' %>">
+    <span class="topbar__brand-mark" aria-hidden="true">📝</span>
+    ProvaFácil
+  </a>
+  <% if (username) { %>
+    <div class="topbar__user">
+      <div class="topbar__user-info">
+        <span class="avatar"><%= username.slice(0, 2).toUpperCase() %></span>
+        <span class="topbar__user-name">Prof. <%= username %></span>
+      </div>
+      <a class="logout" href="/logout">Sair</a>
+    </div>
+  <% } %>
+</header>

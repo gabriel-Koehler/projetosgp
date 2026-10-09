@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from app.core import passwords
 from app.database import check, migrate
-from app.main import create_app
+from app.backend import create_app
 
 
 def test_schema_cria_todas_as_tabelas(banco_url, settings):
