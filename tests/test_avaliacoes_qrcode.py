@@ -22,7 +22,8 @@ def payload(**config):
 
 def ler_qrcode(png: bytes) -> str:
     imagem = cv2.imdecode(np.frombuffer(png, np.uint8), cv2.IMREAD_GRAYSCALE)
-    texto, _, _ = cv2.QRCodeDetector().detectAndDecode(imagem)
+    # Detector Aruco: o QRCodeDetector clássico falha em ~13% dos códigos aleatórios.
+    texto, _, _ = cv2.QRCodeDetectorAruco().detectAndDecode(imagem)
     return texto
 
 
