@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import pytest
 
-from app.core.qrcode_service import gerar_qrcode_png
+from app.services.qrcode_service import gerar_qrcode_png
 
 QUESTOES = [
     {"id": f"Q{i}", "enunciado": f"Pergunta {i}", "alternativas": ["a", "b", "c", "d"], "correta": "ABCD"[i % 4]}
@@ -22,7 +22,8 @@ def payload(**config):
 
 def ler_qrcode(png: bytes) -> str:
     imagem = cv2.imdecode(np.frombuffer(png, np.uint8), cv2.IMREAD_GRAYSCALE)
-    texto, _, _ = cv2.QRCodeDetector().detectAndDecode(imagem)
+    # Detector Aruco: o QRCodeDetector clássico falha em ~13% dos códigos aleatórios.
+    texto, _, _ = cv2.QRCodeDetectorAruco().detectAndDecode(imagem)
     return texto
 
 

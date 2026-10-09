@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from app.main import app
 from app.core.config import get_settings
-from app.mocks.avaliacoes_store import AvaliacoesStore, get_store
+from app.repositories.avaliacao_repository import AvaliacaoRepository, get_avaliacao_repository
 from test_avaliacoes_qrcode import payload, ler_qrcode
 
 
@@ -9,8 +9,8 @@ def test_mounted_backend_preserves_mvp_and_public_qr_contract(settings):
     backend = next(route.app for route in app.routes if getattr(route, 'path', None) == '/n1')
     previous = backend.dependency_overrides.copy()
     backend.dependency_overrides[get_settings] = lambda: settings
-    backend.dependency_overrides[get_store] = lambda: store
-    store = AvaliacoesStore()
+    backend.dependency_overrides[get_avaliacao_repository] = lambda: store
+    store = AvaliacaoRepository()
     try:
         with TestClient(app) as client:
             assert client.get('/n1/api/painel').status_code == 401
