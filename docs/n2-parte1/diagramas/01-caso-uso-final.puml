@@ -1,0 +1,66 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 15
+left to right direction
+actor Professor
+actor Aluno
+rectangle "AvaliaSystem — N2" {
+usecase "UC01 — Fazer login" as UC01
+usecase "UC02 — Gerenciar semestres\ne turmas" as UC02
+usecase "UC03 — Gerenciar/importar\nalunos" as UC03
+usecase "UC04 — Gerenciar banco\nde questões" as UC04
+usecase "UC05 — Importar questões" as UC05
+usecase "UC06 — Criar avaliação" as UC06
+usecase "UC07 — Configurar versões" as UC07
+usecase "UC08 — Gerar versões e\ndocumentos" as UC08
+usecase "UC09 — Corrigir prova" as UC09
+usecase "UC10 — Consultar resultados" as UC10
+usecase "UC11 — Consultar estatísticas" as UC11
+usecase "UC12 — Exportar notas\npara Excel" as UC12
+usecase "UC14 — Liberar/revogar\ngabarito" as UC14
+usecase "UC13 — Consultar gabarito da versão" as UC13
+usecase "Gerar gabaritos" as GERG
+usecase "Gerar QR Codes" as GERQ
+usecase "Preservar snapshots" as SNAP
+usecase "Identificar versão\npelo QR Code" as LERQR
+usecase "Ler marcações OMR" as OMR
+usecase "Calcular nota" as NOTA
+usecase "Persistir resultado" as SAVE
+usecase "Verificar liberação" as LIB
+}
+Professor -- UC01
+Professor -- UC02
+Professor -- UC03
+Professor -- UC04
+Professor -- UC05
+Professor -- UC06
+Professor -- UC07
+Professor -- UC08
+Professor -- UC09
+Professor -- UC10
+Professor -- UC11
+Professor -- UC12
+Professor -- UC14
+Aluno -- UC13
+UC06 ..> UC07 : <<include>>
+UC06 ..> UC08 : <<include>>
+UC08 ..> GERG : <<include>>
+UC08 ..> GERQ : <<include>>
+UC08 ..> SNAP : <<include>>
+UC09 ..> LERQR : <<include>>
+UC09 ..> OMR : <<include>>
+UC09 ..> NOTA : <<include>>
+UC09 ..> SAVE : <<include>>
+UC12 ..> UC10 : <<extend>> [exportação solicitada]
+UC13 ..> LIB : <<include>>
+note bottom of UC13
+Aluno sem conta. Gabarito bloqueado até liberação.
+Exibir apenas alternativas corretas; nunca notas ou respostas individuais.
+end note
+note top of UC06
+Precondição das operações administrativas: sessão válida.
+Login não é incluído em cada operação; pode já ter ocorrido.
+end note
+@enduml

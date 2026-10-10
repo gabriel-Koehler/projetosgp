@@ -2,6 +2,7 @@
 import base64
 import io
 import json
+import os
 import random
 import re
 from secrets import token_urlsafe
@@ -147,7 +148,7 @@ def current_state(user=Depends(current_user)):
 
 def sign_in(user, request, response):
     token = provider.create_session(user["id"], request.cookies.get("avalia_session"))
-    response.set_cookie("avalia_session", token, httponly=True, samesite="lax", max_age=3600, path="/")
+    response.set_cookie("avalia_session", token, httponly=True, samesite="lax", max_age=3600, path="/", secure=os.getenv("SESSION_HTTPS_ONLY", "false").lower() in {"true", "1", "yes"})
     return data(provider.public_user(user))
 
 

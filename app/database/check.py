@@ -5,6 +5,7 @@ Uso: `python -m app.database.check`
 
 from app.core.config import Settings, get_settings
 from app.database.connection import conectar
+from app.database.supabase_client import criar_cliente_supabase
 
 TABELAS = [
     "professor", "semestre", "turma", "aluno", "questao", "alternativa", "avaliacao",
@@ -35,6 +36,13 @@ def main(settings: Settings) -> None:
     else:
         print(f"[OK] As {len(TABELAS)} tabelas existem.")
 
+    cliente = criar_cliente_supabase(settings)
+    if cliente is None:
+        print("[INFO] Supabase Storage não configurado (SUPABASE_URL / SUPABASE_KEY): fotos das folhas não serão guardadas.")
+    else:
+        buckets = [b.name for b in cliente.storage.list_buckets()]
+        status = "[OK]" if settings.supabase_bucket in buckets else "[AVISO] não encontrado:"
+        print(f"{status} bucket '{settings.supabase_bucket}' no Storage.")
 
 
 if __name__ == "__main__":

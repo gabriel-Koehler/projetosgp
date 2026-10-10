@@ -44,7 +44,7 @@ class ConfiguracaoVersoes:
 @dataclass(frozen=True)
 class QuestaoVersao:
     numero: int  # posição na prova, começando em 1
-    questao_id: str
+    questao_id: str | None  # None se a questão foi excluída do banco depois
     enunciado: str
     alternativas: list[str]  # na ordem em que aparecem nesta versão
     correta: str  # letra correta nesta versão
