@@ -183,3 +183,23 @@ Projeto projetosgp criado; schema aplicado/reaplicado, 12 tabelas com RLS. Seed 
 Branch infra/diego-validacao-supabase, baseada na última entrega docs/n2-parte1-diagramas-backlog. Backend #40–#45, MER #48–#49 e arquitetura #54 ainda abertos. Vercel responde / com 200, mas health da API 404. Hospedagem N2 e pacote final dependem dessas integrações; nenhuma issue declarada concluída. Trabalho para validação de Gabriel, sem merge.
 
 PR publicado: [#63 — validação real do Supabase e proteção do pacote](https://github.com/gabriel-Koehler/projetosgp/pull/63), commit f7c61f1. Revisão formal solicitada a Gabriel (@gabriel-Koehler). Base: docs/n2-parte1-diagramas-backlog; depende dos PRs #61/#62. Nenhuma issue encerrada e nenhum merge realizado.
+
+## Entrega N1-DOC-02 — 09/10/2026
+- **Issue:** [#16 — [N1-DOC-02] Elaboração do README v1 Oficial (Critério C3 da N1)](https://github.com/gabriel-Koehler/projetosgp/issues/16).
+- **Responsável:** ALYSON DE LIMA DE OLIVEIRA.
+- **Branch base:** `main` (commit `82a86a7`, preservando todas as entregas e merges dos PRs #60 a #66).
+- **Branch de trabalho:** `docs/n1-doc-02-readme-v1`.
+- **Status de implementação:** Concluída e validada conforme Critério C3 (20% da N1).
+- **Critérios atendidos:**
+  - Redação completa do `README.md` v1 oficial.
+  - Visão geral da plataforma AvaliaSystem e proposta de valor.
+  - Mapeamento detalhado do escopo entregue na N1 (telas navegáveis, dados mock em memória e API Python modular).
+  - Tabela completa de Requisitos Funcionais (RF01 a RF30) e Requisitos Não-Funcionais (RNF01 a RNF09).
+  - Galeria de telas das interfaces e fluxo Mermaid docente/discente.
+  - Guia de execução local passo a passo em Python (venv, pip, uvicorn) e Node.js (`npm run dev:all`).
+  - Referência à hospedagem contínua gratuita (Render/Vercel) e container Docker.
+  - Auditoria de integridade: 100% dos links internos validados sem nenhum link quebrado.
+- **Pull Request a abrir:** `docs: [N1-DOC-02] Elaboração do README v1 oficial da fase N1`.
+- **Revisor:** Gabriel Koehler da Silva (@gabriel-Koehler).
+- **Status de merge:** Aguardando revisão e autorização de merge.
+
