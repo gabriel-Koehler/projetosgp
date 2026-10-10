@@ -130,3 +130,11 @@ Após autorização explícita do usuário, as branches e os cinco commits de Di
 - [PR #62 — diagramas, backlog e evidências](https://github.com/gabriel-Koehler/projetosgp/pull/62): docs/n2-parte1-diagramas-backlog → infra/diego-entregas-locais; commits 32ca0e5 e d8e99e3. Depende do PR #61.
 
 Os registros anteriores de ausência de push/PR são históricos. Análise e validação de Gabriel pendentes; nenhuma issue encerrada, merge ou deploy realizado. Este registro é enviado como commit adicional ao PR #62.
+
+## Validação real do Supabase e continuidade de Diego — 05/10/2026
+
+Projeto projetosgp criado; schema aplicado/reaplicado, 12 tabelas com RLS. Seed idempotente/constraints e bloqueio anon/authenticated validados em transação revertida; zero professores de teste remanescentes. Bucket correcoes privado criado. Testes: 8 Node e 2 Python específicos aprovados. Empacotador exclui metadados .temp/.branches da CLI. Evidências e limites: [validação Supabase](infra/VALIDACAO_SUPABASE.md).
+
+Branch infra/diego-validacao-supabase, baseada na última entrega docs/n2-parte1-diagramas-backlog. Backend #40–#45, MER #48–#49 e arquitetura #54 ainda abertos. Vercel responde / com 200, mas health da API 404. Hospedagem N2 e pacote final dependem dessas integrações; nenhuma issue declarada concluída. Trabalho para validação de Gabriel, sem merge.
+
+PR publicado: [#63 — validação real do Supabase e proteção do pacote](https://github.com/gabriel-Koehler/projetosgp/pull/63), commit f7c61f1. Revisão formal solicitada a Gabriel (@gabriel-Koehler). Base: docs/n2-parte1-diagramas-backlog; depende dos PRs #61/#62. Nenhuma issue encerrada e nenhum merge realizado.

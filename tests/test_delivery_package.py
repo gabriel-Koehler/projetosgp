@@ -13,7 +13,7 @@ class DeliveryTests(unittest.TestCase):
     def test_clean_repeatable_archive_and_extraction(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            for name in ['README.md', '.env.example', 'app/main.py', '.env.production', '.env', 'node_modules/a.js', 'deliveries/old.zip', '.git/config', '.aws/credentials', 'debug.log']:
+            for name in ['README.md', '.env.example', 'app/main.py', '.env.production', '.env', 'node_modules/a.js', 'deliveries/old.zip', '.git/config', '.aws/credentials', 'debug.log', 'supabase/.temp/access-token', 'supabase/.branches/state']:
                 target = root / name
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_text('example', encoding='utf-8')

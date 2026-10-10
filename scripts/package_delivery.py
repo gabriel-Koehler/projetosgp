@@ -4,7 +4,7 @@ import os
 import zipfile
 from pathlib import Path
 
-DEFAULT_EXCLUDES = {'.git', '.venv', 'venv', 'node_modules', '__pycache__', '.pytest_cache', '.mypy_cache', 'dist', 'build', '.next', 'coverage', 'deliveries', 'graphify-out', '.agents', '.codex', '.aws'}
+DEFAULT_EXCLUDES = {'.git', '.venv', 'venv', 'node_modules', '__pycache__', '.pytest_cache', '.mypy_cache', 'dist', 'build', '.next', 'coverage', 'deliveries', 'graphify-out', '.temp', '.branches', '.agents', '.codex', '.aws'}
 DEFAULT_EXCLUDE_FILES = {'.env', '.env.local', '.DS_Store', 'Thumbs.db'}
 
 def should_exclude(relative_path):
