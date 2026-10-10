@@ -1,5 +1,3 @@
 -r requirements.txt
 pytest==9.1.1
 httpx2==2.13.1
-# Lê o QR Code gerado nos testes (vira dependência principal no OMR, N2-BE-05).
-opencv-python-headless==5.0.0.93

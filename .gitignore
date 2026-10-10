@@ -12,3 +12,10 @@ venv/
 .local-validation/
 pytest-cache-files-*/
 # Ambiente
+deliveries/
+.env.*
+!.env.example
+*.log
+
+supabase/.temp/
+supabase/.branches/

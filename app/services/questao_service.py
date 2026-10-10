@@ -10,7 +10,7 @@ from app.models.cadastros import QuestaoBanco
 from app.repositories.questao_repository import QuestaoRepository
 from app.services import importacao
 from app.services.errors import ErroDeNegocio, NaoEncontrado
-from app.core.version_builder import indice_da_letra
+from app.services.version_builder import indice_da_letra
 
 
 @dataclass(frozen=True)

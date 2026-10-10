@@ -1,6 +1,8 @@
 """Rotas HTTP de avaliações, versões e QR Codes (RF14 a RF28). Exigem o professor logado."""
 
+import re
 from dataclasses import asdict
+from typing import Literal
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Request, Response, status
@@ -17,6 +19,8 @@ from app.schemas.avaliacao import (
     VersaoOut,
 )
 from app.services.avaliacao_service import AvaliacaoService, get_avaliacao_service
+from app.services.errors import ErroDeNegocio
+from app.services.folha_resposta import folha_pdf, folha_png
 from app.services.qrcode_service import gerar_qrcode_png
 from app.services.version_builder import ConfiguracaoVersoes
 
@@ -28,11 +32,22 @@ Professor = Depends(professor_id)
 
 def url_publica(request: Request, settings: Settings, caminho: str) -> str:
     host = request.headers.get("x-forwarded-host")
-    base = settings.public_base_url or (f"{request.url.scheme}://{host}" if host else str(request.base_url))
+    if settings.public_base_url:
+        base = settings.public_base_url
+    elif host:  # atrás do proxy do front (Node), usa o domínio que o usuário acessou
+        base = f"{request.url.scheme}://{host}"
+    else:
+        base = str(request.base_url)
     return base.rstrip("/") + caminho
 
 
+def _prefixo(request: Request) -> str:
+    """Prefixo de montagem da API (ex.: /n1 quando montada no app do MVP)."""
+    return request.scope.get("root_path", "").rstrip("/")
+
+
 def url_do_aluno(request: Request, settings: Settings, codigo: str) -> str:
+    """Link do QR Code: página do aluno no front, que consulta /api/public/gabaritos/{codigo}."""
     return url_publica(request, settings, f"/student?token={quote(codigo, safe='')}")
 
 
@@ -46,7 +61,7 @@ def _serializar(avaliacao: Avaliacao, request: Request, settings: Settings) -> A
                 nome=v.versao.nome,
                 codigo=v.codigo,
                 url_aluno=url_do_aluno(request, settings, v.codigo),
-                url_qrcode=f"/api/avaliacoes/{avaliacao.id}/versoes/{v.codigo}/qrcode.png",
+                url_qrcode=_prefixo(request) + f"/api/avaliacoes/{avaliacao.id}/versoes/{v.codigo}/qrcode.png",
                 questoes=[QuestaoVersaoOut(**vars(q)) for q in v.versao.questoes],
                 gabarito=v.versao.gabarito,
             )
@@ -122,3 +137,33 @@ def qrcode_da_versao(
     service.obter_versao(prof, avaliacao_id, codigo)
     png = gerar_qrcode_png(url_do_aluno(request, settings, codigo))
     return Response(content=png, media_type="image/png")
+
+
+@router.get("/{avaliacao_id}/versoes/{codigo}/folha.{formato}", response_class=Response)
+def folha_de_respostas(
+    avaliacao_id: int,
+    codigo: str,
+    formato: Literal["pdf", "png"],
+    request: Request,
+    settings: Settings = Depends(get_settings),
+    prof: int = Professor,
+    service: AvaliacaoService = Service,
+):
+    """RF27: folha de respostas da versão, com QR Code, pronta para imprimir (A4).
+
+    Imprima em tamanho real (100%, sem "ajustar à página") para a leitura automática funcionar.
+    """
+    avaliacao = service.obter(prof, avaliacao_id)
+    versao = service.obter_versao(prof, avaliacao_id, codigo)
+    alternativas = [len(q.alternativas) for q in versao.versao.questoes]
+    gerar = folha_pdf if formato == "pdf" else folha_png
+    try:
+        conteudo = gerar(avaliacao.nome, versao.versao.nome, url_do_aluno(request, settings, codigo), alternativas)
+    except ValueError as erro:
+        raise ErroDeNegocio(str(erro)) from erro
+    nome = re.sub(r"[^A-Za-z0-9]+", "_", f"folha_{avaliacao.id}_{versao.versao.nome}") + f".{formato}"
+    return Response(
+        content=conteudo,
+        media_type="application/pdf" if formato == "pdf" else "image/png",
+        headers={"Content-Disposition": f'inline; filename="{nome}"'},
+    )

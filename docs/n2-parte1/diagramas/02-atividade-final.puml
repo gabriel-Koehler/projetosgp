@@ -1,0 +1,68 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 15
+|Professor / Interface|
+start
+:Selecionar avaliação e aluno;
+Enviar imagem da folha;
+|API / Serviços|
+:Validar sessão, formato e tamanho;
+if (Entrada válida?) then (Sim)
+else (Não)
+  |Professor / Interface|
+  :Exibir erro; permitir nova tentativa;
+  stop
+endif
+|API / Serviços|
+:Decodificar QR Code;
+if (QR válido?) then (Sim)
+else (Não)
+  |Professor / Interface|
+  :Exibir erro de QR; permitir nova imagem;
+  stop
+endif
+|PostgreSQL|
+:Consultar versão, gabarito e vínculos;
+|API / Serviços|
+if (Professor e aluno autorizados?) then (Sim)
+else (Não)
+  |Professor / Interface|
+  :Exibir erro de acesso/vínculo;
+  stop
+endif
+|API / Serviços|
+:Alinhar imagem e ler marcações OMR;
+if (Leitura confiável?) then (Sim)
+else (Não)
+  |Professor / Interface|
+  :Solicitar imagem mais legível;
+  stop
+endif
+|API / Serviços|
+:Classificar branca, única e múltipla marcação;
+Comparar gabarito e calcular nota;
+|Supabase Storage|
+:Gravar imagem privada;
+if (Imagem gravada?) then (Sim)
+else (Não)
+  |Professor / Interface|
+  :Exibir falha; não confirmar resultado;
+  stop
+endif
+|PostgreSQL|
+:BEGIN; gravar resultado; COMMIT;
+if (Commit confirmado?) then (Sim)
+  |Professor / Interface|
+  :Exibir nota e resultado salvo;
+  stop
+else (Não)
+  |Supabase Storage|
+  :Tentar remover imagem recém-gravada;
+Registrar falha para nova limpeza se necessário;
+  |Professor / Interface|
+  :Exibir falha sem confirmação de sucesso;
+  stop
+endif
+@enduml
