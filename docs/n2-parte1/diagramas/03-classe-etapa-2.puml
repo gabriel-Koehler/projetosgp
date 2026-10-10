@@ -1,0 +1,88 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 15
+class Professor {
+  +id: int
+  +nome: String
+  +username: String
+  +senhaHash: String
+}
+class Semestre {
+  +id: int
+  +nome: String
+  +ativo: Boolean
+  +dataInicio: Date
+  +dataFim: Date
+}
+class Turma {
+  +id: int
+  +nome: String
+  +disciplina: String
+}
+class Aluno {
+  +id: int
+  +nome: String
+  +matricula: String
+  +email: String
+}
+class QuestaoBanco {
+  +id: int
+  +enunciado: String
+  +disciplina: String
+  +dificuldade: String
+  +correta: Letra
+  +arquivar()
+}
+class Alternativa {
+  +id: int
+  +letra: Letra
+  +texto: String
+}
+class Avaliacao {
+  +id: int
+  +nome: String
+  +notaMaxima: Decimal
+  +gabaritoLiberado: Boolean
+  +configuracao: JSON
+  +liberarGabarito()
+  +bloquearGabarito()
+}
+class VersaoAvaliacao {
+  +id: int
+  +nome: String
+  +codigo: String
+  +ordem: int
+}
+class QuestaoVersao {
+  +id: int
+  +numero: int
+  +enunciadoSnapshot: String
+  +alternativasSnapshot: List
+  +ordemOriginal: List
+}
+class GabaritoVersao {
+  +corretas: Map<int,Letra>
+}
+class FolhaResposta {
+  +imagem: Arquivo
+  +marcacoes: Map<int,Leitura>
+  +confianca: Decimal
+}
+class ResultadoCorrecao {
+  +id: int
+  +nota: Decimal
+  +acertos: int
+  +erros: int
+  +emBranco: int
+  +anuladas: int
+  +imagemPath: String
+}
+class ServicoCorrecao <<control>> {
+  +corrigir(professor,aluno,imagem)
+  +calcularNota(respostas,gabarito)
+  +persistirComCompensacao()
+}
+
+@enduml

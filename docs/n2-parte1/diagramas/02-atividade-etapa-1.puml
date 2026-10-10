@@ -1,0 +1,14 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 15
+start
+:Enviar imagem;
+:Identificar versão pelo QR;
+:Ler marcações OMR;
+:Calcular nota;
+:Persistir resultado;
+:Exibir resultado;
+stop
+@enduml

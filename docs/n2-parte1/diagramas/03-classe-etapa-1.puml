@@ -1,0 +1,15 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 15
+class Professor {
+}
+class Semestre {
+}
+class Turma {
+}
+class Aluno {
+}
+
+@enduml
