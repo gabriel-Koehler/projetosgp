@@ -138,3 +138,34 @@ Impressão A4 de prova, folha com QR/bolhas A–D e gabarito do professor. Liber
 - Dependência de Diego consultada no GitHub: issue #31, branch `infra/diego-validacao-supabase` em `f8f16e0`, [PR #63](https://github.com/gabriel-Koehler/projetosgp/pull/63), dependente de #61/#62; PR e issue abertos, sem merge. A documentação dessa branch registra o projeto Supabase `projetosgp` (`veyofappfyaoejcjwxky`) já provisionado e DDL/RLS/seed validados remotamente. Não é necessário criar outro projeto.
 - Compatibilidade conferida: mesmas tabelas/colunas/índices da API, acrescidos de transação e RLS. DDL de Diego aplicado em banco local separado, com 12 tabelas e RLS em todas; fluxo HTTP da #23 aprovado sobre esse schema. Isso não substitui a validação das permissões/conexão do backend remoto.
 - A conexão de Diego está documentada como `.env.supabase.local` não versionado; arquivo indisponível neste workspace. Pendência corrigida: obter acesso ao projeto já provisionado e homologar o fluxo da #23, sem repetir o provisionamento. Detalhes em `docs/N2-FE-02.md`.
+
+## Preparação local de Diego — 05/10/2026
+
+Base 972a760; branch infra/diego-entregas-locais. Entregas de hospedagem, empacotador, SQL/seed/DER e UML preparadas para #17/#18/#31/#33/#35/#36. Sem commit, push ou PR dessas alterações. Issues abertas e dependências N2 em PRs abertos. Validação: oito testes Node, 118 Python e health 200/503; detalhes em docs/infra/VALIDACAO_LOCAL.md. Diário em docs/DIARIO_DE_BORDO_DIEGO.md. Revisão de Gabriel, implantação e homologação externa pendentes.
+
+Repetição final: uma falha intermitente no teste de leitura QR; caso isolado aprovado. Pendência registrada, sem homologação final declarada.
+
+## N2 Parte 1 — preparação local em 05/10/2026
+
+Quatro diagramas com passo a passo e backlog Excel de 45 tarefas preparados na branch docs/n2-parte1-diagramas-backlog. Nove tarefas por integrante, 184 horas estimadas, prazo provisório 13/11/2026. Índice: [docs/n2-parte1/README.md](n2-parte1/README.md). Revisão do grupo, material da aula e data oficial pendentes; nenhuma issue declarada concluída ou alteração remota realizada. Evidências no diário de Diego.
+## Commits locais para revisão de Gabriel — 05/10/2026
+
+Por solicitação do usuário, as entregas foram registradas em commits locais na branch docs/n2-parte1-diagramas-backlog: 345c7e5 (hospedagem), e1aa3cb (empacotamento), efc7353 (banco/DER/UML) e 32ca0e5 (diagramas/backlog). Revisor indicado: Gabriel Koehler da Silva (@gabriel-Koehler); análise e validação ainda pendentes. O commit documental seguinte reúne evidências e roteiro de revisão. Os registros “sem commit” acima são históricos.
+
+Validação antes dos commits: 8 testes Node e 2 testes Python específicos aprovados; diff sem erros de whitespace. Limitações anteriores mantidas, incluindo QR intermitente, ausência de build Docker/execução PostgreSQL e prazo acadêmico provisório. [Roteiro de revisão](infra/REVISAO_GABRIEL.md). Nenhum push, PR, merge ou encerramento de issue foi realizado.
+## Publicação autorizada para revisão de Gabriel
+
+Após autorização explícita do usuário, as branches e os cinco commits de Diego foram enviados ao GitHub. PRs abertos, ambos com revisão formal solicitada a @gabriel-Koehler:
+
+- [PR #61 — infraestrutura, empacotamento e banco/UML](https://github.com/gabriel-Koehler/projetosgp/pull/61): infra/diego-entregas-locais → main; commits 345c7e5, e1aa3cb e efc7353.
+- [PR #62 — diagramas, backlog e evidências](https://github.com/gabriel-Koehler/projetosgp/pull/62): docs/n2-parte1-diagramas-backlog → infra/diego-entregas-locais; commits 32ca0e5 e d8e99e3. Depende do PR #61.
+
+Os registros anteriores de ausência de push/PR são históricos. Análise e validação de Gabriel pendentes; nenhuma issue encerrada, merge ou deploy realizado. Este registro é enviado como commit adicional ao PR #62.
+
+## Validação real do Supabase e continuidade de Diego — 05/10/2026
+
+Projeto projetosgp criado; schema aplicado/reaplicado, 12 tabelas com RLS. Seed idempotente/constraints e bloqueio anon/authenticated validados em transação revertida; zero professores de teste remanescentes. Bucket correcoes privado criado. Testes: 8 Node e 2 Python específicos aprovados. Empacotador exclui metadados .temp/.branches da CLI. Evidências e limites: [validação Supabase](infra/VALIDACAO_SUPABASE.md).
+
+Branch infra/diego-validacao-supabase, baseada na última entrega docs/n2-parte1-diagramas-backlog. Backend #40–#45, MER #48–#49 e arquitetura #54 ainda abertos. Vercel responde / com 200, mas health da API 404. Hospedagem N2 e pacote final dependem dessas integrações; nenhuma issue declarada concluída. Trabalho para validação de Gabriel, sem merge.
+
+PR publicado: [#63 — validação real do Supabase e proteção do pacote](https://github.com/gabriel-Koehler/projetosgp/pull/63), commit f7c61f1. Revisão formal solicitada a Gabriel (@gabriel-Koehler). Base: docs/n2-parte1-diagramas-backlog; depende dos PRs #61/#62. Nenhuma issue encerrada e nenhum merge realizado.

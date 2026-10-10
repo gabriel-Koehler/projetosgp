@@ -3,7 +3,7 @@
 import psycopg
 
 from app.models.cadastros import QuestaoBanco
-from app.core.version_builder import letra
+from app.services.version_builder import letra
 
 SELECT = """
     SELECT q.id, q.enunciado, q.correta, q.disciplina, q.categoria, q.dificuldade, q.arquivada,

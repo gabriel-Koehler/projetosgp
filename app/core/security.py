@@ -7,6 +7,7 @@ from fastapi import Depends, HTTPException, Request, status
 
 from app.core import passwords
 from app.core.config import Settings
+from app.database.connection import obter_pool
 from app.repositories.cadastros_repository import ProfessorRepository
 
 SESSION_KEY = "professor"
@@ -29,11 +30,18 @@ def verificar_credenciais(settings: Settings, username: str, password: str) -> b
 def autenticar(request: Request, settings: Settings, username: str, password: str) -> dict | None:
     """Confere usuário e senha. Devolve os dados que vão para a sessão, ou None.
 
-    Usa a tabela professor e senha em hash. Sem banco, falha explicitamente.
+    Com banco configurado, usa a tabela professor (senha em hash). Sem banco:
+    - API de desenvolvimento (app/backend.py, `login_sem_banco`): usa
+      PROFESSOR_USERNAME / PROFESSOR_PASSWORD do .env;
+    - API real (app/persistent.py): responde 503, nunca aceita credenciais de demonstração.
     """
-    pool = getattr(request.app.state, "pool", None)
+    pool = obter_pool(request.app, settings)
     if pool is None:
-        raise HTTPException(503, "Banco de dados indisponível. Tente novamente mais tarde.")
+        if not getattr(request.app.state, "login_sem_banco", False):
+            raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Banco de dados indisponível. Tente novamente mais tarde.")
+        if not verificar_credenciais(settings, username, password):
+            return None
+        return {"id": None, "username": settings.professor_username, "nome": settings.professor_nome}
 
     with pool.connection() as conn:
         professor = ProfessorRepository(conn).obter_por_username(username)

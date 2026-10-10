@@ -1,0 +1,1158 @@
+{
+  "inicio": "2026-10-05",
+  "prazo_provisorio": "2026-11-13",
+  "horas_maximas_dia": 4,
+  "tarefas": [
+    {
+      "id": "A01",
+      "owner": "Alyson de Lima de Oliveira",
+      "card": "N2-PLAN / ajustes N1",
+      "title": "Fechar escopo e conferir material da atividade",
+      "hours": 2,
+      "deps": [],
+      "accept": "Lista de pendências do README conciliada; modelo da aula e prazo confirmados com equipe",
+      "rf": "RF01–RF48",
+      "phase": "Planejamento",
+      "priority": "P0",
+      "note": "Material de aula e prazo ainda não fornecidos",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-05",
+      "end": "2026-10-05",
+      "slots": [
+        [
+          "2026-10-05",
+          2
+        ]
+      ]
+    },
+    {
+      "id": "A02",
+      "owner": "Alyson de Lima de Oliveira",
+      "card": "N2-P1-CU",
+      "title": "Revisar caso de uso e seu passo a passo",
+      "hours": 4,
+      "deps": [
+        "A01"
+      ],
+      "accept": "Atores, fronteira, associações e include/extend conferidos; aluno só acessa gabarito liberado",
+      "rf": "RF01–RF48",
+      "phase": "Modelagem",
+      "priority": "P0",
+      "note": "Rascunho entregue nesta atividade; validação do grupo pendente",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-06",
+      "end": "2026-10-06",
+      "slots": [
+        [
+          "2026-10-06",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "E01",
+      "owner": "Eloisa Fazzio da Silva Rocha",
+      "card": "N2-REQ / ajustes N1",
+      "title": "Consolidar regras de correção e acesso",
+      "hours": 4,
+      "deps": [
+        "A01"
+      ],
+      "accept": "RF/RN rastreados; aluno sem conta; liberação do gabarito e nota máxima definidos",
+      "rf": "RF29–RF40; RN01–RN05; RN14",
+      "phase": "Requisitos",
+      "priority": "P0",
+      "note": "Não criar regras sem confrontar requisitos",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-06",
+      "end": "2026-10-06",
+      "slots": [
+        [
+          "2026-10-06",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "D01",
+      "owner": "Diego Rafael da Silva Dornelles",
+      "card": "N1-INF-01 / ambiente N2",
+      "title": "Reproduzir ambiente e definir versão Python/Node",
+      "hours": 4,
+      "deps": [
+        "A01"
+      ],
+      "accept": "Instalação limpa, API e frontend iniciam; versão validada registrada; dependências vulneráveis triadas",
+      "rf": "RNF06; RNF09",
+      "phase": "Infraestrutura",
+      "priority": "P0",
+      "note": ".venv incompleta; Python README 3.11 versus teste 3.14; quatro alertas npm",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-06",
+      "end": "2026-10-06",
+      "slots": [
+        [
+          "2026-10-06",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "L01",
+      "owner": "Luan Eliseu",
+      "card": "N2-BE-01",
+      "title": "Unificar entrypoint, contratos e camadas da API",
+      "hours": 3,
+      "deps": [
+        "A01"
+      ],
+      "accept": "Contrato de sessão/erros/campos definido; controllers/services/repositories sem duplicar /api e /n1",
+      "rf": "RF01–RF48; RNF08–RNF09",
+      "phase": "Backend",
+      "priority": "P0",
+      "note": "PR #40 como referência da auditoria local; confirmar estado antes de integrar",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-06",
+      "end": "2026-10-06",
+      "slots": [
+        [
+          "2026-10-06",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "G06",
+      "owner": "Gabriel Koehler da Silva",
+      "card": "N1-FE-06 / N2-BE-05",
+      "title": "Ajustar folha impressa ao layout OMR",
+      "hours": 4,
+      "deps": [
+        "E01"
+      ],
+      "accept": "A4 com QR, marcadores e grade fixa; layout acordado com Luan; impressão verificada",
+      "rf": "RF26–RF28; RF31–RF37",
+      "phase": "Frontend",
+      "priority": "P0",
+      "note": "Conferência completa de Figma e impressão ainda pendentes",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-07",
+      "end": "2026-10-07",
+      "slots": [
+        [
+          "2026-10-07",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "D02",
+      "owner": "Diego Rafael da Silva Dornelles",
+      "card": "N2-INF-02 / N2-P1-CL",
+      "title": "Revisar classes UML e conciliar DER",
+      "hours": 4,
+      "deps": [
+        "A02",
+        "E01"
+      ],
+      "accept": "Multiplicidades, snapshots e modelo conceitual separados do schema; passos documentados",
+      "rf": "RN14; N2 Parte 1",
+      "phase": "Modelagem",
+      "priority": "P0",
+      "note": "Modelo N2 ainda é referência de PR; não declarar implantação",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-07",
+      "end": "2026-10-07",
+      "slots": [
+        [
+          "2026-10-07",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "E02",
+      "owner": "Eloisa Fazzio da Silva Rocha",
+      "card": "N2-P1-AT",
+      "title": "Revisar atividade da correção e seu passo a passo",
+      "hours": 4,
+      "deps": [
+        "A02",
+        "E01"
+      ],
+      "accept": "Fluxo normal, decisões, rejeições e falha de persistência conferidos",
+      "rf": "RF31–RF40",
+      "phase": "Modelagem",
+      "priority": "P0",
+      "note": "Rascunho fornecido; grupo valida regras de leitura",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-07",
+      "end": "2026-10-07",
+      "slots": [
+        [
+          "2026-10-07",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "E03",
+      "owner": "Eloisa Fazzio da Silva Rocha",
+      "card": "N2-MER-01",
+      "title": "Consolidar MER e cardinalidades da N2",
+      "hours": 4,
+      "deps": [
+        "E01"
+      ],
+      "accept": "MER inclui versão, código único, snapshots e liberação do gabarito; alinhado ao DER",
+      "rf": "RF14–RF30; RN14",
+      "phase": "Modelagem",
+      "priority": "P0",
+      "note": "PR #48 como referência local; estado remoto a confirmar",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-08",
+      "end": "2026-10-08",
+      "slots": [
+        [
+          "2026-10-08",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "D03",
+      "owner": "Diego Rafael da Silva Dornelles",
+      "card": "N2-INF-01",
+      "title": "Validar schema, seed e migração em PostgreSQL",
+      "hours": 5,
+      "deps": [
+        "D01",
+        "L01"
+      ],
+      "accept": "DDL/seed executam em banco vazio e repetição não duplica dados; caminho SQL oficial definido",
+      "rf": "RNF08; RN14",
+      "phase": "Banco / Infraestrutura",
+      "priority": "P0",
+      "note": "Scripts locais preparados, execução SQL pendente",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-08",
+      "end": "2026-10-09",
+      "slots": [
+        [
+          "2026-10-08",
+          4.0
+        ],
+        [
+          "2026-10-09",
+          1.0
+        ]
+      ]
+    },
+    {
+      "id": "L02",
+      "owner": "Luan Eliseu",
+      "card": "N2-BE-02",
+      "title": "Integrar conector, pool e health do banco",
+      "hours": 4,
+      "deps": [
+        "D03",
+        "L01"
+      ],
+      "accept": "Pool conecta, health detecta queda, migrador usa schema único e credenciais fora do Git",
+      "rf": "RNF08",
+      "phase": "Backend",
+      "priority": "P0",
+      "note": "PR #41 como referência local; integração e teste reais pendentes",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-13",
+      "end": "2026-10-13",
+      "slots": [
+        [
+          "2026-10-13",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "A03",
+      "owner": "Alyson de Lima de Oliveira",
+      "card": "N2-P1-SQ",
+      "title": "Revisar sequência da correção e seu passo a passo",
+      "hours": 4,
+      "deps": [
+        "E02",
+        "D02",
+        "L01"
+      ],
+      "accept": "Lifelines, ordem das mensagens e alternativas compatíveis com atividade e classes",
+      "rf": "RF31–RF40",
+      "phase": "Modelagem",
+      "priority": "P0",
+      "note": "Sequência representa arquitetura proposta, não código homologado",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-08",
+      "end": "2026-10-08",
+      "slots": [
+        [
+          "2026-10-08",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "E04",
+      "owner": "Eloisa Fazzio da Silva Rocha",
+      "card": "N2-MER-02",
+      "title": "Completar dicionário de dados e integridade",
+      "hours": 4,
+      "deps": [
+        "E03",
+        "D03"
+      ],
+      "accept": "Colunas/tipos/FKs/constraints e campos JSON documentados com exemplos válidos",
+      "rf": "RF01–RF48; RN14",
+      "phase": "Modelagem",
+      "priority": "P0",
+      "note": "PR #49 e schema local como referências; revisar divergências",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-13",
+      "end": "2026-10-13",
+      "slots": [
+        [
+          "2026-10-13",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "A04",
+      "owner": "Alyson de Lima de Oliveira",
+      "card": "N2-P1 / rastreabilidade",
+      "title": "Conferir os quatro diagramas e rastrear requisitos",
+      "hours": 4,
+      "deps": [
+        "A02",
+        "A03",
+        "E02",
+        "D02"
+      ],
+      "accept": "Cada fluxo e mensagem correspondem ao mesmo cenário; índices e passos completos",
+      "rf": "N2 Parte 1; RF01–RF48",
+      "phase": "Documentação",
+      "priority": "P0",
+      "note": "Exemplo da aula ainda precisa ser disponibilizado",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-09",
+      "end": "2026-10-09",
+      "slots": [
+        [
+          "2026-10-09",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "A05",
+      "owner": "Alyson de Lima de Oliveira",
+      "card": "N2-DOC-01",
+      "title": "Consolidar arquitetura em camadas e ADRs",
+      "hours": 5,
+      "deps": [
+        "L01",
+        "E01"
+      ],
+      "accept": "ADRs justificam PostgreSQL versus MySQL, cookie, domínio único, snapshots e compensação Storage",
+      "rf": "RNF08–RNF09; RN14",
+      "phase": "Documentação",
+      "priority": "P1",
+      "note": "PR #54 como referência local; confirmar estado e decisões",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-07",
+      "end": "2026-10-13",
+      "slots": [
+        [
+          "2026-10-07",
+          4.0
+        ],
+        [
+          "2026-10-13",
+          1.0
+        ]
+      ]
+    },
+    {
+      "id": "D04",
+      "owner": "Diego Rafael da Silva Dornelles",
+      "card": "N2-INF-01 / segurança",
+      "title": "Validar RLS, acesso por professor e Storage privado",
+      "hours": 4,
+      "deps": [
+        "D03",
+        "E04"
+      ],
+      "accept": "Outro professor não acessa dados/imagens; chave de serviço só no backend; bucket privado validado",
+      "rf": "RNF06; RF30",
+      "phase": "Infraestrutura",
+      "priority": "P0",
+      "note": "RLS sem policies públicas local; papel de servidor ainda precisa validação",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-14",
+      "end": "2026-10-14",
+      "slots": [
+        [
+          "2026-10-14",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "L03",
+      "owner": "Luan Eliseu",
+      "card": "N2-BE-03 / autenticação",
+      "title": "Integrar autenticação, professores e semestres reais",
+      "hours": 4,
+      "deps": [
+        "L02"
+      ],
+      "accept": "Login/cookie e CRUD de semestres persistem no PostgreSQL e isolam professores",
+      "rf": "RF01–RF02",
+      "phase": "Backend",
+      "priority": "P0",
+      "note": "PR #42 como referência local; não reescrever se já atendido",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-14",
+      "end": "2026-10-14",
+      "slots": [
+        [
+          "2026-10-14",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "L04",
+      "owner": "Luan Eliseu",
+      "card": "N2-BE-03 / cadastros",
+      "title": "Integrar CRUD de turmas e alunos reais",
+      "hours": 4,
+      "deps": [
+        "L03"
+      ],
+      "accept": "Vínculos, matrícula e validação de importação são persistentes e transacionais",
+      "rf": "RF03–RF05",
+      "phase": "Backend",
+      "priority": "P0",
+      "note": "Conferir cadastro, duplicidade e ausência de gravação parcial",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-15",
+      "end": "2026-10-15",
+      "slots": [
+        [
+          "2026-10-15",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "L05",
+      "owner": "Luan Eliseu",
+      "card": "N2-BE-03 / questões",
+      "title": "Integrar CRUD e importação de questões/alternativas",
+      "hours": 4,
+      "deps": [
+        "L04"
+      ],
+      "accept": "Alternativas e gabarito corretos persistem; questões usadas preservam snapshots",
+      "rf": "RF06–RF13; RN14",
+      "phase": "Backend",
+      "priority": "P0",
+      "note": "Verificar limites e importação CSV/Excel conforme escopo acordado",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-16",
+      "end": "2026-10-16",
+      "slots": [
+        [
+          "2026-10-16",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "G01",
+      "owner": "Gabriel Koehler da Silva",
+      "card": "N2-FE-01 / login",
+      "title": "Conectar login real e tratamento da sessão",
+      "hours": 4,
+      "deps": [
+        "L03"
+      ],
+      "accept": "Formulário usa contrato final; 401 redireciona; Google/recuperação indicam simulação ou serviço real",
+      "rf": "RF01; RNF06",
+      "phase": "Frontend",
+      "priority": "P0",
+      "note": "PR #60 como referência local; autenticação Google não pode parecer integrada",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-15",
+      "end": "2026-10-15",
+      "slots": [
+        [
+          "2026-10-15",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "G02",
+      "owner": "Gabriel Koehler da Silva",
+      "card": "N2-FE-01 / gestão",
+      "title": "Conectar semestres e turmas ao banco real",
+      "hours": 4,
+      "deps": [
+        "L04",
+        "G01"
+      ],
+      "accept": "Listagem/cadastro/edição/erros funcionam com API real após reinício",
+      "rf": "RF02–RF03",
+      "phase": "Frontend",
+      "priority": "P0",
+      "note": "Preservar visual AvaliaSystem",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-16",
+      "end": "2026-10-16",
+      "slots": [
+        [
+          "2026-10-16",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "G03",
+      "owner": "Gabriel Koehler da Silva",
+      "card": "N2-FE / alunos",
+      "title": "Conectar alunos e importação com confirmação",
+      "hours": 4,
+      "deps": [
+        "L04",
+        "G02"
+      ],
+      "accept": "Prévia mostra erros; confirmação revalida lote; zeros na matrícula preservados",
+      "rf": "RF04–RF05",
+      "phase": "Frontend",
+      "priority": "P1",
+      "note": "CSV existente; validar decisão sobre XLSX sem prometer suporte inexistente",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-19",
+      "end": "2026-10-19",
+      "slots": [
+        [
+          "2026-10-19",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "G04",
+      "owner": "Gabriel Koehler da Silva",
+      "card": "N2-FE-02",
+      "title": "Conectar questões, filtros e importação à API real",
+      "hours": 5,
+      "deps": [
+        "L05",
+        "G03"
+      ],
+      "accept": "CRUD/importação/filtros usam dados persistidos e retornam feedback correto",
+      "rf": "RF06–RF13",
+      "phase": "Frontend",
+      "priority": "P0",
+      "note": "Remover dependência de estado mock no fluxo entregue",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-20",
+      "end": "2026-10-21",
+      "slots": [
+        [
+          "2026-10-20",
+          4.0
+        ],
+        [
+          "2026-10-21",
+          1.0
+        ]
+      ]
+    },
+    {
+      "id": "L06",
+      "owner": "Luan Eliseu",
+      "card": "N2-BE-04",
+      "title": "Integrar gravação atômica de avaliações e versões",
+      "hours": 6,
+      "deps": [
+        "L05"
+      ],
+      "accept": "Avaliação/versões/gabaritos/snapshots gravam tudo ou nada; edição posterior não altera prova",
+      "rf": "RF14–RF25; RN14",
+      "phase": "Backend",
+      "priority": "P0",
+      "note": "PR #43 como referência; testar rollback e posições embaralhadas",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-19",
+      "end": "2026-10-20",
+      "slots": [
+        [
+          "2026-10-19",
+          4.0
+        ],
+        [
+          "2026-10-20",
+          2.0
+        ]
+      ]
+    },
+    {
+      "id": "G05",
+      "owner": "Gabriel Koehler da Silva",
+      "card": "N2-FE-03",
+      "title": "Conectar assistente, versões e liberação do gabarito",
+      "hours": 5,
+      "deps": [
+        "L06",
+        "G04"
+      ],
+      "accept": "Quatro passos enviam contrato final; versões persistem; liberação/revogação funciona",
+      "rf": "RF14–RF30",
+      "phase": "Frontend",
+      "priority": "P0",
+      "note": "Confirmar configuração suportada e seleção por IDs",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-22",
+      "end": "2026-10-23",
+      "slots": [
+        [
+          "2026-10-22",
+          4.0
+        ],
+        [
+          "2026-10-23",
+          1.0
+        ]
+      ]
+    },
+    {
+      "id": "E05",
+      "owner": "Eloisa Fazzio da Silva Rocha",
+      "card": "N2-TEST / integração CRUD",
+      "title": "Testar importações, persistência e isolamento",
+      "hours": 4,
+      "deps": [
+        "G03",
+        "G04",
+        "D04"
+      ],
+      "accept": "Casos positivos/negativos registrados; reinício conserva dados; dois professores isolados",
+      "rf": "RF01–RF13; RNF06",
+      "phase": "Testes",
+      "priority": "P0",
+      "note": "Testar a aplicação integrada, não só repositories isolados",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-22",
+      "end": "2026-10-22",
+      "slots": [
+        [
+          "2026-10-22",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "E06",
+      "owner": "Eloisa Fazzio da Silva Rocha",
+      "card": "N2-TEST / OMR",
+      "title": "Montar conjunto de folhas de teste OMR",
+      "hours": 4,
+      "deps": [
+        "G06",
+        "E04"
+      ],
+      "accept": "Amostras sintéticas com branco, dupla marcação, inclinação e baixa qualidade; resultados esperados",
+      "rf": "RF31–RF37",
+      "phase": "Testes",
+      "priority": "P0",
+      "note": "Sem dados pessoais reais; registrar layout e critérios de leitura",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-14",
+      "end": "2026-10-14",
+      "slots": [
+        [
+          "2026-10-14",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "L07",
+      "owner": "Luan Eliseu",
+      "card": "N2-BE-05",
+      "title": "Integrar leitura QR, alinhamento e marcações OMR",
+      "hours": 6,
+      "deps": [
+        "L06",
+        "G06",
+        "E06"
+      ],
+      "accept": "QR identifica versão; perspectiva alinhada; respostas/brancos/múltiplas marcações classificadas",
+      "rf": "RF31–RF37; RF40",
+      "phase": "Backend",
+      "priority": "P0",
+      "note": "PR #44 como referência; corrigir instabilidade observada no teste QR",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-21",
+      "end": "2026-10-22",
+      "slots": [
+        [
+          "2026-10-21",
+          4.0
+        ],
+        [
+          "2026-10-22",
+          2.0
+        ]
+      ]
+    },
+    {
+      "id": "E07",
+      "owner": "Eloisa Fazzio da Silva Rocha",
+      "card": "N2-TEST / aluno QR",
+      "title": "Testar liberação do gabarito e estabilidade QR",
+      "hours": 4,
+      "deps": [
+        "G05",
+        "L06"
+      ],
+      "accept": "Antes da liberação bloqueia; depois mostra só alternativas; token inválido/revogado e QR variados testados",
+      "rf": "RF29–RF30; RN03–RN05",
+      "phase": "Testes",
+      "priority": "P0",
+      "note": "Falha intermitente QR registrada em VALIDACAO_LOCAL.md",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-26",
+      "end": "2026-10-26",
+      "slots": [
+        [
+          "2026-10-26",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "L08",
+      "owner": "Luan Eliseu",
+      "card": "N2-BE-06 / correção",
+      "title": "Integrar cálculo de nota e resultado persistente",
+      "hours": 4,
+      "deps": [
+        "L07",
+        "D04"
+      ],
+      "accept": "Nota usa regra acordada; branco/múltipla marcação tratados; gravação e compensação de imagem testadas",
+      "rf": "RF38–RF43",
+      "phase": "Backend",
+      "priority": "P0",
+      "note": "PR #45 como referência; não considerar Storage e SQL uma transação única",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-23",
+      "end": "2026-10-23",
+      "slots": [
+        [
+          "2026-10-23",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "L09",
+      "owner": "Luan Eliseu",
+      "card": "N2-BE-06 / Excel",
+      "title": "Implementar/verificar exportação de notas XLSX",
+      "hours": 3,
+      "deps": [
+        "L08"
+      ],
+      "accept": "Arquivo abre em Excel, contém turma/aluno/versão/nota e respeita autorização/filtros",
+      "rf": "RF47–RF48",
+      "phase": "Backend",
+      "priority": "P1",
+      "note": "Exportação real distinta do CSV ou botão simulado",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-26",
+      "end": "2026-10-26",
+      "slots": [
+        [
+          "2026-10-26",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "G07",
+      "owner": "Gabriel Koehler da Silva",
+      "card": "N2-FE-04 / correção",
+      "title": "Conectar upload e feedback da correção real",
+      "hours": 4,
+      "deps": [
+        "G05",
+        "L08"
+      ],
+      "accept": "Upload multipart mostra leitura/erros/nota; nova imagem disponível quando leitura falha",
+      "rf": "RF31; RF38–RF43",
+      "phase": "Frontend",
+      "priority": "P0",
+      "note": "Estados de carregamento, falha e sucesso explícitos",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-26",
+      "end": "2026-10-26",
+      "slots": [
+        [
+          "2026-10-26",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "G08",
+      "owner": "Gabriel Koehler da Silva",
+      "card": "N2-FE-04 / relatórios",
+      "title": "Conectar resultados, estatísticas e download Excel",
+      "hours": 4,
+      "deps": [
+        "G07",
+        "L09"
+      ],
+      "accept": "Filtros e estatísticas refletem banco; download XLSX oficial funciona",
+      "rf": "RF41–RF48",
+      "phase": "Frontend",
+      "priority": "P1",
+      "note": "Conferir contagem por questão e alternativa original após embaralhar",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-27",
+      "end": "2026-10-27",
+      "slots": [
+        [
+          "2026-10-27",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "E08",
+      "owner": "Eloisa Fazzio da Silva Rocha",
+      "card": "N2-TEST / correção",
+      "title": "Validar OMR, nota e falhas de persistência",
+      "hours": 4,
+      "deps": [
+        "G07",
+        "L08",
+        "D04"
+      ],
+      "accept": "Dataset passa; falha de leitura não cria resultado; SQL/Storage com erro não exibem sucesso",
+      "rf": "RF31–RF43",
+      "phase": "Testes",
+      "priority": "P0",
+      "note": "Compensação de imagem e nova correção sem duplicar resultado",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-27",
+      "end": "2026-10-27",
+      "slots": [
+        [
+          "2026-10-27",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "G09",
+      "owner": "Gabriel Koehler da Silva",
+      "card": "N1-FE / ajustes N2",
+      "title": "Revisar responsividade, erros e impressão final",
+      "hours": 4,
+      "deps": [
+        "G08",
+        "G06"
+      ],
+      "accept": "Mobile/desktop/A4, estados vazios e navegação conferidos; visual coerente com Figma acessível",
+      "rf": "RNF01–RNF03; RF26–RF28",
+      "phase": "Frontend",
+      "priority": "P1",
+      "note": "Acesso completo Figma pendente; miniatura de login já conferida",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-28",
+      "end": "2026-10-28",
+      "slots": [
+        [
+          "2026-10-28",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "A06",
+      "owner": "Alyson de Lima de Oliveira",
+      "card": "N2-DOC-02 / execução",
+      "title": "Atualizar guia de execução e variáveis reais",
+      "hours": 4,
+      "deps": [
+        "L02",
+        "D01"
+      ],
+      "accept": "README reproduz ambiente e entrypoint; versão Python e caminho SQL únicos; segredos exemplificados",
+      "rf": "RNF09; N2 C3",
+      "phase": "Documentação",
+      "priority": "P1",
+      "note": "Conciliar instruções atuais conflitantes Node/Python",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-14",
+      "end": "2026-10-14",
+      "slots": [
+        [
+          "2026-10-14",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "D05",
+      "owner": "Diego Rafael da Silva Dornelles",
+      "card": "N2-INF-03 / hospedagem",
+      "title": "Preparar build e proxy no mesmo domínio",
+      "hours": 4,
+      "deps": [
+        "G01",
+        "A05",
+        "L02"
+      ],
+      "accept": "Imagem/build funciona; frontend/API com cookie no mesmo domínio; /health útil ao provedor",
+      "rf": "RNF06; N2 C2",
+      "phase": "Infraestrutura",
+      "priority": "P0",
+      "note": "Docker/Render local preparados, build e publicação pendentes",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-16",
+      "end": "2026-10-16",
+      "slots": [
+        [
+          "2026-10-16",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "D06",
+      "owner": "Diego Rafael da Silva Dornelles",
+      "card": "N2-INF-03 / ambiente",
+      "title": "Configurar variáveis e verificar segredos de produção",
+      "hours": 4,
+      "deps": [
+        "D05",
+        "D04"
+      ],
+      "accept": "Chaves no provedor, HTTPS/cookie corretos; URL e versão documentadas; segredos ausentes do ZIP",
+      "rf": "RNF06; N2 C2",
+      "phase": "Infraestrutura",
+      "priority": "P0",
+      "note": "Execução externa futura depende de autorização; agora só planejamento",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-19",
+      "end": "2026-10-19",
+      "slots": [
+        [
+          "2026-10-19",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "D07",
+      "owner": "Diego Rafael da Silva Dornelles",
+      "card": "N2-INF-03 / staging",
+      "title": "Homologar persistência real no ambiente hospedado",
+      "hours": 4,
+      "deps": [
+        "G09",
+        "L09",
+        "D06"
+      ],
+      "accept": "CRUD/avaliação/resultado persistem após reinício; nenhuma rota entregue depende de mock",
+      "rf": "N2 C2; RF01–RF48",
+      "phase": "Infraestrutura",
+      "priority": "P0",
+      "note": "Não marcar pronto apenas por configurar variáveis Supabase",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-29",
+      "end": "2026-10-29",
+      "slots": [
+        [
+          "2026-10-29",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "E09",
+      "owner": "Eloisa Fazzio da Silva Rocha",
+      "card": "N2-TEST / aceite",
+      "title": "Executar aceitação integrada de ponta a ponta",
+      "hours": 4,
+      "deps": [
+        "D07",
+        "E08",
+        "E07",
+        "G09"
+      ],
+      "accept": "Roteiro com evidências passa em HTTPS; falhas críticas resolvidas ou formalmente bloqueiam entrega",
+      "rf": "N2 C1–C3",
+      "phase": "Testes",
+      "priority": "P0",
+      "note": "Resultado deve refletir execução real, sem copiar status de PR",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-30",
+      "end": "2026-10-30",
+      "slots": [
+        [
+          "2026-10-30",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "A07",
+      "owner": "Alyson de Lima de Oliveira",
+      "card": "N2-DOC-02 / README v2",
+      "title": "Atualizar escopo, imagens e atendido/não atendido",
+      "hours": 5,
+      "deps": [
+        "E09",
+        "D07"
+      ],
+      "accept": "README v2 condiz com evidências, MER/DER/UML, link real e limitações remanescentes",
+      "rf": "N2 C3",
+      "phase": "Documentação",
+      "priority": "P1",
+      "note": "Corrigir contagem 32 versus 36 cards e pendências antigas somente com evidência",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-11-03",
+      "end": "2026-11-04",
+      "slots": [
+        [
+          "2026-11-03",
+          4.0
+        ],
+        [
+          "2026-11-04",
+          1.0
+        ]
+      ]
+    },
+    {
+      "id": "A08",
+      "owner": "Alyson de Lima de Oliveira",
+      "card": "N2-DOC / relatório",
+      "title": "Consolidar evidências, diário e relatório final",
+      "hours": 4,
+      "deps": [
+        "A07",
+        "E09"
+      ],
+      "accept": "Relatórios datados e autores corretos; distingue código, revisão, deploy e homologação",
+      "rf": "N2 C1–C3",
+      "phase": "Documentação",
+      "priority": "P1",
+      "note": "Preservar diário local de Diego e identificar contribuição assistida",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-11-05",
+      "end": "2026-11-05",
+      "slots": [
+        [
+          "2026-11-05",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "A09",
+      "owner": "Alyson de Lima de Oliveira",
+      "card": "N2-PLAN / Excel",
+      "title": "Revisar backlog, esforço e datas com o grupo",
+      "hours": 4,
+      "deps": [
+        "A04"
+      ],
+      "accept": "Cinco integrantes participam; estimativas/dependências validadas; data acadêmica confirmada",
+      "rf": "Planejamento N2",
+      "phase": "Planejamento",
+      "priority": "P0",
+      "note": "Planilha atual usa prazo provisório 13/11/2026",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-10-13",
+      "end": "2026-10-15",
+      "slots": [
+        [
+          "2026-10-13",
+          3.0
+        ],
+        [
+          "2026-10-15",
+          1.0
+        ]
+      ]
+    },
+    {
+      "id": "D08",
+      "owner": "Diego Rafael da Silva Dornelles",
+      "card": "N1-INF-02 / N2-INF-04",
+      "title": "Gerar pacote final e auditar conteúdo/extração",
+      "hours": 4,
+      "deps": [
+        "A08",
+        "A07",
+        "E09"
+      ],
+      "accept": "ZIP sem segredos/caches; extração, UTF-8, integridade e execução limpa conferidas; PRs auditados",
+      "rf": "N2 C1",
+      "phase": "Infraestrutura",
+      "priority": "P0",
+      "note": "Gravação no workspace teve corrupção anterior; verificar hashes e reabrir arquivos",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-11-06",
+      "end": "2026-11-06",
+      "slots": [
+        [
+          "2026-11-06",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "D09",
+      "owner": "Diego Rafael da Silva Dornelles",
+      "card": "N2-INF-04 / fechamento",
+      "title": "Conferir entrega, HTTPS, URL e pacote final",
+      "hours": 3,
+      "deps": [
+        "D08"
+      ],
+      "accept": "Pacote homologado e documentação/URL conferidos; checklist assinado pelo grupo",
+      "rf": "N2 C1–C3",
+      "phase": "Entrega",
+      "priority": "P0",
+      "note": "Publicação e entrega só quando autorizadas; preservar margem até prazo final",
+      "status": "Planejada — validar com o grupo",
+      "start": "2026-11-13",
+      "end": "2026-11-13",
+      "slots": [
+        [
+          "2026-11-13",
+          3
+        ]
+      ]
+    }
+  ]
+}
