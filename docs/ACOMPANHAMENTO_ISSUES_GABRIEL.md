@@ -10,7 +10,7 @@ Este é o arquivo de acompanhamento oficial para atualizar ao concluir cada issu
 - **8 issues implementadas e integradas na main**, com PRs merged: FE-01, BE-02, FE-02, FE-03, FE-04, FE-05, FE-06 e FE-07.
 - FE-04: publicada no PR #56; commit 75327b2.
 - FE-05: publicada no PR #57; commit e227db5, derivado de FE-04.
-- **3 issues sem implementação final**: #3, #25 e #28. As #22 e #23 estão implementadas e validadas com PostgreSQL local; falta homologar no Supabase e revisar/integrar os PRs. A #23 também aguarda validação visual em navegador.
+- **2 issues sem implementação final**: #3 e #28. As #22, #23 e #25 estão implementadas e validadas com PostgreSQL local; falta homologar no Supabase e revisar/integrar os PRs. As #23 e #25 também aguardam validação visual em navegador. Isso não representa aceite final, merge ou encerramento dessas issues.
 - Merges confirmados no GitHub: PRs #51, #52, #53, #56, #57, #58 e #59. Issues #5, #6, #7, #8, #9, #12, #13 e #14 encerradas.
 
 ## Controle das entregas
@@ -28,7 +28,7 @@ Este é o arquivo de acompanhamento oficial para atualizar ao concluir cada issu
 | [#14 N1-FE-07 — Correção e estatísticas simuladas](https://github.com/gabriel-Koehler/projetosgp/issues/14) | Integrada na main | Encerrada, PR merged | `feat/n1-fe-07-correcao-estatisticas`, `3c2d899`; [PR #59](https://github.com/gabriel-Koehler/projetosgp/pull/59) | Nenhuma pendência de integração |
 | [#22 N2-FE-01 — Autenticação e turmas com API real](https://github.com/gabriel-Koehler/projetosgp/issues/22) | Implementada; PostgreSQL local validado | Aberta, [PR #64](https://github.com/gabriel-Koehler/projetosgp/pull/64) | `feat/n2-fe-01-integracao-auth-turmas`, `5fd72c1`, base `feat/n2-api-auth-turmas` ([PR #60](https://github.com/gabriel-Koehler/projetosgp/pull/60)) | Validar no Supabase de desenvolvimento; revisão e merge |
 | [#23 N2-FE-02 — Questões e upload com API real](https://github.com/gabriel-Koehler/projetosgp/issues/23) | Implementada; PostgreSQL local revalidado em 2026-10-07 | Aberta, [PR #65](https://github.com/gabriel-Koehler/projetosgp/pull/65) aberto | `feat/n2-fe-02-integracao-questoes-upload`, `6ab665a`, base da #22 em `121fbdb` | Supabase remoto, navegador desktop/mobile, revisão e merge |
-| [#25 N2-FE-03 — Avaliações e versões persistidas](https://github.com/gabriel-Koehler/projetosgp/issues/25) | Sem entrega específica identificada | Aberta | Avaliações ainda em memória | Integrar criação e persistência reais |
+| [#25 N2-FE-03 — Avaliações e versões persistidas](https://github.com/gabriel-Koehler/projetosgp/issues/25) | Implementada; PostgreSQL local validado | Aberta, [PR #66](https://github.com/gabriel-Koehler/projetosgp/pull/66) aberto | `feat/n2-fe-03-integracao-avaliacoes-versoes`, `225d78f`, base da #23 em `7d591f4` | Supabase remoto, navegador desktop/mobile, revisão e merge |
 | [#28 N2-FE-04 — Correção real e Excel](https://github.com/gabriel-Koehler/projetosgp/issues/28) | Sem entrega específica identificada | Aberta | Correção manual simulada e CSV | Integrar correção real e relatório XLSX |
 
 ## Como atualizar a cada issue
@@ -138,6 +138,20 @@ Impressão A4 de prova, folha com QR/bolhas A–D e gabarito do professor. Liber
 - Dependência de Diego consultada no GitHub: issue #31, branch `infra/diego-validacao-supabase` em `f8f16e0`, [PR #63](https://github.com/gabriel-Koehler/projetosgp/pull/63), dependente de #61/#62; PR e issue abertos, sem merge. A documentação dessa branch registra o projeto Supabase `projetosgp` (`veyofappfyaoejcjwxky`) já provisionado e DDL/RLS/seed validados remotamente. Não é necessário criar outro projeto.
 - Compatibilidade conferida: mesmas tabelas/colunas/índices da API, acrescidos de transação e RLS. DDL de Diego aplicado em banco local separado, com 12 tabelas e RLS em todas; fluxo HTTP da #23 aprovado sobre esse schema. Isso não substitui a validação das permissões/conexão do backend remoto.
 - A conexão de Diego está documentada como `.env.supabase.local` não versionado; arquivo indisponível neste workspace. Pendência corrigida: obter acesso ao projeto já provisionado e homologar o fluxo da #23, sem repetir o provisionamento. Detalhes em `docs/N2-FE-02.md`.
+
+## Entrega N2-FE-03 — 2026-10-07
+- Issue #25 iniciada após solicitação do responsável para executar a próxima issue, preservando as pendências de aceite da #23. Nenhum merge da #23 foi pressuposto ou realizado.
+- Branch base: `feat/n2-fe-02-integracao-questoes-upload`, atualizada via fetch em `7d591f4`. Branch de trabalho: `feat/n2-fe-03-integracao-avaliacoes-versoes`.
+- Implementação: assistente com banco persistente, alternativa E/categoria, nota máxima, ajuste de gabarito da avaliação, 1–500 versões, nomes por letras/números/cores/personalizados, conjuntos iguais/diferentes e embaralhamento. Lista/detalhe recuperam avaliações e versões do banco; snapshots preservados após editar/arquivar questões. QR/impresso persistentes e liberação/revogação de gabaritos por avaliação, com resposta pública mínima.
+- Camadas da API reaproveitadas do PR #43 do Luan e adaptadas à API persistente desta sequência; nenhum merge ou alteração na branch do colega.
+- Validação: 194 testes Python em PostgreSQL local descartável e 17 testes JavaScript aprovados. Inclui persistência após recriar API/pool, isolamento de professores, gabarito específico, conjuntos diferentes, snapshot, QR decodificado, liberação/revogação e rollback intermediário.
+- Fluxo HTTP real pelo proxy Express com o próprio adaptador JS aprovado sobre o DDL de Diego, em banco separado com RLS nas 12 tabelas; reinício do processo Python preservou sessão, dados e códigos. Sintaxe/diff aprovados. HTTP de páginas não equivale a validação visual.
+- Commit de implementação: `225d78f`; push realizado. [PR #66](https://github.com/gabriel-Koehler/projetosgp/pull/66) aberto para a branch da #23. Dependências #65 → #64 → #60, reaproveitamento #43 e infraestrutura #63 → #62 → #61 explícitos.
+- Revisor indicado na issue/PR: Gabriel Koehler da Silva (@gabriel-Koehler). GitHub não permite solicitar revisão ao próprio autor; indicação mantida na descrição.
+- Consulta à API GitHub confirmou PR #66 aberto, sem merge, e issue #25 aberta. Implementação entregue não é encerramento da issue.
+- Pendências: recuperar versões diretamente do projeto Supabase de Diego (`veyofappfyaoejcjwxky`), com TLS/permissões do backend confirmados; conexão `.env.supabase.local` indisponível neste workspace. Validação visual desktop/mobile pendente por ausência de navegador conectado. Nenhuma migração remota executada.
+- Documentação detalhada: `docs/N2-FE-03.md`. Próxima implementação na sequência é #28, somente após concluir o aceite desta issue ou nova instrução do responsável; nenhuma branch da #28 criada.
+- Sequência N2 atual: `feat/n2-api-auth-turmas` (#60) → `feat/n2-fe-01-integracao-auth-turmas` (#64) → `feat/n2-fe-02-integracao-questoes-upload` (#65) → `feat/n2-fe-03-integracao-avaliacoes-versoes` (#66). A branch da #25 passa a ser a última entrega a preservar.
 
 ## Preparação local de Diego — 05/10/2026
 

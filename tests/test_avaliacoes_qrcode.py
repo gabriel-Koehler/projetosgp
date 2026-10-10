@@ -203,7 +203,7 @@ def test_qrcode_da_versao_aponta_para_o_gabarito_do_aluno(api, avaliacao):
     assert resposta.status_code == 200
     assert resposta.headers["content-type"] == "image/png"
     assert ler_qrcode(resposta.content) == versao["url_aluno"]
-    assert versao["url_aluno"].endswith(f"/student/gabarito/{versao['codigo']}")
+    assert versao["url_aluno"].endswith(f"/student?token={versao['codigo']}")  # página do aluno no front
 
 
 def test_qrcode_usa_url_publica_configurada(banco, banco_url, settings, questoes):
@@ -212,7 +212,7 @@ def test_qrcode_usa_url_publica_configurada(banco, banco_url, settings, questoes
         cliente.post("/api/auth/login", json={"username": "professor", "password": "senha-teste"})
         versao = cliente.post("/api/avaliacoes", json=payload(questoes)).json()["versoes"][0]
 
-        assert versao["url_aluno"] == f"https://provafacil.exemplo.com/student/gabarito/{versao['codigo']}"
+        assert versao["url_aluno"] == f"https://provafacil.exemplo.com/student?token={versao['codigo']}"
         assert ler_qrcode(cliente.get(versao["url_qrcode"]).content) == versao["url_aluno"]
 
 
@@ -236,7 +236,7 @@ def test_aluno_ve_so_as_alternativas_corretas_da_sua_versao(api, avaliacao):
     api.post("/api/auth/logout")  # o aluno não tem login
 
     for versao in avaliacao["versoes"]:
-        resposta = api.get(f"/student/gabarito/{versao['codigo']}")
+        resposta = api.get(f"/api/public/gabaritos/{versao['codigo']}")
         assert resposta.status_code == 200
         assert resposta.json() == {
             "avaliacao": "N1 — Engenharia de Software",
@@ -247,7 +247,7 @@ def test_aluno_ve_so_as_alternativas_corretas_da_sua_versao(api, avaliacao):
 
 def test_resposta_do_aluno_nao_expoe_dados_sensiveis(api, avaliacao):
     liberar(api, avaliacao)
-    texto = api.get(f"/student/gabarito/{avaliacao['versoes'][0]['codigo']}").text
+    texto = api.get(f"/api/public/gabaritos/{avaliacao['versoes'][0]['codigo']}").text
     for proibido in ("Pergunta", "enunciado", "nota", "turma", "semestre", "questao_id", "ordem_original"):
         assert proibido not in texto
 
@@ -263,6 +263,15 @@ def test_gabarito_bloqueado_ate_o_professor_liberar(api, avaliacao):
 
 
 def test_codigo_inexistente(api):
-    resposta = api.get("/student/gabarito/nao-existe")
+    resposta = api.get("/api/public/gabaritos/nao-existe")
     assert resposta.status_code == 404
     assert "QR Code" in resposta.json()["detail"]
+
+
+def test_rota_antiga_do_gabarito_continua_funcionando(api, avaliacao):
+    """Folhas impressas antes da mudança têm QR Code com /student/gabarito/{codigo}."""
+    liberar(api, avaliacao)
+    versao = avaliacao["versoes"][0]
+    antiga = api.get(f"/student/gabarito/{versao['codigo']}")
+    assert antiga.status_code == 200
+    assert antiga.json() == api.get(f"/api/public/gabaritos/{versao['codigo']}").json()

@@ -158,7 +158,9 @@ def test_erro_do_codigo_desconhecido_e_repassado():
 
 
 def test_codigo_extraido_da_url():
-    assert O.extrair_codigo("https://x.com/student/gabarito/abc-123/") == "abc-123"
+    assert O.extrair_codigo("https://x.com/student?token=abc-123") == "abc-123"
+    assert O.extrair_codigo("https://x.com/student?token=a%2Bb_9") == "a+b_9"
+    assert O.extrair_codigo("https://x.com/student/gabarito/abc-123/") == "abc-123"  # QR Codes antigos
     assert O.extrair_codigo("abc-123") == "abc-123"
 
 

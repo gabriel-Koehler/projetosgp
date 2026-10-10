@@ -23,7 +23,9 @@ app.use('/api', (req, res) => {
     method: req.method,
     headers: {
       ...req.headers,
-      host: target.host
+      host: target.host,
+      'x-forwarded-host': req.get('host'),
+      'x-forwarded-proto': req.protocol
     },
     timeout: 12000
   }, response => {

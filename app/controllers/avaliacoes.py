@@ -2,8 +2,8 @@
 
 import re
 from dataclasses import asdict
-
 from typing import Literal
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Request, Response, status
 
@@ -31,18 +31,24 @@ Professor = Depends(professor_id)
 
 
 def url_publica(request: Request, settings: Settings, caminho: str) -> str:
+    host = request.headers.get("x-forwarded-host")
     if settings.public_base_url:
-        return settings.public_base_url.rstrip("/") + caminho
-    # Inclui o prefixo de montagem (ex.: /n1), para o link funcionar quando a API está montada no app do MVP.
-    return str(request.url.replace(path=_prefixo(request) + caminho, query=""))
+        base = settings.public_base_url
+    elif host:  # atrás do proxy do front (Node), usa o domínio que o usuário acessou
+        base = f"{request.url.scheme}://{host}"
+    else:
+        base = str(request.base_url)
+    return base.rstrip("/") + caminho
 
 
 def _prefixo(request: Request) -> str:
+    """Prefixo de montagem da API (ex.: /n1 quando montada no app do MVP)."""
     return request.scope.get("root_path", "").rstrip("/")
 
 
 def url_do_aluno(request: Request, settings: Settings, codigo: str) -> str:
-    return url_publica(request, settings, f"/student/gabarito/{codigo}")
+    """Link do QR Code: página do aluno no front, que consulta /api/public/gabaritos/{codigo}."""
+    return url_publica(request, settings, f"/student?token={quote(codigo, safe='')}")
 
 
 def _serializar(avaliacao: Avaliacao, request: Request, settings: Settings) -> AvaliacaoOut:

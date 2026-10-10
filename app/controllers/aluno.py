@@ -9,10 +9,13 @@ from fastapi import APIRouter, Depends
 from app.schemas.avaliacao import GabaritoAlunoOut, ItemGabarito
 from app.services.avaliacao_service import AvaliacaoService, get_avaliacao_service
 
-router = APIRouter(prefix="/student", tags=["aluno"])
+router = APIRouter(tags=["aluno"])
 
 
-@router.get("/gabarito/{codigo}", response_model=GabaritoAlunoOut)
+# /api/public/gabaritos/{codigo}: contrato do front (página /student?token=...).
+# /student/gabarito/{codigo}: mantida para folhas e QR Codes gerados antes.
+@router.get("/api/public/gabaritos/{codigo}", response_model=GabaritoAlunoOut)
+@router.get("/student/gabarito/{codigo}", response_model=GabaritoAlunoOut, include_in_schema=False)
 def gabarito_da_versao(codigo: str, service: AvaliacaoService = Depends(get_avaliacao_service)):
     resultado = service.gabarito_do_aluno(codigo)
     return GabaritoAlunoOut(

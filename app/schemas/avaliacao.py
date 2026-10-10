@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.services.version_builder import Nomenclatura
 
@@ -10,7 +10,7 @@ from app.services.version_builder import Nomenclatura
 class ConfiguracaoIn(BaseModel):
     quantidade: int = Field(ge=1, le=500)
     nomenclatura: Nomenclatura = Nomenclatura.LETRAS
-    nomes_personalizados: list[str] = []
+    nomes_personalizados: list[str] = Field(default_factory=list, max_length=500)
     mesmas_questoes: bool = True
     questoes_por_versao: int | None = Field(default=None, ge=1)
     embaralhar_questoes: bool = False
@@ -20,11 +20,19 @@ class ConfiguracaoIn(BaseModel):
 class AvaliacaoIn(BaseModel):
     nome: str = Field(min_length=1, max_length=200)
     turma_id: int | None = None
-    questao_ids: list[int] = Field(min_length=1, description="Questões do banco, na ordem da prova")
+    questao_ids: list[int] = Field(min_length=1, max_length=100, description="Questões do banco, na ordem da prova")
     # RF16: ajuste do gabarito só nesta avaliação, ex.: {"12": "C"}.
-    gabaritos: dict[int, str] = {}
+    gabaritos: dict[int, str] = Field(default_factory=dict)
     nota_maxima: float = Field(default=10, gt=0, le=1000)
     configuracao: ConfiguracaoIn
+
+    @field_validator("nome")
+    @classmethod
+    def nome_nao_vazio(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Informe o nome da avaliação.")
+        return value
 
 
 class LiberarGabaritoIn(BaseModel):

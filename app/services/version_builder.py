@@ -95,6 +95,8 @@ def nomes_das_versoes(config: ConfiguracaoVersoes) -> list[str]:
         raise ValueError(f"Informe exatamente {n} nome(s) de versão, sem nomes vazios.")
     if len({nome.casefold() for nome in nomes}) != n:
         raise ValueError("Os nomes das versões não podem se repetir.")
+    if any(len(nome) > 30 or any(not (c.isalnum() or c in "_ -") for c in nome) for nome in nomes):
+        raise ValueError("Use nomes de até 30 caracteres: letras, números, espaços, hífen ou sublinhado.")
     return nomes
 
 

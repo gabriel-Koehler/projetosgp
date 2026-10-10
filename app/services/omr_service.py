@@ -9,6 +9,7 @@ Na dúvida, a leitura NÃO é confiável: o professor precisa ler de novo ou con
 """
 
 from collections.abc import Callable
+from urllib.parse import parse_qs, urlsplit
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -185,8 +186,16 @@ def _decodificar_qr(imagem: np.ndarray) -> tuple[str, tuple[float, float]] | Non
 
 
 def extrair_codigo(texto: str) -> str:
-    """O QR Code contém a URL do gabarito do aluno; o código é o último trecho."""
-    return texto.strip().rstrip("/").rsplit("/", 1)[-1]
+    """Código da versão a partir do conteúdo do QR Code.
+
+    Aceita a URL atual (`.../student?token=CODIGO`), a antiga (`.../student/gabarito/CODIGO`)
+    e o código puro.
+    """
+    url = urlsplit(texto.strip())
+    token = parse_qs(url.query).get("token")
+    if token and token[0]:
+        return token[0]
+    return url.path.rstrip("/").rsplit("/", 1)[-1] if url.path else texto.strip()
 
 
 def ler_qrcode(folha: np.ndarray) -> tuple[str, np.ndarray]:

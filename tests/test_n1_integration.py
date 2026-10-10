@@ -34,13 +34,15 @@ def test_mounted_backend_preserves_mvp_and_public_qr_contract(settings, banco, b
             evaluation = response.json()
             version = evaluation["versoes"][0]
             assert version["url_qrcode"].startswith("/n1/api/avaliacoes/")
-            assert version["url_aluno"].startswith("http://testserver/n1/student/gabarito/")
+            # O QR Code abre a página do aluno no front; ela consulta a API pública.
+            assert version["url_aluno"] == f"http://testserver/student?token={version['codigo']}"
             assert ler_qrcode(client.get(version["url_qrcode"]).content) == version["url_aluno"]
+            publica = f"/n1/api/public/gabaritos/{version['codigo']}"
             with TestClient(app) as anonymous:
-                assert anonymous.get(version["url_aluno"]).status_code == 403
+                assert anonymous.get(publica).status_code == 403
                 liberar = client.patch(f"/n1/api/avaliacoes/{evaluation['id']}/gabarito", json={"liberado": True})
                 assert liberar.status_code == 200
-                assert set(anonymous.get(version["url_aluno"]).json()) == {"avaliacao", "versao", "gabarito"}
+                assert set(anonymous.get(publica).json()) == {"avaliacao", "versao", "gabarito"}
             assert client.post("/n1/api/auth/logout").status_code == 204
             assert client.get("/n1/api/painel").status_code == 401
             assert client.get("/api/questoes").status_code == 200

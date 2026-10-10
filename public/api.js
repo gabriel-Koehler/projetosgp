@@ -60,3 +60,8 @@ export async function allQuestions() {
     if (result.itens.length < result.por_pagina) return questions;
   }
 }
+
+export async function evaluationQr(evaluation, version) {
+  if (real) return {image: version.qrUrl};
+  return api('/evaluations/' + evaluation.id + '/qr/' + encodeURIComponent(version.name));
+}
