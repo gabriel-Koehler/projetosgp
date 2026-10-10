@@ -72,4 +72,13 @@ app.get('/print', async (req, res) => {
 });
 app.get('/student', (req, res) => res.render('student'));
 const port = process.env.PORT || 3000;
-app.listen(port, '127.0.0.1', () => console.log('AvaliaSystem em http://localhost:' + port + ' → API Python ' + backend));
+app.get('/health', async (req, res) => {
+  try {
+    const response = await fetch(backend + '/health', { signal: AbortSignal.timeout(4000) });
+    if (!response.ok) return res.status(503).json({ status: 'unavailable' });
+    res.json({ status: 'ok', api: await response.json() });
+  } catch {
+    res.status(503).json({ status: 'unavailable' });
+  }
+});
+app.listen(port, process.env.HOST || '127.0.0.1', () => console.log('AvaliaSystem em http://localhost:' + port + ' → API Python ' + backend));
