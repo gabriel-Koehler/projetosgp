@@ -199,7 +199,28 @@ PR publicado: [#63 — validação real do Supabase e proteção do pacote](http
   - Guia de execução local passo a passo em Python (venv, pip, uvicorn) e Node.js (`npm run dev:all`).
   - Referência à hospedagem contínua gratuita (Render/Vercel) e container Docker.
   - Auditoria de integridade: 100% dos links internos validados sem nenhum link quebrado.
-- **Pull Request a abrir:** `docs: [N1-DOC-02] Elaboração do README v1 oficial da fase N1`.
+- **Pull Request:** [docs: [N1-DOC-02] Elaboração do README v1 oficial da fase N1](https://github.com/gabriel-Koehler/projetosgp/pull/new/docs/n1-doc-02-readme-v1).
 - **Revisor:** Gabriel Koehler da Silva (@gabriel-Koehler).
 - **Status de merge:** Aguardando revisão e autorização de merge.
+
+## Entrega N2-DOC-02 — 09/10/2026
+- **Issue:** [N2-DOC-02 — Atualização do README oficial para versão v2 da N2 com Supabase](https://github.com/gabriel-Koehler/projetosgp/issues).
+- **Responsável:** ALYSON DE LIMA DE OLIVEIRA.
+- **Branch base:** `docs/n1-doc-02-readme-v1` (preservando integralmente a entrega anterior N1-DOC-02).
+- **Branch de trabalho:** `docs/n2-doc-02-readme-v2`.
+- **Status de implementação:** Concluída e validada conforme Critério C3 (20% da N2), Passo 05.
+- **Critérios atendidos:**
+  - Redação e atualização do `README.md` v2 oficial da fase N2 com foco em produção e persistência.
+  - Documentação detalhada da Arquitetura em Camadas (6 camadas) e referências às ADRs (`ADR-0001`, `ADR-0002`, `ADR-0003`).
+  - Módulo de Visão Computacional / OMR com OpenCV (`cv2`) e Pyzbar para correção óptica e homografia de 4 pontos.
+  - Banco de dados Supabase (PostgreSQL Cloud com 12 tabelas relacionais, DDL `src/database/schema.sql`, seed e RLS).
+  - Diagramas oficiais integrados em Mermaid: DER Físico N2 e Diagrama de Classes UML v2.
+  - Tabela completa de variáveis de ambiente (`.env.example`) com finalidades documentadas.
+  - Guia de execução local comparando modo persistente N2 (`npm run dev:real`) e modo mock N1 (`npm run dev:all`), além de migrações (`python -m app.database.migrate`).
+  - Links para sistema em produção (Render/Vercel) e container Docker.
+  - Auditoria de integridade: 100% dos links internos validados sem nenhum link quebrado.
+- **Pull Request a abrir:** `docs: [N2-DOC-02] Atualização do README oficial para versão v2 da N2 com Supabase`.
+- **Revisor:** Gabriel Koehler da Silva (@gabriel-Koehler).
+- **Status de merge:** Aguardando revisão e autorização de merge.
+
 

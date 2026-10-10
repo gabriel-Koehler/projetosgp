@@ -1,45 +1,46 @@
 # 🎓 AvaliaSystem — Sistema de Geração e Correção Automática de Avaliações
 
 > **Repositório Oficial** de desenvolvimento do projeto prático da disciplina de **Projeto e Arquitetura de Software**.  
-> **Entrega da Fase N1 — Versão v1 Oficial** (Atendimento integral ao **Critério C3** da N1).
+> **Entrega da Fase N2 — Versão v2 Oficial com Supabase e OMR** (Atendimento integral ao **Critério C3** da N2).
 
 ---
 
 ## 📑 Sumário
 
-1. [Visão Geral do Projeto](#-visão-geral-do-projeto)
+1. [Visão Geral e Proposta de Valor](#-visão-geral-e-proposta-de-valor)
 2. [Equipe e Responsabilidades Oficiais](#-equipe-e-responsabilidades-oficiais)
-3. [Escopo Entregue na Fase N1](#-escopo-entregue-na-fase-n1)
-4. [Requisitos do Sistema (RF e RNF da N1)](#-requisitos-do-sistema-rf-e-rnf-da-n1)
-5. [Galeria de Telas e Navegação (AvaliaSystem)](#-galeria-de-telas-e-navegação-avaliasystem)
-6. [Arquitetura e Tecnologias](#-arquitetura-e-tecnologias)
-7. [Guia de Execução Local](#-guia-de-execução-local)
-8. [Sistema Hospedado e Deploy em Nuvem](#-sistema-hospedado-e-deploy-em-nuvem)
-9. [Testes e Validação de Aceitação](#-testes-e-validação-de-aceitação)
-10. [Organização do Repositório e Governança](#-organização-do-repositório-e-governança)
+3. [Diferenciais e Evolução da Fase N2](#-diferenciais-e-evolução-da-fase-n2)
+4. [Arquitetura em Camadas (Layered Architecture)](#-arquitetura-em-camadas-layered-architecture)
+5. [Processamento Digital de Imagens e Correção Automática (OMR)](#-processamento-digital-de-imagens-e-correção-automática-omr)
+6. [Modelagem do Banco de Dados (Supabase / PostgreSQL)](#-modelagem-do-banco-de-dados-supabase--postgresql)
+7. [Diagramas Oficiais do Sistema (MER, DER e UML v2)](#-diagramas-oficiais-do-sistema-mer-der-e-uml-v2)
+8. [Variáveis de Ambiente (.env)](#-variáveis-de-ambiente-env)
+9. [Guia de Execução Local (Modo Persistente e Modo Mock)](#-guia-de-execução-local-modo-persistente-e-modo-mock)
+10. [Deploy em Nuvem e Produção](#-deploy-em-nuvem-e-produção)
+11. [Rotas e Contratos da API REST](#-rotas-e-contratos-da-api-rest)
+12. [Organização do Repositório e Governança](#-organização-do-repositório-e-governança)
 
 ---
 
-## 🌟 Visão Geral do Projeto
+## 🌟 Visão Geral e Proposta de Valor
 
-O **AvaliaSystem** é uma plataforma acadêmica completa concebida para otimizar e automatizar todo o ciclo de vida das avaliações escolares e universitárias. Desenvolvido para simplificar o cotidiano docente, o sistema resolve desde o gerenciamento de turmas e questões até a aplicação e correção de exames com alta confiabilidade.
+O **AvaliaSystem** é uma plataforma acadêmica corporativa desenvolvida para resolver as principais dores do processo avaliativo presencial no ensino superior e na educação básica. O sistema integra a elaboração de provas, diagramação automática, prevenção a fraudes por meio de versões com questões embaralhadas, impressão padronizada em folha A4 e **correção automatizada via Visão Computacional / OMR (Optical Mark Recognition)** a partir de fotos tiradas por smartphone.
 
-### Principais Benefícios:
-- **Combate a fraudes e colas:** Geração de múltiplas versões da mesma avaliação (com embaralhamento controlado de questões e de alternativas), mantendo a equivalência de conteúdo.
-- **Rastreabilidade e padronização:** Cada versão de prova recebe um **QR Code exclusivo** impresso no cabeçalho e na folha de respostas, identificando instantaneamente a prova e a versão.
-- **Folha de respostas padronizada (A4):** Diagramação milimetricamente ajustada para impressão em qualquer impressora convencional, com marcadores fiduciais nos cantos e grade de bolhas para preenchimento.
-- **Correção rápida e relatórios:** Mecanismo de leitura automatizada e simulada com geração imediata de notas, estatísticas de aproveitamento por turma e índice de discriminação por questão.
-- **Transparência para o estudante:** Consulta pública restrita via QR Code para que o aluno verifique as respostas corretas de sua versão, com liberação controlada pelo professor.
+### Ciclo Completo de Valor:
+- **Gestão Acadêmica Unificada:** Semestres letivos, turmas, alunos e repositório centralizado de questões classificadas por disciplina e dificuldade.
+- **Geração Inteligente de Provas:** Montagem assistida com criação de múltiplas versões (A, B, C...) com embaralhamento determinístico de enunciados e alternativas.
+- **Folhas de Resposta com QR Code e Âncoras Ópticas:** Cada estudante recebe uma folha com marcadores nos 4 cantos e um QR Code único para leitura e rastreabilidade total.
+- **Correção Automática por Foto/Scan:** O professor fotografa a folha de respostas e o motor de visão computacional em **OpenCV** e **Pyzbar** alinha a imagem, decodifica o QR Code, segmenta as bolhas preenchidas e calcula a nota em segundos.
+- **Portal do Aluno:** Consulta pública do gabarito da sua versão específica via leitura do QR Code com liberação controlada pelo professor.
+- **Relatórios Analíticos e Exportação:** Estatísticas de aproveitamento por turma, discriminador de erros por questão e exportação de notas em **Excel (.xlsx)** e CSV.
 
 ---
 
 ## 👥 Equipe e Responsabilidades Oficiais
 
-O projeto conta com papéis multidisciplinares bem definidos entre os integrantes:
-
 | Integrante | Atribuição | Responsabilidades Oficiais |
 | :--- | :--- | :--- |
-| **Gabriel Koehler da Silva** | **Front-end, Mocks & Navegação** | Desenvolvimento de todas as interfaces web navegáveis no padrão *AvaliaSystem* (N1), usabilidade, responsividade, integração com a API REST Python e telas de correção/relatórios (N2), além da estruturação do repositório/Kanban (`[N1-INF-03]`) e do provedor mock state (`[N1-BE-02]`). |
+| **Gabriel Koehler da Silva** | **Front-end, Mocks & Navegação** | Desenvolvimento de todas as interfaces web navegáveis no padrão *AvaliaSystem* (N1/N2), usabilidade, responsividade, integração com a API REST Python e telas de correção/relatórios (N2), além da estruturação do repositório/Kanban (`[N1-INF-03]`) e do provedor mock state (`[N1-BE-02]`). |
 | **Luan Eliseu** | **Back-end & Banco de Dados** | Desenvolvimento da API REST em Python (FastAPI), módulo de Visão Computacional / OMR via OpenCV (`cv2`) e pyzbar, integração com Supabase (`supabase-py`), regras de embaralhamento e gabaritos, CRUDs relacionais e exportação de relatórios. |
 | **ALYSON DE LIMA DE OLIVEIRA** | **Documentação & Arquitetura** | Esboço inicial das classes de domínio, elaboração dos READMEs oficiais (v1 para N1 e v2 para N2), documentação formal da arquitetura em camadas e registros de decisões técnicas (ADRs). |
 | **ELOISA FAZZIO DA SILVA ROCHA** | **Requisitos, Fluxos & Modelagem Conceitual** | Mapeamento completo dos fluxos de navegação e casos de uso, elaboração do roteiro de testes navegáveis de aceitação (N1), Modelagem Conceitual (MER) e Dicionário de Dados para o banco de dados (N2). |
@@ -47,383 +48,470 @@ O projeto conta com papéis multidisciplinares bem definidos entre os integrante
 
 ---
 
-## 🎯 Escopo Entregue na Fase N1
+## 🚀 Diferenciais e Evolução da Fase N2
 
-Na **Fase N1**, o objetivo principal consistiu na entrega do **MVP (Produto Mínimo Viável) navegável de ponta a ponta**, com layout pixel-perfect de acordo com os wireframes aprovados no Figma, fluxos integrados e ambiente de backend pronto para transição:
+Na transição da Fase N1 para a **Fase N2**, o sistema evoluiu do estágio de protótipo navegável em memória para um sistema de produção robusto e persistente:
 
-1. **Interfaces Visuais Completas (Padrão AvaliaSystem):**
-   - Tela de Autenticação (`views/login.ejs`) com layout moderno de duas colunas, formulário de login docente, atalho com Google simulado e recuperação de senha.
-   - Painel do Professor (`DashboardScreen` / `views/dashboard.ejs`) com cartões de estatísticas, gráfico semanal e ações rápidas.
-   - Módulo de Semestres & Turmas com navegação mestre-detalhe, gerenciamento de status e listagem de estudantes.
-   - Importador em lote de alunos via arquivo `.csv` e `.xlsx` com visualização de prévia e confirmação.
-   - Banco de Questões com filtragem dinâmica por disciplina, nível de dificuldade, categoria e busca textual em tempo real.
-   - Assistente de Criação de Avaliações em 4 passos sequenciais (Configuração inicial ➔ Seleção de Questões ➔ Ajuste de Gabarito ➔ Configuração de Versões).
-   - Tela de Versões da Prova com download do QR Code em `.png`, visualização de gabaritos e comando para impressão.
-   - Documento de Impressão A4 (`views/print.ejs`) contendo prova completa e folha de respostas pronta para uso.
-   - Módulo de Correção com upload de folhas de respostas, conferência de alternativas, cálculo de nota e resumo estatístico.
-   - Portal do Aluno (`views/student.ejs`) para visualização de gabarito liberado, acessível sem credenciais via QR Code.
-
-2. **Arquitetura de Dados em Memória (Mock State Provider):**
-   - Implementação do provedor de estado em memória no servidor Node.js/Express (`public/app.js`, `server.js`) para garantir navegabilidade fluida e imediata no ambiente local e hospedado.
-   - Backend modular Python (FastAPI em `app/`) com contratos estruturados de endpoints, autenticação por cookie de sessão e testes unitários.
+1. **Persistência Relacional Real:** Substituição do mock em memória pelo banco de dados relacional **PostgreSQL** hospedado em nuvem no **Supabase**, com transações ACID, integridade referencial e isolamento por professor.
+2. **Motor de Visão Computacional / OMR:** Processamento digital de imagem real utilizando **OpenCV (`cv2`)** e **pyzbar**, tolerante a variações de iluminação, sombras, fotos inclinadas, rotação de 180° e fotos tiradas por smartphone.
+3. **Auditoria com Armazenamento em Nuvem:** As fotos das folhas corrigidas são salvas no **Supabase Storage** (bucket privado), permitindo auditoria visual direta na tela de resultados.
+4. **Exportação de Relatórios em Excel (.xlsx):** Geração automática de planilhas formatadas contendo notas consolidadas, detalhamento por questão e resumo de desempenho.
+5. **Decisões Técnicas Registradas (ADRs):** Justificativas formais para as escolhas de OpenCV, Supabase e FastAPI documentadas no repositório.
 
 ---
 
-## 📋 Requisitos do Sistema (RF e RNF da N1)
+## 🏛️ Arquitetura em Camadas (Layered Architecture)
 
-### Requisitos Funcionais (RF)
+O AvaliaSystem foi projetado seguindo rigorosamente o **Padrão de Arquitetura em Camadas**, garantindo alta coesão, separação estrita de responsabilidades (*Separation of Concerns*) e baixo acoplamento.
 
-| Código | Requisito | Módulo / Tela | Descrição |
-| :---: | :--- | :--- | :--- |
-| **RF01** | Autenticação do Professor | Login | Acesso seguro exclusivo do professor por e-mail/usuário e senha ou login social. |
-| **RF02** | Gestão de Semestres | Semestres & Turmas | Cadastro, edição, ativação e encerramento de períodos letivos. |
-| **RF03** | Gestão de Turmas | Semestres & Turmas | Criação, listagem e vinculação de turmas a um semestre ativo. |
-| **RF04** | Gestão de Alunos | Semestres & Turmas | Cadastro e visualização de estudantes vinculados à turma selecionada. |
-| **RF05** | Importação de Alunos | Semestres & Turmas | Importação de arquivos CSV/XLSX com validação prévia de duplicidades e confirmação. |
-| **RF06** | Cadastro de Questões | Banco de Questões | Registro de enunciados com 4 ou 5 alternativas (A–D / A–E) e indicação de gabarito. |
-| **RF07** | Metadados de Questões | Banco de Questões | Classificação das questões por disciplina, categoria temática e dificuldade (Fácil, Média, Difícil). |
-| **RF08** | Manutenção de Questões | Banco de Questões | Edição e exclusão/arquivamento de questões, preservando histórico de provas geradas. |
-| **RF09** | Filtro e Busca de Questões | Banco de Questões | Consulta em tempo real com filtros combinados de disciplina, nível e busca por texto. |
-| **RF10** | Importação de Questões | Banco de Questões | Carga em lote de questões por planilha com modelo padrão disponível para download. |
-| **RF11** | Validação de Importação | Banco de Questões | Relatório de consistência indicando linhas válidas e eventuais inconsistências na planilha. |
-| **RF12** | Confirmação Transacional | Banco de Questões | Gravação em lote atômica após aprovação expressa do usuário na prévia. |
-| **RF13** | Download de Modelos | Banco de Questões | Disponibilização de arquivos modelos `.csv` e `.xlsx` prontos para preenchimento. |
-| **RF14** | Criação de Avaliação | Nova Avaliação | Assistente passo a passo para configuração de dados gerais (nome, turma, data, nota máxima). |
-| **RF15** | Seleção de Questões | Nova Avaliação | Painel de escolha das questões do banco com contador dinâmico e somatório de pontos. |
-| **RF16** | Ajuste de Gabarito da Prova | Nova Avaliação | Possibilidade de alterar a alternativa correta exclusivamente para a avaliação em curso. |
-| **RF17** | Configuração de Versões | Nova Avaliação | Definição da quantidade de versões a serem geradas (de 1 a centenas). |
-| **RF18** | Nomenclatura das Versões | Nova Avaliação | Esquemas de identificação por Letras (A, B, C), Números (1, 2, 3), Cores ou nomes customizados. |
-| **RF19** | Embaralhamento de Questões | Nova Avaliação | Algoritmo que altera a ordem dos enunciados entre as versões para evitar cola. |
-| **RF20** | Embaralhamento de Alternativas | Nova Avaliação | Reordenação randômica das letras de resposta mantendo o apontamento correto do gabarito. |
-| **RF21** | Conjuntos de Questões | Nova Avaliação | Suporte para manter as mesmas questões reordenadas ou subconjuntos distintos por versão. |
-| **RF22** | Rascunho de Avaliação | Nova Avaliação | Manutenção do estado do assistente caso o usuário queira voltar etapas antes de concluir. |
-| **RF23** | Geração de Gabaritos | Versões & QR Code | Apuração automatizada e exibição clara da chave de respostas de cada versão criada. |
-| **RF24** | Geração de QR Code | Versões & QR Code | Criação de imagem PNG de QR Code contendo o identificador seguro da prova e versão. |
-| **RF25** | Impressão da Prova | Impressão (A4) | Diagramação otimizada para folha A4 contendo cabeçalho, instruções e questões formatadas. |
-| **RF26** | Impressão de Gabarito Docente | Impressão (A4) | Folha de conferência para uso exclusivo do professor com respostas destacadas. |
-| **RF27** | Folha de Respostas OMR | Impressão (A4) | Folha compacta com marcadores pretos nos cantos, QR Code e grade de bolhas para preenchimento. |
-| **RF28** | Download em Lote | Versões & QR Code | Facilidade para exportação de pacotes de impressão consolidados. |
-| **RF29** | Portal de Consulta do Aluno | Portal do Aluno | Página web responsiva e pública que exibe o gabarito oficial da versão escaneada via QR Code. |
-| **RF30** | Controle de Liberação | Portal do Aluno | Bloqueio de visualização das respostas até que o professor faça a liberação oficial da avaliação. |
-
-### Requisitos Não-Funcionais (RNF)
-
-| Código | Requisito | Especificação e Critério de Aceite |
-| :---: | :--- | :--- |
-| **RNF01** | **Identidade Visual e UX** | Aplicação consistente do padrão *AvaliaSystem*: paleta verde escuro e cinzas neutros, tipografia limpa, hierarquia visual refinada e feedback visual claro para todas as ações. |
-| **RNF02** | **Responsividade** | Interfaces totalmente adaptáveis para telas de computador (desktop) e dispositivos móveis (smartphones com viewport a partir de 375px/390px sem quebras de layout ou overflow horizontal). |
-| **RNF03** | **Desempenho e Fluidez** | Tempo de resposta inferior a 200ms para trocas de tela e operações com os dados locais do MVP. |
-| **RNF04** | **Compatibilidade de Impressão** | Estilos dedicados de `@media print` garantindo corte e margens perfeitos na impressão em tamanho A4 real (100%), sem barras de rolagem ou elementos de navegação indesejados. |
-| **RNF05** | **Segurança de Acesso** | Proteção da área administrativa docente com cookies de sessão protegidos (`HttpOnly`, `SameSite=Lax`). |
-| **RNF06** | **Privacidade do Aluno** | Acesso dos estudantes estritamente limitado à sua própria prova via link do QR Code, sem necessidade de criação de conta e sem exposição de dados de terceiros. |
-| **RNF07** | **Modularidade Arquitetural** | Separação estrita em camadas (Controllers, Services, Repositories, Schemas e Views) facilitando a manutenção e a transição transparente para o banco de dados. |
-| **RNF08** | **Portabilidade e Nuvem** | Arquitetura pronta para containerização via Docker e hospedagem gratuita contínua (ex.: Render e Vercel). |
-| **RNF09** | **Qualidade e Testabilidade** | Cobertura abrangente de testes automatizados unitários e de integração (testes Python com `pytest` e testes Node.js). |
-
----
-
-## 🖼️ Galeria de Telas e Navegação (AvaliaSystem)
-
-O fluxo operacional do sistema foi desenvolvido com foco na usabilidade docente e agilidade na navegação diária:
-
-### 1. Tela de Login e Boas-Vindas (`LoginScreen`)
-*Apresenta o painel institucional verde à esquerda com a proposta de valor do AvaliaSystem e o formulário de login limpo à direita.*
-
-![Login AvaliaSystem](docs/infra/figma-thumbnail.webp)
-
-```
-+------------------------------------------+------------------------------------------+
-|  [Logo AvaliaSystem]                     |  Bem-vindo de volta                      |
-|                                          |  Entre com seus dados para acessar       |
-|  Avaliações do início ao fim,            |                                          |
-|  sem esforço.                            |  [ G Continuar com o Google ]            |
-|                                          |  -- ou entre com seu e-mail --           |
-|  ✓ Criação de provas com versões         |  E-mail:   [ professor@escola.edu.br ]   |
-|  ✓ Folhas de resposta com QR Code        |  Senha:    [ ••••••••••• ]                |
-|  ✓ Correção automatizada instantânea     |  [ Lembrar-me ]      [ Esqueci a senha ] |
-|                                          |  [             Entrar             ]     |
-+------------------------------------------+------------------------------------------+
-```
-
-### 2. Painel Principal do Professor (`DashboardScreen`)
-*Painel de controle com visão geral do volume de avaliações, turmas cadastradas, alunos ativos e atalhos rápidos para as principais tarefas:*
-- **Nova Avaliação:** Inicia o assistente de provas em 4 etapas.
-- **Corrigir Prova:** Leva diretamente para o upload e leitura das folhas de resposta.
-- **Ver Resultados:** Acesso aos relatórios de desempenho e notas da turma.
-
-### 3. Gestão Acadêmica: Semestres, Turmas e Estudantes (`SemestresScreen`)
-*Navegação mestre-detalhe:*
-- **Coluna Lateral:** Lista de semestres letivos com badges de status (`Ativo` / `Encerrado`).
-- **Área Central:** Abas dinâmicas divididas em **Turmas** (com contagem de alunos) e **Alunos** (com ferramenta de importação em lote por planilha CSV/XLSX).
-
-### 4. Banco de Questões com Busca e Filtros (`BancoQuestoesScreen`)
-*Repositório central de itens de avaliação do docente:*
-- Barra de busca textual imediata.
-- Filtro por disciplina e tags de categoria.
-- Seletor de complexidade (Fácil, Média, Difícil).
-- Modal para cadastro de novas questões com suporte a 4 ou 5 alternativas e marcação da alternativa correta.
-- Ferramenta de importação em lote com modelo oficial para download.
-
-### 5. Assistente de Criação de Avaliações em 4 Etapas (`CriarAvaliacaoScreen`)
-*Guia passo a passo com barra de progresso e painel fixo de resumo lateral:*
-1. **Passo 1 (Configurar):** Definição do título do exame, semestre, turma, data de aplicação e nota máxima.
-2. **Passo 2 (Questões):** Seleção ágil de questões do banco, com indicação do total selecionado e pontuação por item.
-3. **Passo 3 (Gabarito):** Conferência visual da resposta correta, permitindo ajustes pontuais específicos para esta prova.
-4. **Passo 4 (Versões):** Escolha da quantidade de provas (ex.: Versões A, B, C), seleção de nomenclatura e ativação do embaralhamento de questões e de alternativas.
-
-### 6. Versões, Impressão e Folha de Respostas (`VersoesScreen` / `print.ejs`)
-*Geração dos artefatos físicos de aplicação da prova:*
-- **Impressão da Prova (A4):** Diagramação em coluna dupla ou simples, cabeçalho institucional com espaço para identificação do aluno, instruções da prova e QR Code de identificação no topo.
-- **Folha de Respostas Padronizada:** 4 marcadores quadrados nos cantos para leitura óptica, QR Code com o código da versão e grade de bolhas para preenchimento a caneta.
-- **Folha de Gabarito do Docente:** Resumo impresso com as alternativas certas de cada versão para uso em sala.
-
-### 7. Correção e Relatórios Estatísticos (`CorrecaoScreen` / `ResultadosScreen`)
-*Módulo de pós-exame com simulação e correção automatizada:*
-- Pré-visualização da imagem da folha escaneada.
-- Leitura do QR Code e mapeamento das alternativas assinaladas.
-- Apuração imediata da nota e conferência manual em caso de rasuras.
-- Estatísticas automáticas: média da turma, distribuição de notas, percentual de acerto por questão e alternativas mais assinaladas.
-
-### 8. Portal de Consulta do Aluno (`student.ejs`)
-*Interface limpa e acessível via smartphone:*
-- Acessada ao apontar a câmera do celular para o QR Code da prova (`/student/gabarito/{codigo}`).
-- **Estado Bloqueado:** Informa que a avaliação ainda está em andamento e o gabarito não foi liberado.
-- **Estado Liberado:** Exibe a tabela oficial com as alternativas corretas correspondentes à versão realizada pelo aluno.
-
----
-
-### Diagrama do Fluxo de Navegação (Professor e Aluno)
+Consulte a documentação completa em: [`docs/arquitetura/arquitetura-em-camadas.md`](docs/arquitetura/arquitetura-em-camadas.md)  
+Registros de Decisões de Arquitetura: [`docs/arquitetura/adr/`](docs/arquitetura/adr/)
 
 ```mermaid
 flowchart TD
-    subgraph AREA_DOCENTE ["Área do Professor (Autenticada)"]
-        LOGIN["Tela de Login"] --> DASH["Painel / Dashboard"]
-        DASH --> SEM["Semestres & Turmas"]
-        DASH --> QUEST["Banco de Questões"]
-        DASH --> ASSIST["Assistente: Nova Avaliação"]
-        DASH --> CORR["Correção de Provas"]
-        DASH --> RES["Resultados & Estatísticas"]
-        
-        ASSIST -->|Etapa 1| P1["1. Configurações"]
-        P1 -->|Etapa 2| P2["2. Questões"]
-        P2 -->|Etapa 3| P3["3. Gabarito"]
-        P3 -->|Etapa 4| P4["4. Versões"]
-        P4 -->|Gerar| VERS["Versões & Impressão"]
-        
-        VERS --> PRINT["Impressão A4 (Prova e Folha OMR)"]
-        VERS --> QR_PNG["Download QR Code PNG"]
-        VERS --> CORR
+    subgraph APRESENTACAO ["1. Camada de Apresentação (Presentation Layer)"]
+        UI_WEB["Interface Web Responsiva (HTML5 / CSS3 / JavaScript Modular)"]
+        UI_VIEWS["Templates EJS (views/dashboard, login, print, student)"]
+        UI_PRINT["Diagramação Impressa (@media print para A4 e Folhas OMR)"]
     end
 
-    subgraph AREA_ALUNO ["Área do Estudante (Pública via QR Code)"]
-        QR_SCAN["Aluno lê QR Code na Prova"] --> PORTAL["Portal do Gabarito (/student/gabarito/{codigo})"]
-        PORTAL -->|Gabarito bloqueado| AVISO["Aviso: Gabarito ainda não liberado"]
-        PORTAL -->|Gabarito liberado| GAB["Visualização do Gabarito Oficial da Versão"]
+    subgraph APLICACAO ["2. Camada de Aplicação e API (API & Application Layer)"]
+        FASTAPI["FastAPI / Uvicorn (Python 3.11)"]
+        ROUTERS["Controllers RESTful (Auth, Turmas, Questões, Avaliações, Correções)"]
+        SCHEMAS["DTOs e Validação de Esquemas (Pydantic Schemas)"]
+        SECURITY["Segurança de Sessão e Dependências (Cookie HttpOnly / SessionID)"]
     end
+
+    subgraph DOMINIO ["3. Camada de Domínio e Regras de Negócio (Domain Layer)"]
+        MODELS["Modelos de Domínio (Professor, Semestre, Turma, Questão, Avaliação, Versão)"]
+        SHUFFLE["Serviço de Embaralhamento (Fisher-Yates Determinístico)"]
+        GRADING["Serviço de Correção e Cálculo de Notas (GradingService)"]
+        RULES["Regras de Integridade e Negócio (RN01 a RN15)"]
+    end
+
+    subgraph OMR ["4. Camada de Visão Computacional (Vision & OMR Service)"]
+        CV_WARP["Alinhamento e Homografia de 4 Pontos (OpenCV)"]
+        CV_QR["Decodificador de QR Code (pyzbar)"]
+        CV_THRESH["Limiarização Adaptativa e Contagem de Pixels Pretos (NumPy)"]
+    end
+
+    subgraph PERSISTENCIA ["5. Camada de Persistência (Data Access Layer)"]
+        REPOS["Repositórios (Repositories)"]
+        POOL["Connection Pool (psycopg com pooler na porta 6543)"]
+        STORAGE_CLIENT["Cliente de Storage (supabase-py para fotos de provas)"]
+    end
+
+    subgraph DADOS ["6. Camada de Banco de Dados e Nuvem (Cloud Layer)"]
+        POSTGRES["PostgreSQL Relacional no Supabase (12 tabelas relacionais com RLS)"]
+        BUCKET["Supabase Storage (Bucket privado 'correcoes')"]
+    end
+
+    APRESENTACAO --> APLICACAO
+    APLICACAO --> DOMINIO
+    APLICACAO --> OMR
+    DOMINIO --> PERSISTENCIA
+    OMR --> PERSISTENCIA
+    PERSISTENCIA --> DADOS
+```
+
+### Decisões Arquiteturais Chave (ADRs):
+* **[ADR-0001](docs/arquitetura/adr/0001-escolha-python-opencv-omr.md):** Escolha de Python 3.11, OpenCV e Pyzbar para o motor OMR (elimina custo de OCR proprietário e garante processamento local rápido).
+* **[ADR-0002](docs/arquitetura/adr/0002-escolha-supabase-postgresql-storage.md):** Escolha do Supabase (PostgreSQL Cloud com suporte a pooler e Storage unificado para imagens de auditoria).
+* **[ADR-0003](docs/arquitetura/adr/0003-arquitetura-em-camadas-fastapi.md):** Adoção de FastAPI com Arquitetura em Camadas (tipagem estática via Pydantic, OpenAPI/Swagger automático e alta performance assíncrona).
+
+---
+
+## 📷 Processamento Digital de Imagens e Correção Automática (OMR)
+
+A leitura das folhas de resposta é realizada por um pipeline de processamento digital de imagem desenhado para tolerar condições reais de digitalização via celular:
+
+```mermaid
+flowchart LR
+    FOTO["Foto / Scan da Folha"] --> DETECT["1. Detecção dos 4 Marcadores de Canto"]
+    DETECT --> WARP["2. Transformação Perspectiva (Homografia 4 Pontos)"]
+    WARP --> QR["3. Leitura do QR Code (pyzbar)"]
+    QR --> SEG["4. Segmentação da Grade de Bolhas"]
+    SEG --> THRESH["5. Thresholding e Contagem de Pixels Pretos"]
+    THRESH --> CONF{"Leitura Confiável? (RN15)"}
+    CONF -->|Sim| NOTA["6. Comparação com Gabarito e Cálculo da Nota"]
+    CONF -->|Dúvida / Rasura| MANUAL["7. Sinalização de Dúvida / Conferência Manual"]
+```
+
+### Especificações Técnicas do OMR:
+1. **Marcadores de Enquadramento:** Quatro quadrados sólidos nos cantos da folha de respostas A4 atuam como âncoras para correção geométrica de rotação, inclinação e escala.
+2. **Identificação da Prova:** O QR Code no canto superior direito é decodificado via `pyzbar`, recuperando a avaliação, a versão exata da prova e a ordem original das questões.
+3. **Classificação de Marcações:** A intensidade média e a densidade de pixels no interior de cada círculo determinam:
+   - Alternativa assinalada única (ex.: `"A"`, `"B"`...)
+   - Em branco (`null`)
+   - Marcação múltipla / rasura anulada (`"*"`)
+4. **Regra de Cálculo de Notas (RF38):**
+   $$\text{Nota} = \left(\frac{\text{Total de Acertos}}{\text{Total de Questões}}\right) \times \text{Nota Máxima}$$
+   *Questões em branco ou anuladas recebem zero ponto.*
+5. **Auditoria e Segurança (RN15):** Em caso de marcação fraca ou rasura ambígua, o sistema rejeita a gravação automática silenciosa, exibe a imagem destacada e solicita confirmação visual do professor.
+
+---
+
+## 🗄️ Modelagem do Banco de Dados (Supabase / PostgreSQL)
+
+O modelo de dados suporta o ciclo completo das avaliações com integridade referencial e isolamento estrito entre professores:
+
+* **Script DDL Oficial:** [`src/database/schema.sql`](src/database/schema.sql) e [`app/database/schema.sql`](app/database/schema.sql)
+* **Script de Dados Iniciais (Seed):** [`src/database/seed.sql`](src/database/seed.sql)
+* **Dicionário de Dados:** [`docs/banco-de-dados/dicionario-de-dados.md`](docs/banco-de-dados/dicionario-de-dados.md)
+
+### Tabelas do Sistema:
+1. `professores`: Usuários docentes autenticados no sistema.
+2. `semestres`: Períodos letivos vinculados a um professor.
+3. `turmas`: Turmas de disciplinas associadas a um semestre.
+4. `alunos`: Estudantes matriculados nas turmas.
+5. `questoes`: Banco de itens avaliativos com enunciados e metadados.
+6. `alternativas`: Opções de resposta vinculadas a cada questão.
+7. `avaliacoes`: Avaliações configuradas pelo professor (com nota máxima e status de liberação do gabarito).
+8. `versoes`: Versões específicas geradas para a avaliação (ex.: Versão A, B, C) com código único de QR Code.
+9. `versao_questoes`: Mapeamento determinístico da ordem das questões e letras de alternativas para cada versão.
+10. `resultados`: Registro da correção por aluno (nota final, total de acertos, erros e data).
+11. `respostas`: Alternativa assinalada pelo aluno em cada questão corrigida.
+
+---
+
+## 📊 Diagramas Oficiais do Sistema (MER, DER e UML v2)
+
+### 1. Diagrama Entidade-Relacionamento (DER Físico)
+
+Consulte o documento completo em: [`docs/arquitetura/der-fisico-n2.md`](docs/arquitetura/der-fisico-n2.md)
+
+```mermaid
+erDiagram
+    professor ||--o{ semestre : "gerencia"
+    professor ||--o{ questao : "cadastra"
+    professor ||--o{ avaliacao : "elabora"
+    semestre ||--o{ turma : "contém"
+    turma ||--o{ aluno : "matricula"
+    turma ||--o{ avaliacao : "recebe"
+    questao ||--|{ alternativa : "possui"
+    avaliacao ||--|{ versao : "gera"
+    versao ||--|{ versao_questoes : "contém"
+    questao ||--o{ versao_questoes : "compõe"
+    versao ||--o{ resultado : "origina"
+    aluno ||--o{ resultado : "obtém"
+    resultado ||--|{ respostas : "detalha"
+
+    professor {
+        BIGSERIAL id PK
+        TEXT username
+        TEXT nome
+        TEXT senha_hash
+    }
+    semestre {
+        BIGSERIAL id PK
+        BIGINT professor_id FK
+        TEXT nome
+        BOOLEAN ativo
+    }
+    turma {
+        BIGSERIAL id PK
+        BIGINT semestre_id FK
+        TEXT nome
+        TEXT disciplina
+    }
+    aluno {
+        BIGSERIAL id PK
+        BIGINT turma_id FK
+        TEXT nome
+        TEXT matricula
+        TEXT email
+    }
+    questao {
+        BIGSERIAL id PK
+        BIGINT professor_id FK
+        TEXT enunciado
+        CHAR correta
+        TEXT disciplina
+        TEXT dificuldade
+        BOOLEAN arquivada
+    }
+    alternativa {
+        BIGSERIAL id PK
+        BIGINT questao_id FK
+        CHAR letra
+        TEXT texto
+    }
+    avaliacao {
+        BIGSERIAL id PK
+        BIGINT professor_id FK
+        BIGINT turma_id FK
+        TEXT nome
+        NUMERIC nota_maxima
+        BOOLEAN gabarito_liberado
+    }
+    versao {
+        BIGSERIAL id PK
+        BIGINT avaliacao_id FK
+        TEXT nome
+        TEXT codigo UK
+    }
+    versao_questoes {
+        BIGSERIAL id PK
+        BIGINT versao_id FK
+        BIGINT questao_id FK
+        INT ordem
+        CHAR correta_na_versao
+    }
+    resultado {
+        BIGSERIAL id PK
+        BIGINT versao_id FK
+        BIGINT aluno_id FK
+        NUMERIC nota
+        INT acertos
+        INT total_questoes
+    }
+    respostas {
+        BIGSERIAL id PK
+        BIGINT resultado_id FK
+        INT numero_questao
+        CHAR alternativa_marcada
+        CHAR alternativa_correta
+        BOOLEAN correta
+    }
 ```
 
 ---
 
-## 🏛️ Arquitetura e Tecnologias
+### 2. Diagrama de Classes UML v2
 
-A solução adota uma arquitetura em camadas limpa e desacoplada, facilitando a testabilidade e evolução contínua:
+Consulte o documento completo em: [`docs/arquitetura/diagrama-classes-uml-v2.md`](docs/arquitetura/diagrama-classes-uml-v2.md)
 
+```mermaid
+classDiagram
+    class Professor {
+        +int id
+        +str username
+        +str nome
+        +str senha_hash
+    }
+    class Semestre {
+        +int id
+        +int professor_id
+        +str nome
+        +bool ativo
+    }
+    class Turma {
+        +int id
+        +int semestre_id
+        +str nome
+        +str disciplina
+    }
+    class Aluno {
+        +int id
+        +int turma_id
+        +str nome
+        +str matricula
+        +str email
+    }
+    class QuestaoBanco {
+        +int id
+        +int professor_id
+        +str enunciado
+        +list alternativas
+        +str correta
+        +str disciplina
+        +str dificuldade
+        +bool arquivada
+    }
+    class Avaliacao {
+        +int id
+        +int professor_id
+        +int turma_id
+        +str nome
+        +float nota_maxima
+        +bool gabarito_liberado
+    }
+    class VersaoAvaliacao {
+        +int id
+        +int avaliacao_id
+        +str nome
+        +str codigo
+        +dict gabarito
+    }
+    class ResultadoCorrecao {
+        +int id
+        +int versao_id
+        +int aluno_id
+        +float nota
+        +int acertos
+        +int total_questoes
+        +list respostas
+    }
+
+    Professor "1" --> "*" Semestre
+    Professor "1" --> "*" QuestaoBanco
+    Professor "1" --> "*" Avaliacao
+    Semestre "1" --> "*" Turma
+    Turma "1" --> "*" Aluno
+    Avaliacao "1" --> "*" VersaoAvaliacao
+    VersaoAvaliacao "1" --> "*" ResultadoCorrecao
 ```
-[ Navegador Web / Dispositivos ]
-             │
-             ▼
-[ Servidor Express / Proxy HTTP (Porta 3000) ]
-  ├── Templates EJS (Views)
-  ├── Estilos CSS3 (Layout Responsivo e @media print)
-  └── JavaScript Modular (Client-side & Mock State)
-             │
-             ▼
-[ API Python / FastAPI (Porta 8000) ]
-  ├── Controllers / Routers (Tratamento HTTP e Validação de Esquemas Pydantic)
-  ├── Services (Regras de Negócio, Embaralhamento e Geração de Gabaritos)
-  ├── Repositories (Camada de Acesso a Dados e Persistência)
-  └── Visão Computacional / OMR (OpenCV e Pyzbar para Decodificação QR e Bolhas)
-```
-
-### Tecnologias Utilizadas:
-- **Front-end:** HTML5 semântico, CSS3 customizado (sem frameworks pesados para garantir máximo controle e renderização em impressão), JavaScript moderno modular (ES6+) e EJS (*Embedded JavaScript Templates*).
-- **Back-end:** **Python 3.11** com **FastAPI** e **Uvicorn** para serviços assíncronos de alta performance, e **Node.js** com **Express** como servidor de aplicação e proxy.
-- **Processamento de Imagens e QR Code:** **OpenCV (`cv2`)**, **Pyzbar** e **NumPy** para processamento digital de imagem e leitura de marcas ópticas (OMR).
-- **Banco de Dados (Transição N2):** **PostgreSQL** hospedado na nuvem via **Supabase**, utilizando pools de conexão resilientes e **Supabase Storage** para armazenamento de fotos de provas.
 
 ---
 
-## ⚙️ Guia de Execução Local
+## 🔐 Variáveis de Ambiente (.env)
 
-Você pode executar o projeto de forma rápida e simultânea com todos os componentes integrados:
+O sistema utiliza o arquivo `.env` para configuração segura. Utilize o modelo versionado [`.env.example`](.env.example) como referência:
+
+| Variável | Obrigatória | Finalidade e Descrição |
+| :--- | :---: | :--- |
+| `SECRET_KEY` | **Sim** | Chave criptográfica para assinatura de cookies de sessão docente. |
+| `DATABASE_URL` | **Sim** (N2) | Connection string do PostgreSQL do Supabase (utilizar pooler na porta 6543 em produção). |
+| `SUPABASE_URL` | Opcional | URL base do projeto Supabase para comunicação com a API de Storage. |
+| `SUPABASE_KEY` | Opcional | Service Role Key ou anon key autorizada para o upload de fotos de provas. |
+| `SUPABASE_BUCKET` | Opcional | Nome do bucket privado para fotos corrigidas (padrão: `correcoes`). |
+| `SESSION_HTTPS_ONLY` | Produção | `true` em produção (força flag Secure no cookie); `false` em desenvolvimento local. |
+| `PUBLIC_BASE_URL` | Produção | Domínio público oficial utilizado na geração dos QR Codes (ex.: `https://projetosgp.onrender.com`). |
+| `CORS_ORIGINS` | Opcional | Origens autorizadas para chamadas cross-origin separadas por vírgula. |
+| `PROFESSOR_USERNAME` | Demo | Usuário inicial para ambiente de testes (padrão: `professor`). |
+| `PROFESSOR_PASSWORD` | Demo | Senha inicial para ambiente de testes (padrão: `123456`). |
+| `PROFESSOR_NOME` | Demo | Nome exibido na interface para a conta demo. |
+| `TEST_DATABASE_URL` | Testes | Connection string exclusiva para execução da suíte de testes de integração descartável. |
+
+---
+
+## ⚙️ Guia de Execução Local (Modo Persistente e Modo Mock)
 
 ### Pré-requisitos
-- **Python 3.11** ou superior instalado e adicionado ao `PATH`.
-- **Node.js 18** ou superior com `npm`.
-- **Git** para clonar o repositório.
+- **Python 3.11** ou superior
+- **Node.js 18** ou superior
+- **Git**
 
-### Passo a Passo de Instalação e Execução
+### 1. Preparação do Ambiente
 
-1. **Clonar o Repositório:**
+```bash
+# Clonar o repositório
+git clone https://github.com/gabriel-Koehler/projetosgp.git
+cd projetosgp
+
+# Criar e ativar o ambiente virtual Python
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1    # Linux/macOS: source .venv/bin/activate
+
+# Instalar dependências completas
+pip install -r requirements-dev.txt
+npm install
+
+# Configurar variáveis de ambiente
+copy .env.example .env          # Linux/macOS: cp .env.example .env
+```
+
+### 2. Execução com Persistência Real no Supabase / PostgreSQL (Modo N2)
+
+1. Preencha `DATABASE_URL` no seu arquivo `.env` com os dados do PostgreSQL.
+2. Execute a migração para criar as tabelas e o usuário inicial:
    ```bash
-   git clone https://github.com/gabriel-Koehler/projetosgp.git
-   cd projetosgp
+   python -m app.database.migrate
    ```
-
-2. **Configurar o Ambiente Virtual Python:**
+3. Verifique a integridade da conexão:
    ```bash
-   # Criar o ambiente virtual
-   python -m venv .venv
-
-   # Ativar no Windows (PowerShell):
-   .\.venv\Scripts\Activate.ps1
-   # Ou Windows (Prompt de Comando):
-   .\.venv\Scripts\activate.bat
-   # No Linux ou macOS:
-   source .venv/bin/activate
-
-   # Instalar as dependências de desenvolvimento e da API:
-   pip install -r requirements-dev.txt
+   python -m app.database.check
    ```
-
-3. **Instalar Dependências Node.js:**
+4. Inicie o sistema integrado no modo real:
    ```bash
-   npm install
+   npm run dev:real
    ```
+   * Aplicação Web: [http://localhost:3000](http://localhost:3000)
+   * Documentação Swagger da API: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-4. **Configurar Variáveis de Ambiente:**
-   Copie o arquivo de exemplo para criar seu `.env`:
-   ```bash
-   # Windows:
-   copy .env.example .env
-   # Linux/macOS:
-   cp .env.example .env
-   ```
+### 3. Execução em Modo Mock / Demonstração (Modo N1)
 
-5. **Iniciar a Aplicação Completa:**
-   Execute o script unificado que inicia o servidor web e a API:
-   ```bash
-   npm run dev:all
-   ```
-
-   * **Interface Web (Aplicação Completa):** [http://localhost:3000](http://localhost:3000)
-   * **API FastAPI e Documentação Swagger:** [http://localhost:8000/docs](http://localhost:8000/docs)
-   * **Documentação das Rotas N1:** [http://localhost:8000/n1/docs](http://localhost:8000/n1/docs)
-
-### Credenciais Padrão de Acesso (Ambiente de Testes)
-- **Usuário:** `professor`
-- **Senha:** `123456`  
-*(Ou utilize o botão de acesso rápido "Continuar com o Google" na tela de login).*
+Para executar sem necessidade de configurar banco de dados externo:
+```bash
+npm run dev:all
+```
 
 ---
 
-## 🌐 Sistema Hospedado e Deploy em Nuvem
+## 🌐 Deploy em Nuvem e Produção
 
-O **AvaliaSystem** está preparado para publicação contínua em ambientes de computação em nuvem gratuitos (atendimento ao **Critério C2**):
+O AvaliaSystem foi homologado para implantação em plataformas gratuitas de computação em nuvem:
 
-* **Ambiente de Demonstração em Nuvem:** [https://projetosgp.onrender.com](https://projetosgp.onrender.com)
-* **Configuração de Infraestrutura como Código:** O repositório inclui o manifesto oficial [`render.yaml`](render.yaml) configurado para build e deploy contínuo via Docker:
+* **Endereço de Demonstração em Produção:** [https://projetosgp.onrender.com](https://projetosgp.onrender.com)
+* **Especificação de Infraestrutura:** Manifesto [`render.yaml`](render.yaml) configurado com healthcheck em `/health`.
 
-### Execução Local via Docker
-Caso deseje rodar a aplicação em um container isolado idêntico ao ambiente de produção:
-
+### Execução via Docker em Produção
 ```bash
-# Construir a imagem Docker
-docker build -t avaliasystem-n1 .
-
-# Executar o container na porta 3000
-docker run --rm -p 3000:3000 --env-file .env avaliasystem-n1
+docker build -t avaliasystem-n2 .
+docker run --rm -p 3000:3000 --env-file .env avaliasystem-n2
 ```
-
-O endpoint `/health` realiza a verificação de integridade (*liveness probe*) para balanceadores de carga e orquestradores em nuvem.
 
 ---
 
-## 🧪 Testes e Validação de Aceitação
+## 📡 Rotas e Contratos da API REST
 
-A qualidade da aplicação é assegurada por baterias de testes automatizados e roteiros de aceitação humana:
+A API FastAPI disponibiliza endpoints estruturados para todos os módulos:
 
-### 1. Testes Automatizados no Backend (Python)
-Para rodar a suíte completa de testes unitários e de integração da API:
-```bash
-pytest
-```
-*Cobrem autenticação por cookie, criação e embaralhamento determinístico de versões, geração de QR Code, isolamento entre turmas e cálculo de gabaritos.*
-
-### 2. Testes Automatizados do Frontend e Proxy (Node.js)
-```bash
-npm test
-```
-*Validam a conformidade das rotas, sanitização de entrada, manipulação de CSVs de questões e importação de turmas.*
-
-### 3. Roteiro de Testes Navegáveis N1
-O roteiro de testes de aceitação visual de ponta a ponta (com todos os casos de teste CT01 a CT13) está detalhado em:  
-📄 [`docs/testes/roteiro-testes-n1.md`](docs/testes/roteiro-testes-n1.md)
+| Método | Endpoint | Autenticado | Descrição da Operação |
+| :---: | :--- | :---: | :--- |
+| `GET` | `/api/health` | — | Verificação de integridade operacional (healthcheck). |
+| `POST` | `/api/auth/login` | — | Autenticação do professor e criação de cookie de sessão. |
+| `POST` | `/api/auth/logout` | — | Encerramento de sessão. |
+| `GET` | `/api/auth/me` | ✅ | Dados do professor autenticado. |
+| `GET` / `POST` | `/api/semestres` | ✅ | Listagem e cadastro de semestres letivos. |
+| `GET` / `PUT` | `/api/semestres/{id}` | ✅ | Consulta e edição de semestre. |
+| `GET` / `POST` | `/api/turmas` | ✅ | Listagem e criação de turmas. |
+| `GET` / `POST` | `/api/turmas/{id}/alunos` | ✅ | Consulta e inclusão de alunos na turma. |
+| `POST` | `/api/turmas/{id}/alunos/importar` | ✅ | Carga de alunos via planilha CSV/XLSX. |
+| `GET` / `POST` | `/api/questoes` | ✅ | Consulta paginada com filtros e cadastro de questões. |
+| `POST` | `/api/questoes/importar` | ✅ | Importação de questões por planilha com prévia e confirmação. |
+| `POST` | `/api/avaliacoes` | ✅ | Geração transacional de avaliações, versões e gabaritos. |
+| `GET` | `/api/avaliacoes` | ✅ | Listagem de avaliações cadastradas. |
+| `PATCH` | `/api/avaliacoes/{id}/gabarito` | ✅ | Liberação ou bloqueio do gabarito para os alunos. |
+| `GET` | `/api/avaliacoes/{id}/versoes/{codigo}/folha.pdf` | ✅ | Folha de respostas A4 oficial com QR Code e marcadores. |
+| `POST` | `/api/correcoes/leitura` | ✅ | Leitura óptica da foto da folha sem registro de nota. |
+| `POST` | `/api/correcoes` | ✅ | Correção automática via OMR e persistência da nota do aluno. |
+| `POST` | `/api/correcoes/manual` | ✅ | Registro de conferência manual de respostas pelo professor. |
+| `GET` | `/api/avaliacoes/{id}/resultados` | ✅ | Consulta de notas e respostas de todos os alunos. |
+| `GET` | `/api/avaliacoes/{id}/estatisticas` | ✅ | Estatísticas de rendimento da turma e discriminação por questão. |
+| `GET` | `/api/avaliacoes/{id}/resultados.xlsx` | ✅ | Exportação do relatório oficial consolidado em Excel. |
+| `GET` | `/student/gabarito/{codigo}` | — | Portal público do aluno para visualização do gabarito liberado. |
 
 ---
 
 ## 📁 Organização do Repositório e Governança
 
-### Estrutura de Diretórios
-
 ```
 projetosgp/
-├── .github/                       # Configurações do GitHub (workflows e templates)
-│   └── ISSUE_TEMPLATE/
-│       └── card-atividade.md      # Template oficial padronizado para issues
+├── .github/                       # Configurações do GitHub e templates de issues
 ├── app/                           # Back-end em Python (FastAPI modular)
-│   ├── controllers/               # Rotas HTTP e tratamento de requisições
-│   ├── core/                      # Configurações de ambiente e segurança
-│   ├── database/                  # Conexão e scripts de migração do banco
+│   ├── controllers/               # Controladores HTTP e tratamento de requisições
+│   ├── core/                      # Configurações de ambiente, segurança e sessões
+│   ├── database/                  # Migrações, checks e conexão com PostgreSQL
 │   ├── models/                    # Entidades do domínio
-│   ├── repositories/              # Camada de persistência e acesso a dados
-│   ├── schemas/                   # Esquemas de validação Pydantic (JSON I/O)
+│   ├── repositories/              # Camada de persistência e acesso ao banco
+│   ├── schemas/                   # Esquemas Pydantic para validação JSON
 │   ├── services/                  # Regras de negócio (embaralhamento, QR, OMR)
-│   └── main.py                    # Ponto de entrada do FastAPI
-├── docs/                          # Documentação técnica e governança
-│   ├── arquitetura/               # Diagramas, classes de domínio e ADRs
-│   │   ├── adr/                   # Registros formais de decisões de arquitetura
-│   │   └── arquitetura-em-camadas.md
-│   ├── requisitos/                # Fluxos de usuário e mapeamento de casos de uso
-│   │   └── fluxos-de-usuario.md
-│   ├── testes/                    # Roteiros e relatórios de aceitação
-│   │   └── roteiro-testes-n1.md
-│   ├── ACOMPANHAMENTO_ISSUES_GABRIEL.md # Registro oficial do ciclo de entregas
-│   ├── KANBAN_BOARD.md            # Quadro Kanban com as 32 atividades
+│   └── main.py                    # Aplicação principal FastAPI
+├── docs/                          # Documentação oficial completa
+│   ├── arquitetura/               # Arquitetura em camadas, ADRs, DER físico e UML v2
+│   ├── banco-de-dados/            # Dicionário de dados e regras de integridade
+│   ├── infra/                     # Auditoria, planos de deploy e validação Supabase
+│   ├── n2-parte1/                 # Diagramas de caso de uso, atividade e sequência
+│   ├── requisitos/                # Fluxos de usuário e mapeamento funcional
+│   ├── testes/                    # Roteiros e evidências de testes
+│   ├── ACOMPANHAMENTO_ISSUES_GABRIEL.md # Registro oficial das entregas
+│   ├── KANBAN_BOARD.md            # Quadro Kanban do projeto
 │   └── PROJECT_BACKLOG.md         # Backlog técnico com critérios de aceite
-├── public/                        # Arquivos estáticos servidos no navegador
-│   ├── app.js                     # Controlador principal e provedor em memória
-│   ├── styles.css                 # Folha de estilos visual AvaliaSystem
-│   ├── documents.css              # Regras de diagramação para impressão A4
-│   ├── modelo_alunos.csv          # Planilha modelo para importação de alunos
-│   └── modelo_questoes.csv        # Planilha modelo para importação de questões
-├── scripts/                       # Utilitários de automação e empacotamento
-│   ├── create_github_issues_kanban.py # Script de geração automática de issues
-│   └── package_delivery.py        # Automação do pacote de entrega C1 (.zip)
-├── src/database/                  # Scripts SQL (schema DDL e seeds)
-├── tests/                         # Bateria de testes automatizados (pytest)
+├── public/                        # Frontend cliente, scripts e estilos CSS
+├── src/database/                  # Scripts SQL (schema.sql DDL e seed.sql)
+├── tests/                         # Baterias de testes automatizados (pytest)
 ├── views/                         # Telas EJS renderizadas pelo servidor
-│   ├── dashboard.ejs              # Painel do professor
-│   ├── login.ejs                  # Tela de login e autenticação
-│   ├── print.ejs                  # Layout de prova e folha de respostas A4
-│   └── student.ejs                # Portal de consulta de gabarito pelo aluno
-├── Dockerfile                     # Receita para containerização de produção
-├── render.yaml                    # Especificação de deploy contínuo no Render
+├── Dockerfile                     # Containerização para deploy em nuvem
+├── render.yaml                    # Infraestrutura como código para o Render
 ├── package.json                   # Dependências e scripts Node.js
 ├── requirements.txt               # Dependências Python de produção
 ├── requirements-dev.txt           # Dependências Python de desenvolvimento/testes
 ├── .env.example                   # Modelo documentado de variáveis de ambiente
-└── README.md                      # Documentação técnica principal oficial (v1)
+└── README.md                      # Documentação técnica oficial v2
 ```
 
-### Governança e Fluxo de Trabalho (Git Workflow)
-O time segue rigorosamente as boas práticas de engenharia de software:
-- **Quadro Kanban Oficial:** Todas as etapas são acompanhadas em [`docs/KANBAN_BOARD.md`](docs/KANBAN_BOARD.md).
-- **Rastreabilidade de Issues:** Cada entrega é associada a um cartão com descrição detalhada em [`docs/PROJECT_BACKLOG.md`](docs/PROJECT_BACKLOG.md).
-- **Ciclo de Branches e Commits Semânticos:** Nenhuma alteração é enviada diretamente sem validação. O ciclo obedece ao padrão:
-  $$\text{Branch da Issue} \longrightarrow \text{Commits Semânticos} \longrightarrow \text{Pull Request} \longrightarrow \text{Revisão por Pares} \longrightarrow \text{Merge}$$
-- **Acompanhamento Contínuo:** Todas as etapas, evidências de testes e status de PRs são mantidos atualizados em [`docs/ACOMPANHAMENTO_ISSUES_GABRIEL.md`](docs/ACOMPANHAMENTO_ISSUES_GABRIEL.md).
-
----
-
-> 📌 **Nota sobre a Fase N2:** A continuidade do projeto inclui a integração com banco de dados real em nuvem (**Supabase/PostgreSQL**), persistência relacional completa, leitura óptica automática via câmera/upload com **OpenCV** e exportação de relatórios em planilhas **Excel (.xlsx)**.
+### Governança Ágil
+- **Quadro Kanban:** Acompanhamento de todas as entregas em [`docs/KANBAN_BOARD.md`](docs/KANBAN_BOARD.md).
+- **Rastreabilidade de Entregas:** Histórico detalhado de commits e branches em [`docs/ACOMPANHAMENTO_ISSUES_GABRIEL.md`](docs/ACOMPANHAMENTO_ISSUES_GABRIEL.md).
+- **Controle de Branches e Code Review:** Todas as funcionalidades seguem o fluxo de criação de branches temáticas, commits semânticos, submissão de Pull Request e revisão por pares antes do merge.
