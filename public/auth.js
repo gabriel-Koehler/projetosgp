@@ -2,6 +2,7 @@ import {
   api
 } from './api.js';
 const $ = id => document.getElementById(id);
+const real = window.APP_CONFIG?.dataMode === 'real';
 let mode = 'login';
 const feedback = message => {
   $('auth-feedback').hidden = false;
@@ -57,3 +58,12 @@ $('auth-form').onsubmit = async event => {
     button.textContent = label;
   }
 };
+
+if (real) {
+  for (const selector of ['#google','.divider','#recover','.auth-switch','.demo-help']) document.querySelector(selector).hidden = true;
+  const login = document.querySelector('[name=email]');
+  login.type = 'text'; login.placeholder = 'Seu usuário'; login.maxLength = 200;
+  login.parentElement.firstChild.textContent = 'Usuário';
+  $('auth-subtitle').textContent = 'Use o usuário cadastrado pela instituição';
+}
+if (new URLSearchParams(location.search).get('expired')) feedback('Sua sessão expirou. Entre novamente.');

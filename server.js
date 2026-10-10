@@ -8,7 +8,8 @@ import {
 
 const app = express();
 const root = path.dirname(fileURLToPath(import.meta.url));
-const backend = process.env.API_TARGET || 'http://127.0.0.1:8000';
+const backend = (process.env.API_TARGET || 'http://127.0.0.1:8000').replace(/\/$/, '');
+const dataMode = process.env.DATA_MODE === 'real' ? 'real' : 'mock';
 app.set('view engine', 'ejs');
 app.set('views', path.join(root, 'views'));
 app.use(express.static(path.join(root, 'public')));
@@ -43,7 +44,7 @@ app.use('/api', (req, res) => {
   req.pipe(upstream);
 });
 
-app.get('/config.js', (req, res) => res.type('application/javascript').send('window.APP_CONFIG = { apiBaseUrl: "/api" };'));
+app.get('/config.js', (req, res) => res.type('application/javascript').send('window.APP_CONFIG = ' + JSON.stringify({apiBaseUrl:'/api',dataMode}) + ';'));
 async function sessionUser(req) {
   try {
     const response = await fetch(backend + '/api/auth/me', {
@@ -52,24 +53,27 @@ async function sessionUser(req) {
       },
       signal: AbortSignal.timeout(4000)
     });
-    if (!response.ok) return null;
-    return (await response.json()).data;
+    if (response.status === 401) return null;
+    if (!response.ok) throw new Error('API unavailable');
+    const payload = await response.json();
+    return dataMode === 'real' ? {name:payload.nome} : payload.data;
   } catch {
-    return null;
+    throw new Error("Serviço indisponível");
   }
 }
-app.get('/', async (req, res) => (await sessionUser(req)) ? res.redirect('/dashboard') : res.render('login'));
-app.get('/dashboard', async (req, res) => {
+const pageRoute = handler => (req,res) => Promise.resolve(handler(req,res)).catch(()=>res.status(503).render('unavailable'));
+app.get('/', pageRoute(async (req, res) => (await sessionUser(req)) ? res.redirect('/dashboard') : res.render('login')));
+app.get('/dashboard', pageRoute(async (req, res) => {
   const user = await sessionUser(req);
   if (!user) return res.redirect('/');
   res.render('dashboard', {
     username: user.name
   });
-});
-app.get('/print', async (req, res) => {
+}));
+app.get('/print', pageRoute(async (req, res) => {
   if (!(await sessionUser(req))) return res.redirect('/');
   res.render('print');
-});
+}));
 app.get('/student', (req, res) => res.render('student'));
 const port = process.env.PORT || 3000;
 app.get('/health', async (req, res) => {

@@ -260,3 +260,9 @@ Instruções de execução, conta demo, escopo e validação: [N1-FE-01](docs/N1
 Nesta branch, execute `npm run dev:all` após instalar as dependências Python.
 O servidor web usa a API Python em memória, sem o adaptador Node da branch anterior.
 Veja [execução, contrato e testes](docs/N1-BE-02.md).
+
+## N2-FE-01 — login, semestres e turmas com PostgreSQL/Supabase
+
+`npm run dev:real` inicia a API persistente e o frontend integrado em localhost:3000. Configure `DATABASE_URL` e `SECRET_KEY` no `.env` do Python; os dados de conexão não são enviados ao navegador. Consulte [N2-FE-01](docs/N2-FE-01.md) para migração, usuário inicial e validação.
+
+`npm run dev:all` preserva o ambiente N1 em memória. No modo real desta entrega, estão disponíveis autenticação, semestres e turmas; os demais módulos serão conectados nas próximas issues N2.

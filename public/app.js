@@ -1,3 +1,5 @@
+import { academic } from './academic.js';
+const real = window.APP_CONFIG?.dataMode === 'real';
 import { renderCorrection, renderResults } from './post-exam.js';
 import { parseQuestionsCsv } from './question-csv.js';
 import { parseStudentsCsv } from './student-csv.js';
@@ -28,9 +30,10 @@ const input = (label, name, type = 'text', value = '') => '<label>' + label + '<
 const select = (label, name, items, chosen) => '<label>' + label + '<select name="' + name + '">' + options(items, chosen) + '</select></label>';
 const findName = (list, id) => esc(list.find(x => x.id === id)?.name || '—');
 async function refresh() {
-  const collections = ['semesters', 'classes', 'students', 'questions', 'evaluations', 'results'];
+  const collections = real ? ['semesters', 'classes'] : ['semesters', 'classes', 'students', 'questions', 'evaluations', 'results'];
   const values = await Promise.all(collections.map(name => api('/' + name)));
-  state = Object.fromEntries(collections.map((name, index) => [name, values[index]]));
+  state = {students:[],questions:[],evaluations:[],results:[],...Object.fromEntries(collections.map((name, index) => [name, values[index]]))};
+  if(real) $('current-semester').textContent = state.semesters.find(s=>s.active)?.name || 'Nenhum semestre ativo';
 }
 
 function page() {
@@ -42,6 +45,7 @@ function render() {
   cleanupPage();
   cleanupPage = () => {};
   const current = page();
+  if(real && !['dashboard','classes'].includes(current)) { screen.innerHTML=empty('Área ainda não disponível','Volte a Semestres & Turmas para gerenciar seus cadastros.'); return; }
   document.querySelectorAll('nav a').forEach(a => {
     const active = a.hash === '#' + (current === 'class' ? 'classes' : current === 'evaluation' ? 'versions' : current);
     a.classList.toggle('active', active);
@@ -66,6 +70,11 @@ function render() {
 }
 
 function dashboard() {
+  if(real) {
+    screen.innerHTML=head('Olá, '+esc(user.name),'Organize seus semestres e turmas','<a class="btn" href="#classes">Gerenciar semestres e turmas</a>')+'<div class="metrics">'+[['Semestres',state.semesters.length],['Turmas',state.classes.length]].map(([name,count])=>'<div class="metric"><small>'+name+'</small><strong>'+count+'</strong></div>').join('')+'</div>';
+    return;
+  }
+
   const average = state.results.length ? (state.results.reduce((n, r) => n + r.grade, 0) / state.results.length).toFixed(1) : '—';
   screen.innerHTML = head('Olá, ' + esc(user.name), 'Seu espaço para organizar avaliações e acompanhar seus alunos') +
     '<div class="quick-actions"><a href="#correction"><span><strong>▦ Corrigir prova</strong><small>Registrar respostas e calcular a nota</small></span>→</a><a href="#create"><span><strong>▧ Nova avaliação</strong><small>Criar prova com o banco de questões</small></span>→</a><a href="#results"><span><strong>▥ Ver resultados</strong><small>Notas e desempenho da turma</small></span>→</a></div>' +
@@ -81,6 +90,7 @@ function dashboard() {
 
 function routeParams() { return new URLSearchParams(location.hash.split('?')[1] || ''); }
 function classes() {
+  if(real){cleanupPage=academic(screen,state,{modal,refresh,render,notice});return;}
   selectedSemester = routeParams().get('semester') || selectedSemester;
   if (!state.semesters.some(s => s.id === selectedSemester)) selectedSemester = state.semesters[0]?.id;
   const semester = state.semesters.find(s => s.id === selectedSemester);
@@ -605,6 +615,12 @@ $('menu-toggle').onclick = () => {
 window.addEventListener('hashchange', () => {
   if (state) render();
 });
+if(real) {
+  document.querySelectorAll('nav a').forEach(a=>{if(!['#dashboard','#classes'].includes(a.hash))a.hidden=true;});
+  document.querySelectorAll('nav small').forEach((el,i)=>{if(i>1)el.hidden=true;});
+  document.querySelector('.app-footer').textContent='AvaliaSystem';
+}
+screen.innerHTML='<div class="panel" role="status">Carregando seus dados…</div>';
 try {
   user = await api('/auth/me');
   $('professor-name').textContent = user.name;
