@@ -21,6 +21,8 @@ class ResultadoExclusao:
 
 
 def validar_questao(dados: dict) -> dict:
+    if not dados['enunciado'].strip():
+        raise ErroDeNegocio('Informe o enunciado da questão.')
     alternativas = [a.strip() for a in dados["alternativas"]]
     if any(not a for a in alternativas):
         raise ErroDeNegocio("As alternativas não podem ficar em branco.")

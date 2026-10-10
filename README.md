@@ -265,4 +265,4 @@ Veja [execução, contrato e testes](docs/N1-BE-02.md).
 
 `npm run dev:real` inicia a API persistente e o frontend integrado em localhost:3000. Configure `DATABASE_URL` e `SECRET_KEY` no `.env` do Python; os dados de conexão não são enviados ao navegador. Consulte [N2-FE-01](docs/N2-FE-01.md) para migração, usuário inicial e validação.
 
-`npm run dev:all` preserva o ambiente N1 em memória. No modo real desta entrega, estão disponíveis autenticação, semestres e turmas; os demais módulos serão conectados nas próximas issues N2.
+`npm run dev:all` preserva o ambiente N1 em memória. No modo real, estão disponíveis autenticação, semestres, turmas e banco de questões com importação CSV/XLSX. Consulte [N2-FE-02](docs/N2-FE-02.md) para os contratos e a validação. Avaliações e correção serão conectadas nas próximas issues N2.

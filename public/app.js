@@ -2,9 +2,10 @@ import { academic } from './academic.js';
 const real = window.APP_CONFIG?.dataMode === 'real';
 import { renderCorrection, renderResults } from './post-exam.js';
 import { parseQuestionsCsv } from './question-csv.js';
+import { importRealQuestions } from './question-import.js';
 import { parseStudentsCsv } from './student-csv.js';
 import {
-  api
+  api, allQuestions
 } from './api.js';
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
@@ -33,6 +34,7 @@ async function refresh() {
   const collections = real ? ['semesters', 'classes'] : ['semesters', 'classes', 'students', 'questions', 'evaluations', 'results'];
   const values = await Promise.all(collections.map(name => api('/' + name)));
   state = {students:[],questions:[],evaluations:[],results:[],...Object.fromEntries(collections.map((name, index) => [name, values[index]]))};
+  if (real) state.questions = await allQuestions();
   if(real) $('current-semester').textContent = state.semesters.find(s=>s.active)?.name || 'Nenhum semestre ativo';
 }
 
@@ -45,7 +47,7 @@ function render() {
   cleanupPage();
   cleanupPage = () => {};
   const current = page();
-  if(real && !['dashboard','classes'].includes(current)) { screen.innerHTML=empty('Área ainda não disponível','Volte a Semestres & Turmas para gerenciar seus cadastros.'); return; }
+  if(real && !['dashboard','classes','questions'].includes(current)) { screen.innerHTML=empty('Área ainda não disponível','Volte a Semestres & Turmas ou Banco de Questões para gerenciar seus cadastros.'); return; }
   document.querySelectorAll('nav a').forEach(a => {
     const active = a.hash === '#' + (current === 'class' ? 'classes' : current === 'evaluation' ? 'versions' : current);
     a.classList.toggle('active', active);
@@ -201,7 +203,7 @@ function questions() {
     const term = questionFilters.text.trim().toLocaleLowerCase('pt-BR');
     const matches = state.questions.filter(q => (q.statement + ' ' + q.subject).toLocaleLowerCase('pt-BR').includes(term) && (!questionFilters.subject || q.subject === questionFilters.subject) && (!questionFilters.difficulty || q.difficulty === questionFilters.difficulty));
     $('question-count').textContent = matches.length + ' questões encontradas';
-    $('question-list').innerHTML = matches.map(q => '<article class="question-card"><div class="question-meta"><span>' + esc(q.subject) + ' · ' + esc(q.id.slice(0,8)) + '</span><span class="badge">' + esc(q.difficulty) + '</span></div><h3>' + esc(q.statement) + '</h3><details class="question-alternatives"><summary>Ver alternativas A–D</summary><div class="question-options">' + q.options.map((o,i) => '<div class="' + (q.answer === String.fromCharCode(65+i) ? 'correct' : '') + '">' + String.fromCharCode(65+i) + ' · ' + esc(o) + '</div>').join('') + '</div></details><div class="question-footer"><span>Gabarito: <strong class="badge">' + q.answer + '</strong></span><div class="actions">' + button('Editar', 'edit-question:' + q.id, 'secondary') + button('Excluir', 'delete-question:' + q.id, 'danger') + '</div></div></article>').join('') || empty('Nenhuma questão encontrada', 'Cadastre uma questão ou ajuste os filtros.');
+    $('question-list').innerHTML = matches.map(q => '<article class="question-card"><div class="question-meta"><span>' + esc(q.subject) + ' · ' + esc(q.id.slice(0,8)) + '</span><span class="badge">' + esc(q.difficulty || 'Não informada') + '</span></div><h3>' + esc(q.statement) + '</h3><details class="question-alternatives"><summary>Ver alternativas</summary><div class="question-options">' + q.options.map((o,i) => '<div class="' + (q.answer === String.fromCharCode(65+i) ? 'correct' : '') + '">' + String.fromCharCode(65+i) + ' · ' + esc(o) + '</div>').join('') + '</div></details><div class="question-footer"><span>Gabarito: <strong class="badge">' + q.answer + '</strong></span><div class="actions">' + button('Editar', 'edit-question:' + q.id, 'secondary') + button('Excluir', 'delete-question:' + q.id, 'danger') + '</div></div></article>').join('') || empty('Nenhuma questão encontrada', 'Cadastre uma questão ou ajuste os filtros.');
   };
   $('search-question').oninput = list;
   $('filter-subject').onchange = list;
@@ -212,18 +214,22 @@ function questions() {
 function editQuestion(id) {
   const question = id ? state.questions.find(q => q.id === id) : null;
   if (id && !question) return notice('Questão não encontrada.');
-  const fields = '<label>Enunciado<textarea name="statement" required maxlength="2000"></textarea></label>' +
-    input('Disciplina','subject') + select('Dificuldade','difficulty',['Fácil','Médio','Difícil'].map(name => ({id:name,name}))) +
-    '<div class="option-grid">' + ['A','B','C','D'].map(a => '<label data-option="' + a + '">Alternativa ' + a + '<input name="option' + a + '" required maxlength="500"></label>').join('') + '</div>' +
-    select('Resposta correta','answer',['A','B','C','D'].map(name => ({id:name,name}))) + '<p id="answer-highlight" class="badge" role="status"></p>';
+  const fields = '<label>Enunciado<textarea name="statement" required maxlength="' + (real ? 5000 : 2000) + '"></textarea></label>' +
+    (real ? '<label>Disciplina (opcional)<input name="subject" maxlength="200"></label>' : input('Disciplina','subject')) + select('Dificuldade','difficulty',(real ? ['','Fácil','Médio','Difícil'] : ['Fácil','Médio','Difícil']).map(name => ({id:name,name:name || 'Não informada'}))) +
+    (real ? '<label>Categoria (opcional)<input name="category" maxlength="200"></label>' : '') +
+    '<div class="option-grid">' + (real ? ['A','B','C','D','E'] : ['A','B','C','D']).map(a => '<label data-option="' + a + '">Alternativa ' + a + (a === 'E' ? ' (opcional)' : '') + '<input name="option' + a + '" ' + (a === 'E' ? '' : 'required') + ' maxlength="500"></label>').join('') + '</div>' +
+    select('Resposta correta','answer',(real ? ['A','B','C','D','E'] : ['A','B','C','D']).map(name => ({id:name,name}))) + '<p id="answer-highlight" class="badge" role="status"></p>';
   modal(id ? 'Editar questão' : 'Nova questão', fields, async form => {
-    const body = { statement: form.get('statement'), subject: form.get('subject'), difficulty: form.get('difficulty'), options: ['A','B','C','D'].map(a => form.get('option'+a)), answer: form.get('answer') };
+    const alternatives = ['A','B','C','D'].map(a => form.get('option'+a));
+    if (real && form.get('optionE').trim()) alternatives.push(form.get('optionE'));
+    const body = { statement: form.get('statement'), subject: form.get('subject'), category: form.get('category'), difficulty: form.get('difficulty'), options: alternatives, answer: form.get('answer') };
     await api('/questions' + (id ? '/' + id : ''), { method: id ? 'PUT' : 'POST', body });
   });
   const form = $('modal-form');
   if (question) {
     for (const key of ['statement','subject','difficulty','answer']) form.elements[key].value = question[key];
     question.options.forEach((option, i) => { form.elements['option'+String.fromCharCode(65+i)].value = option; });
+    if (real) form.elements.category.value = question.category;
   }
   const highlight = () => {
     const answer = form.elements.answer.value;
@@ -235,6 +241,14 @@ function editQuestion(id) {
 }
 
 function importQuestions() {
+  if (real) return importRealQuestions(async count => {
+    try {
+      await refresh(); questionFilters = {text:'',subject:'',difficulty:''}; render();
+      notice(count + ' questões importadas.');
+    } catch (error) {
+      notice(count + ' questões importadas. Não foi possível atualizar a lista: ' + error.message + ' Recarregue a página.');
+    }
+  });
   const dialog = $('modal'), form = $('modal-form');
   $('modal-title').textContent = 'Importar questões';
   $('modal-error').hidden = true;
@@ -397,7 +411,7 @@ function questionWorkspace(body) {
     const matches = state.questions.filter(q => (q.statement + ' ' + q.subject).toLocaleLowerCase('pt-BR').includes(term));
     $('bank-total').textContent = state.questions.length + ' no banco';
     $('selected-total').textContent = draft.questionIds.length + ' questão(ões) adicionada(s) à prova';
-    $('wizard-bank-list').innerHTML = matches.map(q => '<label class="wizard-bank-item"><input type="checkbox" name="questionIds" value="' + esc(q.id) + '" ' + (draft.questionIds.includes(q.id) ? 'checked' : '') + '><span><strong>' + esc(q.statement) + '</strong><small>' + esc(q.subject) + ' · ' + esc(q.difficulty) + '</small><small>' + (draft.questionIds.includes(q.id) ? 'Adicionada à prova' : 'Adicionar à prova') + '</small></span></label>').join('') || '<p class="empty">Nenhuma questão encontrada. Crie uma ao lado ou ajuste a busca.</p>';
+    $('wizard-bank-list').innerHTML = matches.map(q => '<label class="wizard-bank-item"><input type="checkbox" name="questionIds" value="' + esc(q.id) + '" ' + (draft.questionIds.includes(q.id) ? 'checked' : '') + '><span><strong>' + esc(q.statement) + '</strong><small>' + esc(q.subject) + ' · ' + esc(q.difficulty || 'Não informada') + '</small><small>' + (draft.questionIds.includes(q.id) ? 'Adicionada à prova' : 'Adicionar à prova') + '</small></span></label>').join('') || '<p class="empty">Nenhuma questão encontrada. Crie uma ao lado ou ajuste a busca.</p>';
     $('wizard-bank-list').querySelectorAll('input').forEach(input => {
       input.onchange = () => {
         if (input.checked) draft.questionIds = [...new Set([...draft.questionIds, input.value])];
@@ -546,12 +560,12 @@ document.addEventListener('click', async event => {
     if (action === 'edit-question') editQuestion(id);
     if (action === 'import-questions') importQuestions();
     if (action === 'delete-question' && confirm('Excluir esta questão do banco? As versões já geradas serão preservadas.')) {
-      await api('/questions/' + id, {
+      const result = await api('/questions/' + id, {
         method: 'DELETE'
       });
       await refresh();
       questions();
-      notice('Questão excluída.');
+      notice(result?.mensagem || 'Questão excluída.');
     }
     if (action === 'qr') {
       const versionName = decodeURIComponent(version);

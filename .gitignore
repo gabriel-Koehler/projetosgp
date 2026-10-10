@@ -9,6 +9,8 @@ mvp-runtime*.log
 # Python
 venv/
 .pytest_cache/
+.local-validation/
+pytest-cache-files-*/
 # Ambiente
 deliveries/
 .env.*

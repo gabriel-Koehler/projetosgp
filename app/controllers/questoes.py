@@ -62,7 +62,7 @@ async def importar_questoes(
     service: QuestaoService = Service,
 ):
     """RF10 a RF12: valida a planilha e mostra a prévia; com confirmar=true, grava as válidas."""
-    conteudo = await arquivo_planilha.read()
+    conteudo = await arquivo_planilha.read(importacao.TAMANHO_MAXIMO + 1)
     previa, importadas = service.importar(prof, conteudo, arquivo_planilha.filename or "", confirmar)
     return resposta_importacao(previa, importadas, confirmar)
 
