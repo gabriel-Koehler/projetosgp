@@ -3,10 +3,11 @@
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class SemestreIn(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
     nome: str = Field(min_length=1, max_length=100)
     data_inicio: date | None = None
     data_fim: date | None = None
@@ -25,6 +26,7 @@ class AtivoIn(BaseModel):
 
 
 class TurmaIn(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
     semestre_id: int
     nome: str = Field(min_length=1, max_length=100)
     disciplina: str | None = Field(default=None, max_length=200)

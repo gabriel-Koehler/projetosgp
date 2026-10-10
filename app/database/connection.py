@@ -24,8 +24,10 @@ def criar_pool(database_url: str, min_size: int = 1, max_size: int = 10) -> Conn
         min_size=min_size,
         max_size=max_size,
         open=True,
+        timeout=5,  # espera no máximo 5 s por uma conexão livre
         kwargs={
             "autocommit": True,
+            "connect_timeout": 5,
             "row_factory": dict_row,
             # O pooler do Supabase (porta 6543, modo transaction) não aceita
             # prepared statements; desligar evita erros intermitentes.
