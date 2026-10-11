@@ -1,4 +1,4 @@
-"""Ponto de entrada da API: `uvicorn app.main:app --reload`."""
+"""API unificada persistente: uvicorn app.persistent:create_app --factory."""
 
 from contextlib import asynccontextmanager
 import psycopg
@@ -6,25 +6,26 @@ from psycopg_pool import PoolTimeout
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.core.config import Settings, get_settings
-from app.controllers import auth, cadastros, painel, questoes, avaliacoes, aluno
-from app.database.connection import criar_pool
+from app.controllers import auth, cadastros, painel, questoes, avaliacoes, aluno, correcoes, resultados
+from app.database.connection import obter_pool
 from app.services.errors import ErroDeNegocio
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app(settings: Settings | None = None, *, development_login: bool = False) -> FastAPI:
     settings = settings or get_settings()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        app.state.pool = criar_pool(settings.database_url) if settings.database_url else None
+        obter_pool(app, settings)
         try:
             yield
         finally:
-            if app.state.pool:
+            if getattr(app.state, "pool", None):
                 app.state.pool.close()
 
     app = FastAPI(
@@ -36,7 +37,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_middleware(
         SessionMiddleware,
         secret_key=settings.secret_key,
-        session_cookie="sessao_professor_n2",
+        session_cookie="sessao_professor" if development_login else "sessao_professor_n2",
         max_age=settings.session_max_age,
         same_site="lax",
         https_only=settings.session_https_only,
@@ -51,10 +52,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         )
 
     app.dependency_overrides[get_settings] = lambda: settings
+    app.state.login_sem_banco = development_login
 
     @app.exception_handler(ErroDeNegocio)
     def erro_de_negocio(_: Request, erro: ErroDeNegocio):
-        return JSONResponse(status_code=erro.status_code, content={"detail": erro.mensagem})
+        conteudo = {"detail": erro.mensagem, **erro.dados}
+        if erro.codigo:
+            conteudo["codigo"] = erro.codigo
+        return JSONResponse(status_code=erro.status_code, content=jsonable_encoder(conteudo))
 
     @app.exception_handler(psycopg.OperationalError)
     @app.exception_handler(PoolTimeout)
@@ -67,11 +72,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(questoes.router)
     app.include_router(avaliacoes.router)
     app.include_router(aluno.router)
+    app.include_router(correcoes.router)
+    app.include_router(resultados.router)
 
     @app.get("/api/health", tags=["infra"])
     def health():
-        pool = getattr(app.state, "pool", None)
+        pool = obter_pool(app, settings)
         if pool is None:
+            if development_login:
+                return {"status": "ok", "banco": "nao_configurado"}
             return JSONResponse(status_code=503, content={"status": "erro", "banco": "nao_configurado"})
         try:
             with pool.connection(timeout=5) as conn:

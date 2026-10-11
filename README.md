@@ -103,7 +103,7 @@ flowchart TD
 
     subgraph DADOS ["6. Camada de Banco de Dados e Nuvem (Cloud Layer)"]
         POSTGRES["PostgreSQL Relacional no Supabase (12 tabelas relacionais com RLS)"]
-        BUCKET["Supabase Storage (Bucket privado 'correcoes')"]
+        BUCKET["Supabase Storage (Bucket privado 'folhas-resposta')"]
     end
 
     APRESENTACAO --> APLICACAO
@@ -364,13 +364,13 @@ O sistema utiliza o arquivo `.env` para configuração segura. Utilize o modelo 
 | `DATABASE_URL` | **Sim** (N2) | Connection string do PostgreSQL do Supabase (utilizar pooler na porta 6543 em produção). |
 | `SUPABASE_URL` | Opcional | URL base do projeto Supabase para comunicação com a API de Storage. |
 | `SUPABASE_KEY` | Opcional | Service Role Key ou anon key autorizada para o upload de fotos de provas. |
-| `SUPABASE_BUCKET` | Opcional | Nome do bucket privado para fotos corrigidas (padrão: `correcoes`). |
+| `SUPABASE_BUCKET` | Opcional | Nome do bucket privado para fotos corrigidas (padrão: `folhas-resposta`). |
 | `SESSION_HTTPS_ONLY` | Produção | `true` em produção (força flag Secure no cookie); `false` em desenvolvimento local. |
 | `PUBLIC_BASE_URL` | Produção | Domínio público oficial utilizado na geração dos QR Codes (ex.: `https://projetosgp.onrender.com`). |
 | `CORS_ORIGINS` | Opcional | Origens autorizadas para chamadas cross-origin separadas por vírgula. |
-| `PROFESSOR_USERNAME` | Demo | Usuário inicial para ambiente de testes (padrão: `professor`). |
-| `PROFESSOR_PASSWORD` | Demo | Senha inicial para ambiente de testes (padrão: `123456`). |
-| `PROFESSOR_NOME` | Demo | Nome exibido na interface para a conta demo. |
+| `PROFESSOR_USERNAME` | Migração | Usuário inicial criado por `python -m app.database.migrate`, caso não exista. |
+| `PROFESSOR_PASSWORD` | Migração | Senha escolhida para o professor inicial; não é a senha do banco. |
+| `PROFESSOR_NOME` | Migração | Nome do professor inicial. |
 | `TEST_DATABASE_URL` | Testes | Connection string exclusiva para execução da suíte de testes de integração descartável. |
 
 ---
@@ -430,18 +430,20 @@ npm run dev:all
 
 ## 🌐 Deploy em Nuvem e Produção
 
-O AvaliaSystem foi homologado para implantação em plataformas gratuitas de computação em nuvem:
+O projeto contém configuração de Vercel Services em `vercel.json`: Express serve as páginas e a API Python unificada atende `/api/*`. A comunicação interna usa `PYTHON_API_URL`, gerada pela Vercel. O PostgreSQL e o Storage permanecem no Supabase. Consulte o [guia de publicação](docs/DEPLOY_VERCEL.md) para preparar as variáveis, migrar o banco e validar o deploy.
 
-* **Endereço de Demonstração em Produção:** [https://projetosgp.onrender.com](https://projetosgp.onrender.com)
-* **Especificação de Infraestrutura:** Manifesto [`render.yaml`](render.yaml) configurado com healthcheck em `/health`.
+| Variável | Uso |
+| --- | --- |
+| `DATA_MODE=real` | Front-end usa os contratos persistentes. |
+| `PYTHON_API_URL` | Binding automático da Vercel; não preencher manualmente. |
+| `API_TARGET` | Alternativa fora de Services: origem da API Python, sem `/api`. |
 
-### Execução via Docker em Produção
-```bash
-docker build -t avaliasystem-n2 .
-docker run --rm -p 3000:3000 --env-file .env avaliasystem-n2
-```
+A API persistente e a API modular compartilham a fábrica e todas as rotas de negócio. O modo persistente exige banco para autenticar; o login local da N1 continua restrito ao ponto de entrada legado. `npm run dev:all` permanece uma demonstração com estado em memória.
 
----
+Como alternativa, o Docker inicia Node e a API persistente (`DATA_MODE=real`, padrão do launcher). Configure `DATABASE_URL`, `SECRET_KEY`, `SESSION_HTTPS_ONLY=true` e `PUBLIC_BASE_URL`. O health check do Node em `/health` consulta `/api/health` no Python. Para demonstração explícita no Docker use `DATA_MODE=mock`.
+
+Publicação em produção depende de credenciais do ambiente e validação no provedor; a configuração versionada não comprova que um domínio esteja operacional.
+
 
 ## 📡 Rotas e Contratos da API REST
 

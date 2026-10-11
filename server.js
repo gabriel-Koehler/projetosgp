@@ -8,8 +8,8 @@ import {
 
 const app = express();
 const root = path.dirname(fileURLToPath(import.meta.url));
-const backend = (process.env.API_TARGET || 'http://127.0.0.1:8000').replace(/\/$/, '');
-const dataMode = process.env.DATA_MODE === 'real' ? 'real' : 'mock';
+const backend = (process.env.PYTHON_API_URL || process.env.API_TARGET || 'http://127.0.0.1:8000').replace(/\/$/, '');
+const dataMode = (process.env.DATA_MODE || (process.env.VERCEL ? 'real' : 'mock')) === 'real' ? 'real' : 'mock';
 app.set('view engine', 'ejs');
 app.set('views', path.join(root, 'views'));
 app.use(express.static(path.join(root, 'public')));
@@ -78,9 +78,10 @@ app.get('/print', pageRoute(async (req, res) => {
 }));
 app.get('/student', (req, res) => res.render('student'));
 const port = process.env.PORT || 3000;
+export default app;
 app.get('/health', async (req, res) => {
   try {
-    const response = await fetch(backend + '/health', { signal: AbortSignal.timeout(4000) });
+    const response = await fetch(backend + (dataMode === 'real' ? '/api/health' : '/health'), { signal: AbortSignal.timeout(4000) });
     if (!response.ok) return res.status(503).json({ status: 'unavailable' });
     res.json({ status: 'ok', api: await response.json() });
   } catch {

@@ -224,3 +224,15 @@ PR publicado: [#63 — validação real do Supabase e proteção do pacote](http
 - **Status de merge:** Aguardando revisão e autorização de merge.
 
 
+
+
+## Integração das APIs e publicação Vercel — 2026-10-11
+
+- Branch: `fix/integracao-api-vercel`, criada a partir de `docs/n2-doc-02-readme-v2` (PR #68), preservando a documentação v2 e a main integrada.
+- Fábrica comum da API modular/persistente, incluindo correções, estatísticas e Excel; autenticação de produção exige PostgreSQL.
+- Vercel Services: Express + FastAPI, rotas públicas e binding interno; health Node corrigido; Docker inicia modo persistente por padrão.
+- Interface real de leitura/conferência, gravação manual, resultados, Excel e folha OMR gerada no backend.
+- README e guia `docs/DEPLOY_VERCEL.md` corrigidos; credenciais de migração e Storage diferenciadas.
+- Validação: 335 testes Python com PostgreSQL descartável, 17 testes JavaScript, configuração validada contra os campos do schema oficial Vercel.
+- Status: commit `27b2ab5` enviado; [PR #69](https://github.com/gabriel-Koehler/projetosgp/pull/69) aberto contra a branch do PR #68. Sem merge ou deploy de produção. Validação Chromium local concluída: login, correção manual persistente, nota, estatísticas, Excel, folha OMR, leitura óptica, layout móvel e health Node.
+- Pendências externas: cadastrar variáveis na Vercel, preparar Supabase e professor via migração, publicar e validar no domínio. Gabriel informou que ainda não configurou o ambiente.

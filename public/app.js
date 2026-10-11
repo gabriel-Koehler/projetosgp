@@ -1,3 +1,4 @@
+import { realCorrection, realResults } from './post-exam-real.js';
 import { academic } from './academic.js';
 import { versionNames } from './evaluation-settings.js';
 const real = window.APP_CONFIG?.dataMode === 'real';
@@ -48,7 +49,7 @@ function render() {
   cleanupPage();
   cleanupPage = () => {};
   const current = page();
-  if(real && !['dashboard','classes','questions','create','versions','evaluation'].includes(current)) { screen.innerHTML=empty('Área ainda não disponível','Volte às avaliações ou aos cadastros para continuar.'); return; }
+  if(real && !['dashboard','classes','questions','create','versions','evaluation','correction','results'].includes(current)) { screen.innerHTML=empty('Área ainda não disponível','Volte às avaliações ou aos cadastros para continuar.'); return; }
   document.querySelectorAll('nav a').forEach(a => {
     const active = a.hash === '#' + (current === 'class' ? 'classes' : current === 'evaluation' ? 'versions' : current);
     a.classList.toggle('active', active);
@@ -571,8 +572,8 @@ async function evaluationConfirmation() {
   document.title=evaluation.name+' · AvaliaSystem';
 }
 
-function correction() { cleanupPage = renderCorrection(screen, state, refresh, notice); }
-function results() { cleanupPage = renderResults(screen, state); }
+function correction() { cleanupPage = real ? realCorrection(screen, state, notice) : renderCorrection(screen, state, refresh, notice); }
+function results() { cleanupPage = real ? realResults(screen, state) : renderResults(screen, state); }
 
 function modal(title, fields, onSave) {
   $('modal-form').querySelector('[type=submit]').disabled = false;
@@ -717,8 +718,7 @@ window.addEventListener('hashchange', () => {
   if (state) render();
 });
 if(real) {
-  document.querySelectorAll('nav a').forEach(a=>{if(!['#dashboard','#classes','#questions','#create','#versions'].includes(a.hash))a.hidden=true;});
-  document.querySelectorAll('nav small').forEach((el,i)=>{if(i>2)el.hidden=true;});
+  document.querySelectorAll('nav a').forEach(a=>{if(!['#dashboard','#classes','#questions','#create','#versions','#correction','#results'].includes(a.hash))a.hidden=true;});
   document.querySelector('.app-footer').textContent='AvaliaSystem';
 }
 screen.innerHTML='<div class="panel" role="status">Carregando seus dados…</div>';

@@ -1,8 +1,10 @@
 import { spawn } from 'node:child_process';
 
+const real = process.env.DATA_MODE !== 'mock';
+const entrypoint = real ? ['app.persistent:create_app', '--factory'] : ['app.main:app'];
 const children = [
-  spawn(process.env.PYTHON_BIN || 'python', ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', '8000', '--workers', '1'], { stdio: 'inherit', windowsHide: true }),
-  spawn(process.execPath, ['server.js'], { stdio: 'inherit', windowsHide: true, env: { ...process.env, HOST: process.env.HOST || '0.0.0.0', API_TARGET: 'http://127.0.0.1:8000' } })
+  spawn(process.env.PYTHON_BIN || 'python', ['-m', 'uvicorn', ...entrypoint, '--host', '127.0.0.1', '--port', '8000', '--workers', '1'], { stdio: 'inherit', windowsHide: true }),
+  spawn(process.execPath, ['server.js'], { stdio: 'inherit', windowsHide: true, env: { ...process.env, DATA_MODE: real ? 'real' : 'mock', HOST: process.env.HOST || '0.0.0.0', API_TARGET: 'http://127.0.0.1:8000' } })
 ];
 let stopping = false;
 function stop(code = 0) {
