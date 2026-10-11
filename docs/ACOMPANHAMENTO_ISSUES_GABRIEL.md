@@ -183,3 +183,44 @@ Projeto projetosgp criado; schema aplicado/reaplicado, 12 tabelas com RLS. Seed 
 Branch infra/diego-validacao-supabase, baseada na última entrega docs/n2-parte1-diagramas-backlog. Backend #40–#45, MER #48–#49 e arquitetura #54 ainda abertos. Vercel responde / com 200, mas health da API 404. Hospedagem N2 e pacote final dependem dessas integrações; nenhuma issue declarada concluída. Trabalho para validação de Gabriel, sem merge.
 
 PR publicado: [#63 — validação real do Supabase e proteção do pacote](https://github.com/gabriel-Koehler/projetosgp/pull/63), commit f7c61f1. Revisão formal solicitada a Gabriel (@gabriel-Koehler). Base: docs/n2-parte1-diagramas-backlog; depende dos PRs #61/#62. Nenhuma issue encerrada e nenhum merge realizado.
+
+## Entrega N1-DOC-02 — 09/10/2026
+- **Issue:** [#16 — [N1-DOC-02] Elaboração do README v1 Oficial (Critério C3 da N1)](https://github.com/gabriel-Koehler/projetosgp/issues/16).
+- **Responsável:** ALYSON DE LIMA DE OLIVEIRA.
+- **Branch base:** `main` (commit `82a86a7`, preservando todas as entregas e merges dos PRs #60 a #66).
+- **Branch de trabalho:** `docs/n1-doc-02-readme-v1`.
+- **Status de implementação:** Concluída e validada conforme Critério C3 (20% da N1).
+- **Critérios atendidos:**
+  - Redação completa do `README.md` v1 oficial.
+  - Visão geral da plataforma AvaliaSystem e proposta de valor.
+  - Mapeamento detalhado do escopo entregue na N1 (telas navegáveis, dados mock em memória e API Python modular).
+  - Tabela completa de Requisitos Funcionais (RF01 a RF30) e Requisitos Não-Funcionais (RNF01 a RNF09).
+  - Galeria de telas das interfaces e fluxo Mermaid docente/discente.
+  - Guia de execução local passo a passo em Python (venv, pip, uvicorn) e Node.js (`npm run dev:all`).
+  - Referência à hospedagem contínua gratuita (Render/Vercel) e container Docker.
+  - Auditoria de integridade: 100% dos links internos validados sem nenhum link quebrado.
+- **Pull Request:** [docs: [N1-DOC-02] Elaboração do README v1 oficial da fase N1](https://github.com/gabriel-Koehler/projetosgp/pull/new/docs/n1-doc-02-readme-v1).
+- **Revisor:** Gabriel Koehler da Silva (@gabriel-Koehler).
+- **Status de merge:** Aguardando revisão e autorização de merge.
+
+## Entrega N2-DOC-02 — 09/10/2026
+- **Issue:** [N2-DOC-02 — Atualização do README oficial para versão v2 da N2 com Supabase](https://github.com/gabriel-Koehler/projetosgp/issues).
+- **Responsável:** ALYSON DE LIMA DE OLIVEIRA.
+- **Branch base:** `docs/n1-doc-02-readme-v1` (preservando integralmente a entrega anterior N1-DOC-02).
+- **Branch de trabalho:** `docs/n2-doc-02-readme-v2`.
+- **Status de implementação:** Concluída e validada conforme Critério C3 (20% da N2), Passo 05.
+- **Critérios atendidos:**
+  - Redação e atualização do `README.md` v2 oficial da fase N2 com foco em produção e persistência.
+  - Documentação detalhada da Arquitetura em Camadas (6 camadas) e referências às ADRs (`ADR-0001`, `ADR-0002`, `ADR-0003`).
+  - Módulo de Visão Computacional / OMR com OpenCV (`cv2`) e Pyzbar para correção óptica e homografia de 4 pontos.
+  - Banco de dados Supabase (PostgreSQL Cloud com 12 tabelas relacionais, DDL `src/database/schema.sql`, seed e RLS).
+  - Diagramas oficiais integrados em Mermaid: DER Físico N2 e Diagrama de Classes UML v2.
+  - Tabela completa de variáveis de ambiente (`.env.example`) com finalidades documentadas.
+  - Guia de execução local comparando modo persistente N2 (`npm run dev:real`) e modo mock N1 (`npm run dev:all`), além de migrações (`python -m app.database.migrate`).
+  - Links para sistema em produção (Render/Vercel) e container Docker.
+  - Auditoria de integridade: 100% dos links internos validados sem nenhum link quebrado.
+- **Pull Request a abrir:** `docs: [N2-DOC-02] Atualização do README oficial para versão v2 da N2 com Supabase`.
+- **Revisor:** Gabriel Koehler da Silva (@gabriel-Koehler).
+- **Status de merge:** Aguardando revisão e autorização de merge.
+
+
