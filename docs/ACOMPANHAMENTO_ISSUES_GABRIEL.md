@@ -234,5 +234,5 @@ PR publicado: [#63 — validação real do Supabase e proteção do pacote](http
 - Interface real de leitura/conferência, gravação manual, resultados, Excel e folha OMR gerada no backend.
 - README e guia `docs/DEPLOY_VERCEL.md` corrigidos; credenciais de migração e Storage diferenciadas.
 - Validação: 335 testes Python com PostgreSQL descartável, 17 testes JavaScript, configuração validada contra os campos do schema oficial Vercel.
-- Status: implementação local; PR e validação do navegador registrados na entrega. Sem merge ou deploy de produção nesta etapa.
+- Status: commit `27b2ab5` enviado; [PR #69](https://github.com/gabriel-Koehler/projetosgp/pull/69) aberto contra a branch do PR #68. Sem merge ou deploy de produção. Conferência visual não concluída devido à falha de inicialização do navegador neste ambiente.
 - Pendências externas: cadastrar variáveis na Vercel, preparar Supabase e professor via migração, publicar e validar no domínio. Gabriel informou que ainda não configurou o ambiente.
