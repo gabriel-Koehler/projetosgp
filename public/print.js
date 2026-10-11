@@ -20,11 +20,19 @@ try {
  if(kind==='exam')content='<p class="document-instructions">Leia os enunciados e marque uma alternativa por questão na folha de respostas.</p><ol class="print-questions">'+version.questions.map(q=>'<li><h3>'+esc(q.statement)+'</h3><ol type="A">'+q.options.map(o=>'<li>'+esc(o)+'</li>').join('')+'</ol></li>').join('')+'</ol>';
  if(kind==='answers')content='<p class="document-instructions">Preencha completamente uma única bolinha por questão, com caneta azul ou preta. Não rasure nem escreva sobre o QR Code.</p><table class="answer-table"><thead><tr><th>Questão</th>'+letters.map(a=>'<th>'+a+'</th>').join('')+'</tr></thead><tbody>'+version.questions.map((q,i)=>'<tr><th scope="row">'+(i+1)+'</th>'+letters.map((a,j)=>'<td>'+(j<q.options.length?'<span class="answer-bubble" aria-label="Questão '+(i+1)+', alternativa '+a+'"></span>':'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table><p class="document-reference">Identificação: '+esc(evaluation.id)+' · Versão '+esc(version.name)+'</p>';
  if(kind==='key')content='<p class="teacher-only">Uso do professor — contém respostas corretas.</p><ol class="print-questions">'+version.questions.map(q=>'<li><h3>'+esc(q.statement)+'</h3><p>Resposta: <strong>'+q.answerLetter+' · '+esc(q.correctAnswer)+'</strong></p></li>').join('')+'</ol>';
+ if(kind==='answers' && window.APP_CONFIG?.dataMode === 'real') {
+   const base='/api/avaliacoes/'+encodeURIComponent(evaluation.id)+'/versoes/'+encodeURIComponent(version.code)+'/folha.';
+   root.innerHTML='<a class="btn no-print" href="'+base+'pdf">Baixar folha em PDF</a><img style="width:100%;display:block" src="'+base+'png" alt="Folha de respostas para leitura óptica">';
+   await root.querySelector('img').decode();
+   const print=document.getElementById('print-document'); print.disabled=false; print.onclick=()=>window.print();
+   root.dataset.ready='true';
+ } else {
  root.innerHTML='<article class="paper">'+heading+(kind==='key'?'':identification)+content+'</article>';
  document.title=kinds[kind]+' — '+evaluation.name+' — '+version.name;
  if(qr)await root.querySelector('img').decode();
  const print=document.getElementById('print-document');print.disabled=false;print.onclick=()=>window.print();
  root.dataset.ready='true';
+ }
 } catch(error) {
  root.innerHTML='<section class="panel document-error"><h1>Não foi possível abrir o documento</h1><p>'+esc(error.message)+'</p><a href="/dashboard#versions">Voltar às versões</a></section>';
 }
