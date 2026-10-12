@@ -243,3 +243,7 @@ PR publicado: [#63 — validação real do Supabase e proteção do pacote](http
 - Resolve endereço da API em runtime, usa domínio público na ausência de binding e proíbe localhost na Vercel. Mantém cookies e evita proxy recursivo.
 - Testes de resolução e HTTP: login com 401, proteção do dashboard, indisponibilidade e ausência de binding.
 - Publicação real deve ser verificada após deploy; não altera credenciais Supabase.
+
+## Rota inicial Vercel — 2026-10-12
+
+Diagnóstico HTTP público: `/` retorna 404 da plataforma, enquanto `/api/health` e `/health` respondem 200 e `/api/auth/me` responde 401. Adicionada regra explícita para `/` no serviço web. Branch `fix/vercel-root-route`. Validação de produção pendente do deployment do novo commit.

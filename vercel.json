@@ -5,7 +5,14 @@
       "root": ".",
       "framework": "express",
       "entrypoint": "server.js",
-      "bindings": [{"type": "service", "service": "python", "format": "url", "env": "PYTHON_API_URL"}]
+      "bindings": [
+        {
+          "type": "service",
+          "service": "python",
+          "format": "url",
+          "env": "PYTHON_API_URL"
+        }
+      ]
     },
     "python": {
       "root": ".",
@@ -14,8 +21,29 @@
     }
   },
   "rewrites": [
-    {"source": "/api/:path*", "destination": {"service": "python"}},
-    {"source": "/student/gabarito/:path*", "destination": {"service": "python"}},
-    {"source": "/:path*", "destination": {"service": "web"}}
+    {
+      "source": "/",
+      "destination": {
+        "service": "web"
+      }
+    },
+    {
+      "source": "/api/:path*",
+      "destination": {
+        "service": "python"
+      }
+    },
+    {
+      "source": "/student/gabarito/:path*",
+      "destination": {
+        "service": "python"
+      }
+    },
+    {
+      "source": "/:path*",
+      "destination": {
+        "service": "web"
+      }
+    }
   ]
 }
