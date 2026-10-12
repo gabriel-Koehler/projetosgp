@@ -1,3 +1,4 @@
+import { backendTarget } from './backend-target.js';
 import express from 'express';
 import http from 'node:http';
 import https from 'node:https';
@@ -8,7 +9,6 @@ import {
 
 const app = express();
 const root = path.dirname(fileURLToPath(import.meta.url));
-const backend = (process.env.PYTHON_API_URL || process.env.API_TARGET || 'http://127.0.0.1:8000').replace(/\/$/, '');
 const dataMode = (process.env.DATA_MODE || (process.env.VERCEL ? 'real' : 'mock')) === 'real' ? 'real' : 'mock';
 app.set('view engine', 'ejs');
 app.set('views', path.join(root, 'views'));
@@ -17,7 +17,11 @@ app.use(express.static(path.join(root, 'public')));
 // Same-origin proxy: the browser only talks to /api, including session cookies.
 // Keep the request streaming so methods, query strings and bodies are preserved.
 app.use('/api', (req, res) => {
-  const target = new URL(req.originalUrl, backend);
+  let resolved;
+  try { resolved = backendTarget(); } catch { return res.status(503).json({detail:'Endereço da API não configurado.'}); }
+  // In Services, public /api requests must be routed to Python, never proxy back to this handler.
+  if (resolved.publicRoute) return res.status(503).json({detail:'Verifique a rota /api do serviço Python no vercel.json.'});
+  const target = new URL(req.originalUrl, resolved.origin);
   const transport = target.protocol === 'https:' ? https : http;
   const upstream = transport.request(target, {
     method: req.method,
@@ -37,7 +41,7 @@ app.use('/api', (req, res) => {
   upstream.on('error', () => {
     if (!res.headersSent) res.status(502).json({
       error: {
-        message: 'API indisponível. Verifique se o serviço Python está rodando e tente novamente.'
+        message: 'API indisponÃ­vel. Verifique se o serviÃ§o Python estÃ¡ rodando e tente novamente.'
       }
     });
     else res.destroy();
@@ -49,18 +53,19 @@ app.use('/api', (req, res) => {
 app.get('/config.js', (req, res) => res.type('application/javascript').send('window.APP_CONFIG = ' + JSON.stringify({apiBaseUrl:'/api',dataMode}) + ';'));
 async function sessionUser(req) {
   try {
-    const response = await fetch(backend + '/api/auth/me', {
+    const response = await fetch(backendTarget().origin + '/api/auth/me', {
       headers: {
         Cookie: req.headers.cookie || ''
       },
-      signal: AbortSignal.timeout(4000)
+      redirect: 'error',
+      signal: AbortSignal.timeout(12000)
     });
     if (response.status === 401) return null;
     if (!response.ok) throw new Error('API unavailable');
     const payload = await response.json();
     return dataMode === 'real' ? {name:payload.nome} : payload.data;
   } catch {
-    throw new Error("Serviço indisponível");
+    throw new Error("ServiÃ§o indisponÃ­vel");
   }
 }
 const pageRoute = handler => (req,res) => Promise.resolve(handler(req,res)).catch(()=>res.status(503).render('unavailable'));
@@ -81,11 +86,12 @@ const port = process.env.PORT || 3000;
 export default app;
 app.get('/health', async (req, res) => {
   try {
-    const response = await fetch(backend + (dataMode === 'real' ? '/api/health' : '/health'), { signal: AbortSignal.timeout(4000) });
+    const response = await fetch(backendTarget().origin + (dataMode === 'real' ? '/api/health' : '/health'), { redirect: 'error',
+      signal: AbortSignal.timeout(12000) });
     if (!response.ok) return res.status(503).json({ status: 'unavailable' });
     res.json({ status: 'ok', api: await response.json() });
   } catch {
     res.status(503).json({ status: 'unavailable' });
   }
 });
-app.listen(port, process.env.HOST || '127.0.0.1', () => console.log('AvaliaSystem em http://localhost:' + port + ' → API Python ' + backend));
+if (!process.env.VERCEL) app.listen(port, process.env.HOST || '127.0.0.1', () => console.log('AvaliaSystem em http://localhost:' + port + ' â†’ API Python ' + backend));

@@ -55,3 +55,7 @@ Uploads na tela de leitura ficam limitados a 4 MB (PNG/JPEG), deixando margem pa
 - Cookie não persiste: conferir `SECRET_KEY` fixa, HTTPS e domínio.
 
 Sem acesso ao projeto Vercel e às credenciais Supabase, só é possível validar código e ambiente local. Um PR aberto ainda não altera a publicação da `main`.
+
+## Correção do acesso Node → Python (2026-10-12)
+
+O endereço é resolvido a cada requisição: binding `PYTHON_API_URL`, API externa `API_TARGET` ou, na Vercel sem binding, `PUBLIC_BASE_URL` em produção (alternativa: `VERCEL_PROJECT_PRODUCTION_URL`). Previews usam seu próprio `VERCEL_URL`, nunca o domínio de produção. A sessão é encaminhada na consulta e redirects são recusados. A Vercel não usa fallback localhost. O domínio público precisa encaminhar `/api/*` ao Python, como definido no `vercel.json`. Deployments protegidos podem exigir acesso autorizado; não desative proteção para contornar erros.
