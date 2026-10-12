@@ -236,3 +236,10 @@ PR publicado: [#63 — validação real do Supabase e proteção do pacote](http
 - Validação: 335 testes Python com PostgreSQL descartável, 17 testes JavaScript, configuração validada contra os campos do schema oficial Vercel.
 - Status: commit `27b2ab5` enviado; [PR #69](https://github.com/gabriel-Koehler/projetosgp/pull/69) aberto contra a branch do PR #68. Sem merge ou deploy de produção. Validação Chromium local concluída: login, correção manual persistente, nota, estatísticas, Excel, folha OMR, leitura óptica, layout móvel e health Node.
 - Pendências externas: cadastrar variáveis na Vercel, preparar Supabase e professor via migração, publicar e validar no domínio. Gabriel informou que ainda não configurou o ambiente.
+
+## Correção Vercel — 2026-10-12
+
+- Branch `fix/vercel-api-origin`, a partir da main com PRs #68/#69 integrados.
+- Resolve endereço da API em runtime, usa domínio público na ausência de binding e proíbe localhost na Vercel. Mantém cookies e evita proxy recursivo.
+- Testes de resolução e HTTP: login com 401, proteção do dashboard, indisponibilidade e ausência de binding.
+- Publicação real deve ser verificada após deploy; não altera credenciais Supabase.
