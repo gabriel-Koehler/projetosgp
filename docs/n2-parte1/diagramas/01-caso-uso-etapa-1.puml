@@ -1,0 +1,12 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 15
+left to right direction
+actor Professor
+actor Aluno
+rectangle "AvaliaSystem — N2" {
+}
+
+@enduml

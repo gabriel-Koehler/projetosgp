@@ -1,0 +1,19 @@
+# Preparação local N1. Aplicar somente quando a publicação for autorizada.
+services:
+  - type: web
+    name: avaliasystem-n2
+    runtime: docker
+    plan: free
+    autoDeploy: false
+    healthCheckPath: /health
+    envVars:
+      - key: DATA_MODE
+        value: "real"
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SESSION_HTTPS_ONLY
+        value: "true"
+      - key: PUBLIC_BASE_URL
+        sync: false

@@ -1,0 +1,249 @@
+# Acompanhamento das issues — Gabriel Koehler
+
+Última atualização: 2026-10-07. Responsável GitHub: `gabriel-Koehler`.
+Fonte: issues atribuídas e PRs de `gabriel-Koehler/projetosgp`.
+Este é o arquivo de acompanhamento oficial para atualizar ao concluir cada issue.
+
+## Visão geral
+- Total de issues atribuídas: **13**.
+- Issues encerradas no GitHub nesta consulta: **8**.
+- **8 issues implementadas e integradas na main**, com PRs merged: FE-01, BE-02, FE-02, FE-03, FE-04, FE-05, FE-06 e FE-07.
+- FE-04: publicada no PR #56; commit 75327b2.
+- FE-05: publicada no PR #57; commit e227db5, derivado de FE-04.
+- **2 issues sem implementação final**: #3 e #28. As #22, #23 e #25 estão implementadas e validadas com PostgreSQL local; falta homologar no Supabase e revisar/integrar os PRs. As #23 e #25 também aguardam validação visual em navegador. Isso não representa aceite final, merge ou encerramento dessas issues.
+- Merges confirmados no GitHub: PRs #51, #52, #53, #56, #57, #58 e #59. Issues #5, #6, #7, #8, #9, #12, #13 e #14 encerradas.
+
+## Controle das entregas
+
+| Issue | Implementação | GitHub | Branch / evidência | Pendência |
+| --- | --- | --- | --- | --- |
+| [#3 N1-INF-03 — Repositório, labels, templates e Kanban](https://github.com/gabriel-Koehler/projetosgp/issues/3) | Parcial / precisa de auditoria | Aberta | Existem backlog, templates e script de criação de issues | Verificar todos os critérios e quadro Kanban; não foi entregue nesta sequência |
+| [#5 N1-FE-01 — Layout e autenticação](https://github.com/gabriel-Koehler/projetosgp/issues/5) | Integrada na main | Encerrada, PR merged | `feat/n1-fe-01-layout-login`, `3d94c07`; [PR #51](https://github.com/gabriel-Koehler/projetosgp/pull/51) inclui a entrega | Nenhuma pendência de integração |
+| [#6 N1-BE-02 — Mock Python](https://github.com/gabriel-Koehler/projetosgp/issues/6) | Integrada na main | Encerrada, PR merged | `feat/n1-be-02-python-mock-state`, `dc9e59c` e `b3ae5f3`; [PR #51](https://github.com/gabriel-Koehler/projetosgp/pull/51) | Nenhuma pendência de integração |
+| [#7 N1-FE-02 — Semestres e turmas](https://github.com/gabriel-Koehler/projetosgp/issues/7) | Integrada na main | Encerrada, PR merged | `feat/n1-fe-02-semestres-turmas`, `be20064`; [PR #52](https://github.com/gabriel-Koehler/projetosgp/pull/52) | Nenhuma pendência de integração |
+| [#8 N1-FE-03 — Alunos e importação](https://github.com/gabriel-Koehler/projetosgp/issues/8) | Integrada na main | Encerrada, PR merged | `feat/n1-fe-03-alunos-importacao`, `dc475ef`; [PR #53](https://github.com/gabriel-Koehler/projetosgp/pull/53) | Nenhuma pendência de integração |
+| [#9 N1-FE-04 — Banco de questões](https://github.com/gabriel-Koehler/projetosgp/issues/9) | Integrada na main | Encerrada, PR merged | `feat/n1-fe-04-banco-questoes`, `75327b2`; [PR #56](https://github.com/gabriel-Koehler/projetosgp/pull/56) | Nenhuma pendência de integração |
+| [#12 N1-FE-05 — Assistente de avaliações](https://github.com/gabriel-Koehler/projetosgp/issues/12) | Integrada na main | Encerrada, PR merged | `feat/n1-fe-05-criacao-avaliacoes-versoes`, `e227db5`; [PR #57](https://github.com/gabriel-Koehler/projetosgp/pull/57) | Nenhuma pendência de integração |
+| [#13 N1-FE-06 — Impressão e tela aluno](https://github.com/gabriel-Koehler/projetosgp/issues/13) | Integrada na main | Encerrada, PR merged | `feat/n1-fe-06-impressao-prova-aluno`, `3f7ce1a`; [PR #58](https://github.com/gabriel-Koehler/projetosgp/pull/58) | Nenhuma pendência de integração |
+| [#14 N1-FE-07 — Correção e estatísticas simuladas](https://github.com/gabriel-Koehler/projetosgp/issues/14) | Integrada na main | Encerrada, PR merged | `feat/n1-fe-07-correcao-estatisticas`, `3c2d899`; [PR #59](https://github.com/gabriel-Koehler/projetosgp/pull/59) | Nenhuma pendência de integração |
+| [#22 N2-FE-01 — Autenticação e turmas com API real](https://github.com/gabriel-Koehler/projetosgp/issues/22) | Implementada; PostgreSQL local validado | Aberta, [PR #64](https://github.com/gabriel-Koehler/projetosgp/pull/64) | `feat/n2-fe-01-integracao-auth-turmas`, `5fd72c1`, base `feat/n2-api-auth-turmas` ([PR #60](https://github.com/gabriel-Koehler/projetosgp/pull/60)) | Validar no Supabase de desenvolvimento; revisão e merge |
+| [#23 N2-FE-02 — Questões e upload com API real](https://github.com/gabriel-Koehler/projetosgp/issues/23) | Implementada; PostgreSQL local revalidado em 2026-10-07 | Aberta, [PR #65](https://github.com/gabriel-Koehler/projetosgp/pull/65) aberto | `feat/n2-fe-02-integracao-questoes-upload`, `6ab665a`, base da #22 em `121fbdb` | Supabase remoto, navegador desktop/mobile, revisão e merge |
+| [#25 N2-FE-03 — Avaliações e versões persistidas](https://github.com/gabriel-Koehler/projetosgp/issues/25) | Implementada; PostgreSQL local validado | Aberta, [PR #66](https://github.com/gabriel-Koehler/projetosgp/pull/66) aberto | `feat/n2-fe-03-integracao-avaliacoes-versoes`, `225d78f`, base da #23 em `7d591f4` | Supabase remoto, navegador desktop/mobile, revisão e merge |
+| [#28 N2-FE-04 — Correção real e Excel](https://github.com/gabriel-Koehler/projetosgp/issues/28) | Sem entrega específica identificada | Aberta | Correção manual simulada e CSV | Integrar correção real e relatório XLSX |
+
+## Como atualizar a cada issue
+- [ ] Consultar a issue e registrar critérios de aceite.
+- [ ] Criar branch a partir da última entrega, anotando a base.
+- [ ] Implementar e validar fluxos, erros e layout mobile.
+- [ ] Atualizar a linha da issue e evidências abaixo.
+- [ ] Fazer commit e push; registrar PR e revisor.
+- [ ] Após revisão, verificar separadamente merge do PR e encerramento da issue.
+- [ ] Atualizar data, totais e próxima issue.
+- [ ] Manter dependências dos PRs explícitas; não marcar futuros trabalhos como concluídos.
+
+## Registro para próximas entregas
+Copiar este bloco ao iniciar uma issue:
+
+### [ID] — Título
+- Issue:
+- Branch base:
+- Branch de trabalho:
+- Status de implementação:
+- Critérios atendidos:
+- Testes e evidências:
+- Commit(s):
+- Pull request / revisor:
+- Status de merge:
+- Pendências:
+- Data da atualização:
+
+## Evidências atuais
+- FE-04: CRUD, filtros por disciplina/dificuldade/texto, alternativas recolhíveis e gabarito visível.
+- Importação de questões CSV com modelo, prévia, validação de linhas e proteção contra duplicados; lote atômico.
+- 9 testes Python e testes CSV de questões/alunos aprovados.
+- Fluxo FE-04 aprovado em navegador: inclusão, edição, filtros, recolhimento, importação, exclusão e mobile.
+
+
+## Revisores das issues
+Em 2026-10-04, atualizado o campo Revisor de 32 issues para Gabriel Koehler da Silva (@gabriel-Koehler). As descrições das quatro issues atribuídas à Eloisa (#2, #15, #29, #30) foram preservadas e comparadas após a edição. Isso registra a alteração nas descrições das issues, não a realização de code review ou merge.
+
+## Evidências FE-05
+Assistente de 3 etapas, nomes únicos, rascunho por usuário, contadores, confirmação por cards, gabaritos e QR de nomes personalizados. 10 testes Python aprovados e fluxo desktop/mobile validado.
+
+## Sequência de branches e PRs
+FE-03 (PR #53) → FE-04 (PR #56, 75327b2) → FE-05 (PR #57, e227db5).
+FE-06 (PR #58, 3f7ce1a) parte da FE-05. FE-07 parte da FE-06 em 3cfa132. Toda a sequência está integrada na main. Registro histórico da integração N1. A sequência N2 agora é `feat/n2-api-auth-turmas` (PR #60) → `feat/n2-fe-01-integracao-auth-turmas` (PR #64) → `feat/n2-fe-02-integracao-questoes-upload` (#23). Novas entregas devem preservar a branch mais atual desta sequência.
+
+## Evidências FE-06
+Impressão A4 de prova, folha com QR/bolhas A–D e gabarito do professor. Liberação explícita e revogável do gabarito público, com página do aluno responsiva. 11 testes Python aprovados. Navegador: prova de 45 questões, PDFs de 10/2/5 páginas, revisão visual e acesso anônimo/revogação em 390 px. Dados permanecem em memória.
+
+
+## Evidências FE-07
+- Upload local de PNG/JPEG/PDF com validação de formato e limite de 10 MB; feedback por etapas e prévia de imagem.
+- Leitura explicitamente simulada, respostas editáveis, confirmação obrigatória, entrada manual e proteção contra duplicidade.
+- Notas por aluno, conferência de respostas, filtros de avaliação/aluno, relatório imprimível e CSV do filtro.
+- Percentual de acertos e alternativas mais marcadas, com empates e identificação original preservada entre versões embaralhadas.
+- 12 testes Python e 8 testes Node aprovados. Navegador: upload, revisão, notas 10/0, estatística 50%, filtros, CSV, estado vazio, duplicidade e viewport 390 px sem overflow.
+- Dados permanecem em memória e não há OCR real. PR integrado e issue encerrada após a autorização de merge do responsável.
+
+
+## Integração na main — 2026-10-04
+- Autorização: reunir todas as features desta sequência na main.
+- Integração sequencial com merge commits, preservando o histórico e a documentação já existente na main.
+- Último merge de funcionalidades: 3407672 (PR #59).
+- Árvore da main comparada com a integração local validada: nenhuma diferença.
+- Validação do conjunto: 12 testes Python e 8 testes Node aprovados.
+- Permanecem pendentes a auditoria N1-INF-03 (#3) e as quatro integrações N2 (#22, #23, #25 e #28).
+
+## Demais PRs N1 integrados — 2026-10-04
+- PR #37: setup da API Python e autenticação modular.
+- PR #38: embaralhamento e gabaritos próprios por versão.
+- PR #39: QR Code e consulta pública restrita do gabarito.
+- PR #47: roteiro e relatório de testes de aceitação.
+- PR #50: histórico dos fluxos e casos de uso (sem alteração líquida de arquivos nesta integração).
+- PR #55: classes de domínio.
+- Todos os seis PRs estão merged na main. Consulta final: nenhum PR N1 aberto; nove PRs N2 continuam abertos.
+- Conflitos de contratos de API resolvidos mantendo /api do MVP e disponibilizando o backend modular em /n1 na porta 8000; detalhes em INTEGRACAO_N1.md.
+- Validação: 116 testes Python e 8 testes JavaScript aprovados, incluindo isolamento de sessões, links QR sob /n1 e consulta pública.
+- O merge desses PRs não conclui a auditoria da issue #3 nem implementa as integrações N2 pendentes.
+
+## Entrega N2-FE-01 — 2026-10-05
+- API requerida localizada nos PRs #40–42, ainda não integrados. Dependência adaptada na branch feat/n2-api-auth-turmas, PR #60, baseada na main 972a760.
+- Frontend desenvolvido em seguida, na branch feat/n2-fe-01-integracao-auth-turmas, preservando o MVP N1 e conectando login/semestres/turmas à API persistente.
+- 145 testes Python aprovados com PostgreSQL local real; 11 testes JavaScript e fluxo de navegador desktop/mobile aprovados. Persistência após reiniciar API/pool confirmada.
+- Sem .env Supabase fornecido; aceite nesse ambiente externo permanece pendente. Issue #22 aberta, nenhum merge realizado nesta entrega.
+
+
+## Entrega N2-FE-02 — 2026-10-06
+- Issue: #23; iniciada por instrução do responsável, mantendo explícitas as pendências de aceite da #22.
+- Branch base: `feat/n2-fe-01-integracao-auth-turmas`, atualizada via fetch em `121fbdb`.
+- Branch de trabalho: `feat/n2-fe-02-integracao-questoes-upload`.
+- Implementação: CRUD persistente de questões, carregamento completo paginado, categoria e alternativa E, upload multipart CSV/XLSX, modelos autenticados, prévia sem gravação e confirmação transacional com revalidação no banco. Endpoints reaproveitados do PR #42 e adaptados à API desta sequência.
+- Validação: 183 testes Python aprovados em PostgreSQL 16.14 local descartável, incluindo isolamento, persistência após recriar API/pool, duplicadas entre prévia/confirmação e rollback; 13 testes JavaScript aprovados; diff e sintaxe verificados.
+- Commit de implementação: `6ab665a`. Push ao origin recusado com HTTP 403: única conta configurada `tnah-Gabriel-Silva`, sem permissão de escrita. Nenhum PR criado. Publicação aguarda conta com acesso ou autorização para fork; o PR deve apontar à branch da #22 e declarar dependência dos PRs #64 e #60 e reaproveitamento do #42.
+- Revisor: Gabriel Koehler da Silva (@gabriel-Koehler).
+- Status: implementação entregue localmente; sem merge, issue aberta.
+- Pendências: configuração e homologação em Supabase de desenvolvimento; navegador desktop/mobile indisponível na sessão; revisão e merge mediante autorização. Não iniciar #25 nesta entrega.
+- Detalhes: docs/N2-FE-02.md.
+- Fluxo HTTP pelo proxy Express validado com API e banco locais: login/cookie, painel/config, CRUD, modelos CSV/XLSX, multipart, prévia/confirmação, duplicadas e logout. Nenhuma migração remota executada.
+
+## Regularização N2-FE-02 — 2026-10-07
+- Bloqueio de publicação resolvido com a conta já configurada `gabriel-Koehler`; push confirmado para a branch da #23.
+- [PR #65](https://github.com/gabriel-Koehler/projetosgp/pull/65) aberto para `feat/n2-fe-01-integracao-auth-turmas`. Dependências #64 e #60, reaproveitamento #42 e pendências de aceite explícitos na descrição.
+- Revisor indicado: @gabriel-Koehler. GitHub não permite solicitar revisão ao próprio autor; indicação preservada na descrição.
+- Revalidação: 183 testes Python e 13 testes JavaScript aprovados. Fluxo HTTP pelo proxy Express novamente aprovado em banco PostgreSQL local separado.
+- API GitHub confirmou PR #65 e issue #23 abertos; nenhum merge ou encerramento realizado.
+- Pendências externas: configurar e autorizar Supabase de desenvolvimento para homologação; disponibilizar navegador conectado para validação visual desktop/mobile. Não há `.env` nem `DATABASE_URL` nesta sessão; inventário de navegadores vazio e navegador integrado indisponível.
+- Próxima implementação na sequência: #25, após concluir o aceite da #23. Branch futura `feat/n2-fe-03-integracao-avaliacoes-versoes`, partindo da versão mais atual da branch da #23. Nenhuma branch da #25 criada.
+- Dependência de Diego consultada no GitHub: issue #31, branch `infra/diego-validacao-supabase` em `f8f16e0`, [PR #63](https://github.com/gabriel-Koehler/projetosgp/pull/63), dependente de #61/#62; PR e issue abertos, sem merge. A documentação dessa branch registra o projeto Supabase `projetosgp` (`veyofappfyaoejcjwxky`) já provisionado e DDL/RLS/seed validados remotamente. Não é necessário criar outro projeto.
+- Compatibilidade conferida: mesmas tabelas/colunas/índices da API, acrescidos de transação e RLS. DDL de Diego aplicado em banco local separado, com 12 tabelas e RLS em todas; fluxo HTTP da #23 aprovado sobre esse schema. Isso não substitui a validação das permissões/conexão do backend remoto.
+- A conexão de Diego está documentada como `.env.supabase.local` não versionado; arquivo indisponível neste workspace. Pendência corrigida: obter acesso ao projeto já provisionado e homologar o fluxo da #23, sem repetir o provisionamento. Detalhes em `docs/N2-FE-02.md`.
+
+## Entrega N2-FE-03 — 2026-10-07
+- Issue #25 iniciada após solicitação do responsável para executar a próxima issue, preservando as pendências de aceite da #23. Nenhum merge da #23 foi pressuposto ou realizado.
+- Branch base: `feat/n2-fe-02-integracao-questoes-upload`, atualizada via fetch em `7d591f4`. Branch de trabalho: `feat/n2-fe-03-integracao-avaliacoes-versoes`.
+- Implementação: assistente com banco persistente, alternativa E/categoria, nota máxima, ajuste de gabarito da avaliação, 1–500 versões, nomes por letras/números/cores/personalizados, conjuntos iguais/diferentes e embaralhamento. Lista/detalhe recuperam avaliações e versões do banco; snapshots preservados após editar/arquivar questões. QR/impresso persistentes e liberação/revogação de gabaritos por avaliação, com resposta pública mínima.
+- Camadas da API reaproveitadas do PR #43 do Luan e adaptadas à API persistente desta sequência; nenhum merge ou alteração na branch do colega.
+- Validação: 194 testes Python em PostgreSQL local descartável e 17 testes JavaScript aprovados. Inclui persistência após recriar API/pool, isolamento de professores, gabarito específico, conjuntos diferentes, snapshot, QR decodificado, liberação/revogação e rollback intermediário.
+- Fluxo HTTP real pelo proxy Express com o próprio adaptador JS aprovado sobre o DDL de Diego, em banco separado com RLS nas 12 tabelas; reinício do processo Python preservou sessão, dados e códigos. Sintaxe/diff aprovados. HTTP de páginas não equivale a validação visual.
+- Commit de implementação: `225d78f`; push realizado. [PR #66](https://github.com/gabriel-Koehler/projetosgp/pull/66) aberto para a branch da #23. Dependências #65 → #64 → #60, reaproveitamento #43 e infraestrutura #63 → #62 → #61 explícitos.
+- Revisor indicado na issue/PR: Gabriel Koehler da Silva (@gabriel-Koehler). GitHub não permite solicitar revisão ao próprio autor; indicação mantida na descrição.
+- Consulta à API GitHub confirmou PR #66 aberto, sem merge, e issue #25 aberta. Implementação entregue não é encerramento da issue.
+- Pendências: recuperar versões diretamente do projeto Supabase de Diego (`veyofappfyaoejcjwxky`), com TLS/permissões do backend confirmados; conexão `.env.supabase.local` indisponível neste workspace. Validação visual desktop/mobile pendente por ausência de navegador conectado. Nenhuma migração remota executada.
+- Documentação detalhada: `docs/N2-FE-03.md`. Próxima implementação na sequência é #28, somente após concluir o aceite desta issue ou nova instrução do responsável; nenhuma branch da #28 criada.
+- Sequência N2 atual: `feat/n2-api-auth-turmas` (#60) → `feat/n2-fe-01-integracao-auth-turmas` (#64) → `feat/n2-fe-02-integracao-questoes-upload` (#65) → `feat/n2-fe-03-integracao-avaliacoes-versoes` (#66). A branch da #25 passa a ser a última entrega a preservar.
+
+## Preparação local de Diego — 05/10/2026
+
+Base 972a760; branch infra/diego-entregas-locais. Entregas de hospedagem, empacotador, SQL/seed/DER e UML preparadas para #17/#18/#31/#33/#35/#36. Sem commit, push ou PR dessas alterações. Issues abertas e dependências N2 em PRs abertos. Validação: oito testes Node, 118 Python e health 200/503; detalhes em docs/infra/VALIDACAO_LOCAL.md. Diário em docs/DIARIO_DE_BORDO_DIEGO.md. Revisão de Gabriel, implantação e homologação externa pendentes.
+
+Repetição final: uma falha intermitente no teste de leitura QR; caso isolado aprovado. Pendência registrada, sem homologação final declarada.
+
+## N2 Parte 1 — preparação local em 05/10/2026
+
+Quatro diagramas com passo a passo e backlog Excel de 45 tarefas preparados na branch docs/n2-parte1-diagramas-backlog. Nove tarefas por integrante, 184 horas estimadas, prazo provisório 13/11/2026. Índice: [docs/n2-parte1/README.md](n2-parte1/README.md). Revisão do grupo, material da aula e data oficial pendentes; nenhuma issue declarada concluída ou alteração remota realizada. Evidências no diário de Diego.
+## Commits locais para revisão de Gabriel — 05/10/2026
+
+Por solicitação do usuário, as entregas foram registradas em commits locais na branch docs/n2-parte1-diagramas-backlog: 345c7e5 (hospedagem), e1aa3cb (empacotamento), efc7353 (banco/DER/UML) e 32ca0e5 (diagramas/backlog). Revisor indicado: Gabriel Koehler da Silva (@gabriel-Koehler); análise e validação ainda pendentes. O commit documental seguinte reúne evidências e roteiro de revisão. Os registros “sem commit” acima são históricos.
+
+Validação antes dos commits: 8 testes Node e 2 testes Python específicos aprovados; diff sem erros de whitespace. Limitações anteriores mantidas, incluindo QR intermitente, ausência de build Docker/execução PostgreSQL e prazo acadêmico provisório. [Roteiro de revisão](infra/REVISAO_GABRIEL.md). Nenhum push, PR, merge ou encerramento de issue foi realizado.
+## Publicação autorizada para revisão de Gabriel
+
+Após autorização explícita do usuário, as branches e os cinco commits de Diego foram enviados ao GitHub. PRs abertos, ambos com revisão formal solicitada a @gabriel-Koehler:
+
+- [PR #61 — infraestrutura, empacotamento e banco/UML](https://github.com/gabriel-Koehler/projetosgp/pull/61): infra/diego-entregas-locais → main; commits 345c7e5, e1aa3cb e efc7353.
+- [PR #62 — diagramas, backlog e evidências](https://github.com/gabriel-Koehler/projetosgp/pull/62): docs/n2-parte1-diagramas-backlog → infra/diego-entregas-locais; commits 32ca0e5 e d8e99e3. Depende do PR #61.
+
+Os registros anteriores de ausência de push/PR são históricos. Análise e validação de Gabriel pendentes; nenhuma issue encerrada, merge ou deploy realizado. Este registro é enviado como commit adicional ao PR #62.
+
+## Validação real do Supabase e continuidade de Diego — 05/10/2026
+
+Projeto projetosgp criado; schema aplicado/reaplicado, 12 tabelas com RLS. Seed idempotente/constraints e bloqueio anon/authenticated validados em transação revertida; zero professores de teste remanescentes. Bucket correcoes privado criado. Testes: 8 Node e 2 Python específicos aprovados. Empacotador exclui metadados .temp/.branches da CLI. Evidências e limites: [validação Supabase](infra/VALIDACAO_SUPABASE.md).
+
+Branch infra/diego-validacao-supabase, baseada na última entrega docs/n2-parte1-diagramas-backlog. Backend #40–#45, MER #48–#49 e arquitetura #54 ainda abertos. Vercel responde / com 200, mas health da API 404. Hospedagem N2 e pacote final dependem dessas integrações; nenhuma issue declarada concluída. Trabalho para validação de Gabriel, sem merge.
+
+PR publicado: [#63 — validação real do Supabase e proteção do pacote](https://github.com/gabriel-Koehler/projetosgp/pull/63), commit f7c61f1. Revisão formal solicitada a Gabriel (@gabriel-Koehler). Base: docs/n2-parte1-diagramas-backlog; depende dos PRs #61/#62. Nenhuma issue encerrada e nenhum merge realizado.
+
+## Entrega N1-DOC-02 — 09/10/2026
+- **Issue:** [#16 — [N1-DOC-02] Elaboração do README v1 Oficial (Critério C3 da N1)](https://github.com/gabriel-Koehler/projetosgp/issues/16).
+- **Responsável:** ALYSON DE LIMA DE OLIVEIRA.
+- **Branch base:** `main` (commit `82a86a7`, preservando todas as entregas e merges dos PRs #60 a #66).
+- **Branch de trabalho:** `docs/n1-doc-02-readme-v1`.
+- **Status de implementação:** Concluída e validada conforme Critério C3 (20% da N1).
+- **Critérios atendidos:**
+  - Redação completa do `README.md` v1 oficial.
+  - Visão geral da plataforma AvaliaSystem e proposta de valor.
+  - Mapeamento detalhado do escopo entregue na N1 (telas navegáveis, dados mock em memória e API Python modular).
+  - Tabela completa de Requisitos Funcionais (RF01 a RF30) e Requisitos Não-Funcionais (RNF01 a RNF09).
+  - Galeria de telas das interfaces e fluxo Mermaid docente/discente.
+  - Guia de execução local passo a passo em Python (venv, pip, uvicorn) e Node.js (`npm run dev:all`).
+  - Referência à hospedagem contínua gratuita (Render/Vercel) e container Docker.
+  - Auditoria de integridade: 100% dos links internos validados sem nenhum link quebrado.
+- **Pull Request:** [docs: [N1-DOC-02] Elaboração do README v1 oficial da fase N1](https://github.com/gabriel-Koehler/projetosgp/pull/new/docs/n1-doc-02-readme-v1).
+- **Revisor:** Gabriel Koehler da Silva (@gabriel-Koehler).
+- **Status de merge:** Aguardando revisão e autorização de merge.
+
+## Entrega N2-DOC-02 — 09/10/2026
+- **Issue:** [N2-DOC-02 — Atualização do README oficial para versão v2 da N2 com Supabase](https://github.com/gabriel-Koehler/projetosgp/issues).
+- **Responsável:** ALYSON DE LIMA DE OLIVEIRA.
+- **Branch base:** `docs/n1-doc-02-readme-v1` (preservando integralmente a entrega anterior N1-DOC-02).
+- **Branch de trabalho:** `docs/n2-doc-02-readme-v2`.
+- **Status de implementação:** Concluída e validada conforme Critério C3 (20% da N2), Passo 05.
+- **Critérios atendidos:**
+  - Redação e atualização do `README.md` v2 oficial da fase N2 com foco em produção e persistência.
+  - Documentação detalhada da Arquitetura em Camadas (6 camadas) e referências às ADRs (`ADR-0001`, `ADR-0002`, `ADR-0003`).
+  - Módulo de Visão Computacional / OMR com OpenCV (`cv2`) e Pyzbar para correção óptica e homografia de 4 pontos.
+  - Banco de dados Supabase (PostgreSQL Cloud com 12 tabelas relacionais, DDL `src/database/schema.sql`, seed e RLS).
+  - Diagramas oficiais integrados em Mermaid: DER Físico N2 e Diagrama de Classes UML v2.
+  - Tabela completa de variáveis de ambiente (`.env.example`) com finalidades documentadas.
+  - Guia de execução local comparando modo persistente N2 (`npm run dev:real`) e modo mock N1 (`npm run dev:all`), além de migrações (`python -m app.database.migrate`).
+  - Links para sistema em produção (Render/Vercel) e container Docker.
+  - Auditoria de integridade: 100% dos links internos validados sem nenhum link quebrado.
+- **Pull Request a abrir:** `docs: [N2-DOC-02] Atualização do README oficial para versão v2 da N2 com Supabase`.
+- **Revisor:** Gabriel Koehler da Silva (@gabriel-Koehler).
+- **Status de merge:** Aguardando revisão e autorização de merge.
+
+
+
+
+## Integração das APIs e publicação Vercel — 2026-10-11
+
+- Branch: `fix/integracao-api-vercel`, criada a partir de `docs/n2-doc-02-readme-v2` (PR #68), preservando a documentação v2 e a main integrada.
+- Fábrica comum da API modular/persistente, incluindo correções, estatísticas e Excel; autenticação de produção exige PostgreSQL.
+- Vercel Services: Express + FastAPI, rotas públicas e binding interno; health Node corrigido; Docker inicia modo persistente por padrão.
+- Interface real de leitura/conferência, gravação manual, resultados, Excel e folha OMR gerada no backend.
+- README e guia `docs/DEPLOY_VERCEL.md` corrigidos; credenciais de migração e Storage diferenciadas.
+- Validação: 335 testes Python com PostgreSQL descartável, 17 testes JavaScript, configuração validada contra os campos do schema oficial Vercel.
+- Status: commit `27b2ab5` enviado; [PR #69](https://github.com/gabriel-Koehler/projetosgp/pull/69) aberto contra a branch do PR #68. Sem merge ou deploy de produção. Validação Chromium local concluída: login, correção manual persistente, nota, estatísticas, Excel, folha OMR, leitura óptica, layout móvel e health Node.
+- Pendências externas: cadastrar variáveis na Vercel, preparar Supabase e professor via migração, publicar e validar no domínio. Gabriel informou que ainda não configurou o ambiente.
+
+## Correção Vercel — 2026-10-12
+
+- Branch `fix/vercel-api-origin`, a partir da main com PRs #68/#69 integrados.
+- Resolve endereço da API em runtime, usa domínio público na ausência de binding e proíbe localhost na Vercel. Mantém cookies e evita proxy recursivo.
+- Testes de resolução e HTTP: login com 401, proteção do dashboard, indisponibilidade e ausência de binding.
+- Publicação real deve ser verificada após deploy; não altera credenciais Supabase.
+
+## Rota inicial Vercel — 2026-10-12
+
+Diagnóstico HTTP público: `/` retorna 404 da plataforma, enquanto `/api/health` e `/health` respondem 200 e `/api/auth/me` responde 401. Adicionada regra explícita para `/` no serviço web. Branch `fix/vercel-root-route`. Validação de produção pendente do deployment do novo commit.

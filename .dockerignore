@@ -1,0 +1,14 @@
+.git
+.venv
+venv
+node_modules
+deliveries
+graphify-out
+__pycache__
+.pytest_cache
+.env*
+!.env.example
+*.log
+.aws
+.agents
+.codex

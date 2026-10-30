@@ -1,0 +1,49 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "web": {
+      "root": ".",
+      "framework": "express",
+      "entrypoint": "server.js",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "python",
+          "format": "url",
+          "env": "PYTHON_API_URL"
+        }
+      ]
+    },
+    "python": {
+      "root": ".",
+      "framework": "fastapi",
+      "entrypoint": "app.vercel:app"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": {
+        "service": "web"
+      }
+    },
+    {
+      "source": "/api/:path*",
+      "destination": {
+        "service": "python"
+      }
+    },
+    {
+      "source": "/student/gabarito/:path*",
+      "destination": {
+        "service": "python"
+      }
+    },
+    {
+      "source": "/:path*",
+      "destination": {
+        "service": "web"
+      }
+    }
+  ]
+}

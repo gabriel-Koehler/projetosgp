@@ -1,0 +1,15 @@
+@startuml
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 15
+actor Professor as P
+participant "Interface" as UI <<boundary>>
+participant "API" as API <<control>>
+participant "ServicoCorrecao" as S <<control>>
+participant "OMR" as OMR <<control>>
+participant "Repositorio" as R <<repository>>
+database "PostgreSQL" as DB <<database>>
+participant "Supabase Storage" as ST <<external>>
+
+@enduml
