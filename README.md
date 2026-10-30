@@ -60,59 +60,61 @@ Na transição da Fase N1 para a **Fase N2**, o sistema evoluiu do estágio de p
 
 ---
 
-## 🏛️ Arquitetura em Camadas (Layered Architecture)
+## 🌐 Acesso ao Sistema em Nuvem (Critério C2)
 
-O AvaliaSystem foi projetado seguindo rigorosamente o **Padrão de Arquitetura em Camadas**, garantindo alta coesão, separação estrita de responsabilidades (*Separation of Concerns*) e baixo acoplamento.
+A aplicação está publicada e acessível no seguinte endereço:
+* **Ambiente Online:** [https://projetosgp-e9dz.vercel.app/](https://projetosgp-e9dz.vercel.app/)
 
-Consulte a documentação completa em: [`docs/arquitetura/arquitetura-em-camadas.md`](docs/arquitetura/arquitetura-em-camadas.md)  
-Registros de Decisões de Arquitetura: [`docs/arquitetura/adr/`](docs/arquitetura/adr/)
+### 🔑 Credenciais de Demonstração (Acesso Docente)
+* **E-mail / Usuário:** `professor@avaliasystem.com` *(ou `professor`)*
+* **Senha:** `123456`
 
-```mermaid
-flowchart TD
-    subgraph APRESENTACAO ["1. Camada de Apresentação (Presentation Layer)"]
-        UI_WEB["Interface Web Responsiva (HTML5 / CSS3 / JavaScript Modular)"]
-        UI_VIEWS["Templates EJS (views/dashboard, login, print, student)"]
-        UI_PRINT["Diagramação Impressa (@media print para A4 e Folhas OMR)"]
-    end
+> ℹ️ **Nota de Interface:** O botão *"Continuar com o Google"* é um elemento visual demonstrativo de MVP; para autenticar e testar todas as funcionalidades, utilize as credenciais de demonstração acima.
 
-    subgraph APLICACAO ["2. Camada de Aplicação e API (API & Application Layer)"]
-        FASTAPI["FastAPI / Uvicorn (Python 3.11)"]
-        ROUTERS["Controllers RESTful (Auth, Turmas, Questões, Avaliações, Correções)"]
-        SCHEMAS["DTOs e Validação de Esquemas (Pydantic Schemas)"]
-        SECURITY["Segurança de Sessão e Dependências (Cookie HttpOnly / SessionID)"]
-    end
+### 👨‍🎓 Acesso do Aluno
+Conforme a regra de negócio do projeto (RN02), o estudante **não possui login nem painel administrativo**. O acesso do aluno é público e restrito à conferência do gabarito da sua versão da prova através da leitura do QR Code impresso na avaliação ou pela rota `/student`.
 
-    subgraph DOMINIO ["3. Camada de Domínio e Regras de Negócio (Domain Layer)"]
-        MODELS["Modelos de Domínio (Professor, Semestre, Turma, Questão, Avaliação, Versão)"]
-        SHUFFLE["Serviço de Embaralhamento (Fisher-Yates Determinístico)"]
-        GRADING["Serviço de Correção e Cálculo de Notas (GradingService)"]
-        RULES["Regras de Integridade e Negócio (RN01 a RN15)"]
-    end
+---
 
-    subgraph OMR ["4. Camada de Visão Computacional (Vision & OMR Service)"]
-        CV_WARP["Alinhamento e Homografia de 4 Pontos (OpenCV)"]
-        CV_QR["Decodificador de QR Code (pyzbar)"]
-        CV_THRESH["Limiarização Adaptativa e Contagem de Pixels Pretos (NumPy)"]
-    end
+## 📖 Como Usar o Sistema (Guia de Navegação)
 
-    subgraph PERSISTENCIA ["5. Camada de Persistência (Data Access Layer)"]
-        REPOS["Repositórios (Repositories)"]
-        POOL["Connection Pool (psycopg com pooler na porta 6543)"]
-        STORAGE_CLIENT["Cliente de Storage (supabase-py para fotos de provas)"]
-    end
+O fluxo operacional do **AvaliaSystem** segue a jornada do professor documentada em [`docs/requisitos/fluxos-de-usuario.md`](docs/requisitos/fluxos-de-usuario.md):
 
-    subgraph DADOS ["6. Camada de Banco de Dados e Nuvem (Cloud Layer)"]
-        POSTGRES["PostgreSQL Relacional no Supabase (12 tabelas relacionais com RLS)"]
-        BUCKET["Supabase Storage (Bucket privado 'folhas-resposta')"]
-    end
+### 1. Autenticação e Painel Principal
+1. Acesse a tela de login (`/`) e informe as credenciais de demonstração.
+2. No **Painel do Professor (`DashboardScreen`)**, visualize as métricas gerais (questões no banco, provas corrigidas, avaliações criadas e alunos ativos), o gráfico de correções e os atalhos rápidos (*Corrigir prova*, *Nova avaliação* e *Ver resultados*).
 
-    APRESENTACAO --> APLICACAO
-    APLICACAO --> DOMINIO
-    APLICACAO --> OMR
-    DOMINIO --> PERSISTENCIA
-    OMR --> PERSISTENCIA
-    PERSISTENCIA --> DADOS
-```
+### 2. Gestão de Semestres, Turmas e Alunos
+1. No menu lateral fixo, clique em **Semestres & Turmas** (`SemestresScreen`).
+2. Selecione o período letivo desejado na lista lateral esquerda.
+3. Na aba **Turmas**, visualize as turmas cadastradas ou clique em **"+ Nova turma"** para registrar uma turma vinculada ao semestre.
+4. Na aba **Alunos**, visualize a lista de estudantes ou utilize o botão **"Importar alunos"** para carregar arquivos `.csv` ou `.xlsx` com prévia e confirmação.
+
+### 3. Banco de Questões
+1. No menu lateral, acesse **Banco de Questões** (`BancoQuestoesScreen`).
+2. Utilize os filtros laterais por disciplina, nível de dificuldade (Fácil, Média, Difícil) ou a barra de pesquisa textual.
+3. Clique em **"Nova questão"** para cadastrar enunciados, alternativas e definir a resposta correta, ou em **"Importar"** para carga em lote via planilha modelo.
+
+### 4. Elaboração de Avaliações em 4 Passos
+No menu ou no painel, clique em **"Nova avaliação"** para iniciar o assistente (`CriarAvaliacaoScreen`):
+* **Passo 1 (Configurar):** Preencha nome da prova, semestre letivo, turma de destino, data de aplicação e instruções gerais.
+* **Passo 2 (Questões):** Selecione as questões do banco que comporão a prova, acompanhando o contador no painel lateral fixo.
+* **Passo 3 (Gabarito):** Confira ou personalize a alternativa correta de cada questão selecionada para a prova.
+* **Passo 4 (Versões):** Defina a quantidade de versões (ex.: A, B, C) e habilite o embaralhamento de questões e de alternativas para mitigar cola. Ao finalizar, clique em **"Gerar avaliação"**.
+
+### 5. Versões, Impressão e QR Code
+1. Na tela **Versões & QR Code** (`VersoesScreen`), alterne entre as versões geradas (A, B, C) para inspecionar as questões e os gabaritos correspondentes.
+2. Baixe o **QR Code** exclusivo de cada versão em `.png`.
+3. Gere e imprima os documentos diagramados para folha A4 com `@media print`: a **Prova do Aluno**, a **Folha de Respostas OMR** (com marcadores de canto e grade de bolhas) e o **Gabarito Docente**.
+
+### 6. Correção e Resultados
+1. No menu lateral ou painel, clique em **Correção Automática**: envie a imagem da folha de respostas preenchida para decodificação do QR Code e leitura óptica ou utilize a conferência manual das respostas.
+2. Acesse a tela de **Resultados**: consulte as notas apuradas por aluno, verifique as estatísticas de desempenho por questão e exporte a planilha consolidada para Excel (`.xlsx`).
+
+---
+
+
+## 📋 Organização do Trabalho e Governança no GitHub
 
 ### Decisões Arquiteturais Chave (ADRs):
 * **[ADR-0001](docs/arquitetura/adr/0001-escolha-python-opencv-omr.md):** Escolha de Python 3.11, OpenCV e Pyzbar para o motor OMR (elimina custo de OCR proprietário e garante processamento local rápido).
