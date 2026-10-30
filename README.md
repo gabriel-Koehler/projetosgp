@@ -281,78 +281,23 @@ erDiagram
 
 ### 2. Diagrama de Classes UML v2
 
-Consulte o documento completo em: [`docs/arquitetura/diagrama-classes-uml-v2.md`](docs/arquitetura/diagrama-classes-uml-v2.md)
+Consulte o documento completo em: [`docs/Diagrama_de_Classes_do_AvaliaSystem.png
+`](docs/Diagrama_de_Classes_do_AvaliaSystem.png)
 
-```mermaid
-classDiagram
-    class Professor {
-        +int id
-        +str username
-        +str nome
-        +str senha_hash
-    }
-    class Semestre {
-        +int id
-        +int professor_id
-        +str nome
-        +bool ativo
-    }
-    class Turma {
-        +int id
-        +int semestre_id
-        +str nome
-        +str disciplina
-    }
-    class Aluno {
-        +int id
-        +int turma_id
-        +str nome
-        +str matricula
-        +str email
-    }
-    class QuestaoBanco {
-        +int id
-        +int professor_id
-        +str enunciado
-        +list alternativas
-        +str correta
-        +str disciplina
-        +str dificuldade
-        +bool arquivada
-    }
-    class Avaliacao {
-        +int id
-        +int professor_id
-        +int turma_id
-        +str nome
-        +float nota_maxima
-        +bool gabarito_liberado
-    }
-    class VersaoAvaliacao {
-        +int id
-        +int avaliacao_id
-        +str nome
-        +str codigo
-        +dict gabarito
-    }
-    class ResultadoCorrecao {
-        +int id
-        +int versao_id
-        +int aluno_id
-        +float nota
-        +int acertos
-        +int total_questoes
-        +list respostas
-    }
+### 3. Diagrama de Atividade
 
-    Professor "1" --> "*" Semestre
-    Professor "1" --> "*" QuestaoBanco
-    Professor "1" --> "*" Avaliacao
-    Semestre "1" --> "*" Turma
-    Turma "1" --> "*" Aluno
-    Avaliacao "1" --> "*" VersaoAvaliacao
-    VersaoAvaliacao "1" --> "*" ResultadoCorrecao
-```
+Consulte o documento completo em: [`docs/DIAGRAMA_DE_ATIVIDADE_ATUALIZADO.png
+`](docs/DIAGRAMA_DE_ATIVIDADE_ATUALIZADO.png)
+
+### 4. Diagrama de Caso de Uso
+
+Consulte o documento completo em: [`docs/CasosDeUso_completo_AvaliaSytem.png
+`](docs/CasosDeUso_completo_AvaliaSytem.png)
+
+### 5. Diagrama de Sequência
+
+Consulte o documento completo em: [`docs/DIAGRAMA_SEQUENCIA.jpeg
+`](docs/DIAGRAMA_SEQUENCIA.jpeg)
 
 ---
 
