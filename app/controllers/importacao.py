@@ -3,6 +3,7 @@
 from fastapi import Response
 
 from app.schemas.cadastros import ErroLinhaOut, ImportacaoOut, LinhaValidaOut
+from app.services import importacao
 from app.services.importacao import Previa
 
 TIPOS = {
@@ -28,3 +29,11 @@ def arquivo(conteudo: bytes, nome: str) -> Response:
         media_type=TIPOS[extensao],
         headers={"Content-Disposition": f'attachment; filename="{nome}"'},
     )
+
+
+def arquivo_modelo_alunos(formato: str) -> Response:
+    if formato == "csv":
+        conteudo = importacao.modelo_csv(importacao.COLUNAS_ALUNO, importacao.EXEMPLO_ALUNO)
+    else:
+        conteudo = importacao.modelo_alunos_xlsx()
+    return arquivo(conteudo, f"modelo_alunos.{formato}")

@@ -130,14 +130,17 @@ class CadastrosService:
     ) -> tuple[importacao.Previa, int]:
         """RF05: sem confirmar, só devolve a prévia; confirmando, grava as linhas válidas."""
         self.obter_turma(professor_id, turma_id)
-        linhas = importacao.ler_planilha(conteudo, nome_arquivo)
+        linhas = importacao.ler_planilha(conteudo, nome_arquivo, aba_preferida="Alunos")
         previa = importacao.validar_alunos(linhas, self.alunos.matriculas(turma_id))
         importados = 0
         if confirmar and previa.validas:
-            with self.conn.transaction():
-                importados = self.alunos.criar_varios(
-                    turma_id, [(l.dados["nome"], l.dados["matricula"], l.dados["email"]) for l in previa.validas]
-                )
+            try:
+                with self.conn.transaction():
+                    importados = self.alunos.criar_varios(
+                        turma_id, [(l.dados["nome"], l.dados["matricula"], l.dados["email"]) for l in previa.validas]
+                    )
+            except psycopg.errors.UniqueViolation as erro:
+                raise Conflito("A lista da turma mudou durante a importação. Atualize a prévia e tente novamente.") from erro
         return previa, importados
 
 

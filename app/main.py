@@ -12,12 +12,16 @@ from typing import Annotated, Literal
 from uuid import uuid4
 
 import qrcode
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, File, HTTPException, Request, Response, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator, model_validator
 
+from app.controllers.importacao import arquivo_modelo_alunos, resposta_importacao
 from app.mocks.data_provider import MemoryProvider
+from app.schemas.cadastros import AlunoIn
+from app.services import importacao
+from app.services.errors import ErroDeNegocio
 from app.schemas.auth import Username
 
 provider = MemoryProvider()
@@ -287,6 +291,92 @@ def import_students(body: StudentImport, state=Depends(current_state)):
         items = [{"id": str(uuid4()), "classId": body.classId, **student.model_dump()} for student in body.students]
         state["students"].extend(items)
         return data(items)
+
+
+def _aluno_roster(student: dict) -> dict:
+    return {"id": student["id"], "turma_id": student["classId"], "nome": student["name"],
+            "matricula": student["registration"], "email": student.get("email")}
+
+
+def _alunos_da_turma(state: dict, turma_id: str) -> list[dict]:
+    if not any(turma["id"] == turma_id for turma in state["classes"]):
+        missing("Turma não encontrada.")
+    return [student for student in state["students"] if student["classId"] == turma_id]
+
+
+def _aluno_da_conta(state: dict, aluno_id: str) -> dict:
+    student = next((student for student in state["students"] if student["id"] == aluno_id), None)
+    if student is None:
+        missing("Aluno não encontrado.")
+    return student
+
+
+@app.get("/api/alunos/modelo.{formato}")
+def modelo_alunos(formato: Literal["csv", "xlsx"], _=Depends(current_user)):
+    return arquivo_modelo_alunos(formato)
+
+
+@app.get("/api/turmas/{turma_id}/alunos")
+def listar_alunos_da_turma(turma_id: str, state=Depends(current_state)):
+    with provider.lock:
+        return data([_aluno_roster(student) for student in _alunos_da_turma(state, turma_id)])
+
+
+@app.post("/api/turmas/{turma_id}/alunos", status_code=201)
+def criar_aluno_na_turma(turma_id: str, dados: AlunoIn, state=Depends(current_state)):
+    with provider.lock:
+        students = _alunos_da_turma(state, turma_id)
+        if any(student["registration"] == dados.matricula for student in students):
+            raise HTTPException(409, "Matrícula já cadastrada nesta turma.")
+        student = {"id": str(uuid4()), "classId": turma_id, "name": dados.nome,
+                   "registration": dados.matricula, "email": dados.email}
+        state["students"].append(student)
+        return data(_aluno_roster(student))
+
+
+@app.put("/api/alunos/{aluno_id}")
+def atualizar_aluno_na_turma(aluno_id: str, dados: AlunoIn, state=Depends(current_state)):
+    with provider.lock:
+        student = _aluno_da_conta(state, aluno_id)
+        turma = _alunos_da_turma(state, student["classId"])
+        if any(other["id"] != aluno_id and other["registration"] == dados.matricula for other in turma):
+            raise HTTPException(409, "Matrícula já cadastrada nesta turma.")
+        student.update(name=dados.nome, registration=dados.matricula, email=dados.email)
+        return data(_aluno_roster(student))
+
+
+@app.delete("/api/alunos/{aluno_id}", status_code=204)
+def remover_aluno_da_turma(aluno_id: str, state=Depends(current_state)):
+    with provider.lock:
+        state["students"].remove(_aluno_da_conta(state, aluno_id))
+        for result in state["results"]:
+            if result["studentId"] == aluno_id:
+                result["studentId"] = None
+    return Response(status_code=204)
+
+
+@app.post("/api/turmas/{turma_id}/alunos/importar")
+def importar_alunos_da_turma(
+    turma_id: str,
+    planilha: UploadFile = File(alias="arquivo"),
+    confirmar: bool = False,
+    state=Depends(current_state),
+):
+    try:
+        conteudo = planilha.file.read(importacao.TAMANHO_MAXIMO + 1)
+        linhas = importacao.ler_planilha(conteudo, planilha.filename or "", aba_preferida="Alunos")
+    except ErroDeNegocio as erro:
+        raise HTTPException(erro.status_code, erro.mensagem) from erro
+    with provider.lock:
+        students = _alunos_da_turma(state, turma_id)
+        previa = importacao.validar_alunos(linhas, {student["registration"] for student in students})
+        novos = [
+            {"id": str(uuid4()), "classId": turma_id, "name": item.dados["nome"],
+             "registration": item.dados["matricula"], "email": item.dados["email"]}
+            for item in previa.validas
+        ] if confirmar else []
+        state["students"].extend(novos)
+    return data(resposta_importacao(previa, len(novos), confirmar).model_dump())
 
 
 @app.get("/api/questoes")

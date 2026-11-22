@@ -41,9 +41,11 @@ class TurmaOut(BaseModel):
 
 
 class AlunoIn(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
     nome: str = Field(min_length=1, max_length=200)
     matricula: str = Field(min_length=1, max_length=50)
-    email: str | None = Field(default=None, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+    email: str | None = Field(default=None, max_length=254, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 class AlunoOut(BaseModel):
