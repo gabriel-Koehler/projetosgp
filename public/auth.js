@@ -74,7 +74,6 @@ $('auth-form').onsubmit = async event => {
 
 setMode('login');
 if (real) {
-  document.querySelector('.demo-help').hidden = true;
   api('/auth/options').then(({google}) => {
     $('google').hidden = !google;
     document.querySelector('.divider').hidden = !google;
