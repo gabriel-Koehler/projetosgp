@@ -263,3 +263,11 @@ Diagnóstico HTTP público: `/` retorna 404 da plataforma, enquanto `/api/health
 - Branch `feat/confirmacao-email-professor` atualizada para aproveitar o PR anterior. O fluxo de envio de código foi revertido e o cadastro local passa a pedir nome, nome de usuário e senha.
 - Login com Google segue pelo OAuth já configurado. Contas antigas também podem usar o e-mail anteriormente cadastrado.
 - A mudança dispensa o Resend e a tabela de cadastros pendentes. O esquema atual de professores aceita contas sem e-mail.
+
+
+## Gestão de alunos nas turmas
+
+- Branch `feat/gestao-alunos-turma`, baseada em `b610531` de `feat/confirmacao-email-professor`.
+- Ao salvar uma turma, abre a lista de alunos. Turmas existentes dão acesso à busca, cadastro, edição e remoção. A remoção preserva correções já registradas e desvincula o aluno.
+- Importação CSV ou Excel com prévia por linha e confirmação. O modelo Excel usa nome, matrícula e e-mail opcional, com matrícula como texto e instruções em aba separada.
+- Validação: 23 testes JavaScript, 12 testes da API de demonstração, 2 testes de gestão e importação de alunos e teste HTTP local passando pelo proxy. Validação em PostgreSQL depende de ambiente de teste com conexão disponível.

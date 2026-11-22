@@ -54,7 +54,7 @@ def _chave_coluna(nome: str) -> str:
     return normalizar_texto(str(nome or "")).replace(" ", "_")
 
 
-def ler_planilha(conteudo: bytes, nome_arquivo: str) -> list[LinhaImportada]:
+def ler_planilha(conteudo: bytes, nome_arquivo: str, *, aba_preferida: str | None = None) -> list[LinhaImportada]:
     if len(conteudo) > TAMANHO_MAXIMO:
         raise ErroDeNegocio("Arquivo muito grande (máximo 5 MB).")
     if not conteudo:
@@ -62,7 +62,7 @@ def ler_planilha(conteudo: bytes, nome_arquivo: str) -> list[LinhaImportada]:
 
     extensao = nome_arquivo.lower().rsplit(".", 1)[-1] if "." in nome_arquivo else ""
     if extensao == "xlsx":
-        linhas = _ler_xlsx(conteudo)
+        linhas = _ler_xlsx(conteudo, aba_preferida)
     elif extensao == "csv":
         linhas = _ler_csv(conteudo)
     else:
@@ -82,12 +82,16 @@ def ler_planilha(conteudo: bytes, nome_arquivo: str) -> list[LinhaImportada]:
     return resultado
 
 
-def _ler_xlsx(conteudo: bytes) -> list[list]:
+def _ler_xlsx(conteudo: bytes, aba_preferida: str | None) -> list[list]:
     try:
-        planilha = load_workbook(io.BytesIO(conteudo), read_only=True, data_only=True).active
+        livro = load_workbook(io.BytesIO(conteudo), read_only=True, data_only=True)
+        try:
+            planilha = livro[aba_preferida] if aba_preferida in livro.sheetnames else livro.active
+            return list(planilha.iter_rows(values_only=True))
+        finally:
+            livro.close()
     except Exception as erro:
         raise ErroDeNegocio("Não foi possível abrir o arquivo Excel. Confira se ele não está corrompido.") from erro
-    return [list(linha) for linha in planilha.iter_rows(values_only=True)]
 
 
 def _ler_csv(conteudo: bytes) -> list[list]:
@@ -198,15 +202,21 @@ def validar_alunos(linhas: list[LinhaImportada], matriculas_existentes: set[str]
 
         if not nome:
             erros.append("Nome não informado.")
+        elif len(nome) > 200:
+            erros.append("Nome deve ter até 200 caracteres.")
         if not matricula:
             erros.append("Matrícula não informada.")
+        elif len(matricula) > 50:
+            erros.append("Matrícula deve ter até 50 caracteres.")
         elif matricula in matriculas_existentes:
             erros.append("Matrícula já cadastrada nesta turma.")
         elif matricula in vistas:
             erros.append(f"Matrícula repetida na planilha (igual à linha {vistas[matricula]}).")
         else:
             vistas[matricula] = item.linha
-        if email and not EMAIL.match(email):
+        if email and len(email) > 254:
+            erros.append("E-mail deve ter até 254 caracteres.")
+        elif email and not EMAIL.fullmatch(email):
             erros.append(f"E-mail '{email}' inválido.")
 
         if erros:
@@ -222,7 +232,7 @@ EXEMPLO_QUESTAO = [
     "Qual linguagem define a estrutura de uma página web?", "HTML", "CSS", "JavaScript", "SQL", "",
     "A", "Desenvolvimento Web", "Fundamentos", "facil",
 ]
-EXEMPLO_ALUNO = ["Maria da Silva", "2026001", "maria@exemplo.com"]
+EXEMPLO_ALUNO = ["Maria da Silva", "000123", "maria@exemplo.com"]
 
 
 def modelo_csv(colunas: list[str], exemplo: list[str]) -> bytes:
@@ -233,7 +243,39 @@ def modelo_csv(colunas: list[str], exemplo: list[str]) -> bytes:
     return saida.getvalue().encode("utf-8-sig")
 
 
+def modelo_alunos_xlsx() -> bytes:
+    livro = _livro_modelo(COLUNAS_ALUNO, EXEMPLO_ALUNO)
+    planilha = livro.active
+    planilha.title = "Alunos"
+    planilha.freeze_panes = "A2"
+    for coluna, largura in zip("ABC", (40, 23, 42)):
+        planilha.column_dimensions[coluna].width = largura
+    planilha.column_dimensions["B"].number_format = "@"
+    planilha["B2"].number_format = "@"
+
+    guia = livro.create_sheet("Instruções")
+    guia.column_dimensions["A"].width = 86
+    guia["A1"] = "Como preencher o modelo de alunos"
+    guia["A1"].font = Font(bold=True, color="FFFFFF")
+    guia["A1"].fill = PatternFill("solid", fgColor="305496")
+    for instrucao in (
+        "Preencha a aba Alunos, mantendo os cabeçalhos da primeira linha.",
+        "Substitua ou apague o exemplo da segunda linha antes de importar.",
+        "Nome completo é obrigatório e pode ter até 200 caracteres.",
+        "Matrícula é obrigatória, tem até 50 caracteres e é única por turma.",
+        "Mantenha a matrícula como texto para preservar zeros à esquerda.",
+        "E-mail é opcional. Deixe a célula vazia se não houver endereço.",
+        "A turma é selecionada no AvaliaSystem. Não adicione uma coluna de turma.",
+    ):
+        guia.append([instrucao])
+    return _salvar_modelo(livro)
+
+
 def modelo_xlsx(colunas: list[str], exemplo: list[str]) -> bytes:
+    return _salvar_modelo(_livro_modelo(colunas, exemplo))
+
+
+def _livro_modelo(colunas: list[str], exemplo: list[str]) -> Workbook:
     livro = Workbook()
     planilha = livro.active
     planilha.title = "Importação"
@@ -244,6 +286,10 @@ def modelo_xlsx(colunas: list[str], exemplo: list[str]) -> bytes:
         celula.fill = PatternFill("solid", fgColor="305496")
     for coluna in planilha.columns:
         planilha.column_dimensions[coluna[0].column_letter].width = max(14, len(str(coluna[1].value or "")) + 2)
+    return livro
+
+
+def _salvar_modelo(livro: Workbook) -> bytes:
     saida = io.BytesIO()
     livro.save(saida)
     return saida.getvalue()

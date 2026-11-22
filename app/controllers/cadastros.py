@@ -4,7 +4,7 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 
-from app.controllers.importacao import arquivo, resposta_importacao
+from app.controllers.importacao import arquivo_modelo_alunos, resposta_importacao
 from app.core.security import professor_id
 from app.schemas.cadastros import AlunoIn, AlunoOut, AtivoIn, ImportacaoOut, SemestreIn, SemestreOut, TurmaIn, TurmaOut
 from app.services import importacao
@@ -78,8 +78,7 @@ def excluir_turma(turma_id: int, prof: int = Professor, service: CadastrosServic
 @router.get("/alunos/modelo.{formato}", tags=["importação"])
 def modelo_alunos(formato: Literal["csv", "xlsx"], _: int = Professor):
     """RF05: modelo de planilha para importar alunos."""
-    gerar = importacao.modelo_csv if formato == "csv" else importacao.modelo_xlsx
-    return arquivo(gerar(importacao.COLUNAS_ALUNO, importacao.EXEMPLO_ALUNO), f"modelo_alunos.{formato}")
+    return arquivo_modelo_alunos(formato)
 
 
 @router.get("/turmas/{turma_id}/alunos", response_model=list[AlunoOut])
@@ -93,14 +92,14 @@ def criar_aluno(turma_id: int, dados: AlunoIn, prof: int = Professor, service: C
 
 
 @router.post("/turmas/{turma_id}/alunos/importar", response_model=ImportacaoOut, tags=["importação"])
-async def importar_alunos(
+def importar_alunos(
     turma_id: int,
     arquivo_planilha: UploadFile = File(alias="arquivo"),
     confirmar: bool = Query(False, description="false = só prévia; true = grava as linhas válidas"),
     prof: int = Professor,
     service: CadastrosService = Service,
 ):
-    conteudo = await arquivo_planilha.read()
+    conteudo = arquivo_planilha.file.read(importacao.TAMANHO_MAXIMO + 1)
     previa, importados = service.importar_alunos(prof, turma_id, conteudo, arquivo_planilha.filename or "", confirmar)
     return resposta_importacao(previa, importados, confirmar)
 
