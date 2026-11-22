@@ -728,6 +728,10 @@ td {
 }
 
 #notice {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   position: sticky;
   top: 10px;
   z-index: 5;
@@ -737,6 +741,16 @@ td {
   border: 1px solid #a9c8af;
   border-radius: 8px;
   padding: 13px
+}
+
+#notice-message {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+#notice-dismiss {
+  flex: none;
+  padding: 4px 10px;
 }
 
 dialog {
