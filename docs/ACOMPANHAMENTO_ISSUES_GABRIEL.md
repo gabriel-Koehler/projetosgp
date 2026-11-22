@@ -271,3 +271,9 @@ Diagnóstico HTTP público: `/` retorna 404 da plataforma, enquanto `/api/health
 - Ao salvar uma turma, abre a lista de alunos. Turmas existentes dão acesso à busca, cadastro, edição e remoção. A remoção preserva correções já registradas e desvincula o aluno.
 - Importação CSV ou Excel com prévia por linha e confirmação. O modelo Excel usa nome, matrícula e e-mail opcional, com matrícula como texto e instruções em aba separada.
 - Validação: 23 testes JavaScript, 12 testes da API de demonstração, 2 testes de gestão e importação de alunos e teste HTTP local passando pelo proxy. Validação em PostgreSQL depende de ambiente de teste com conexão disponível.
+
+
+## Fechamento das notificações do painel
+
+- Branch `fix/notificacoes-temporarias`, baseada em `0bfbbe2` de `feat/gestao-alunos-turma`.
+- Avisos globais do painel fecham após sete segundos, têm botão de fechamento e reiniciam o prazo quando uma nova mensagem substitui a anterior. Erros de validação continuam disponíveis junto ao formulário.

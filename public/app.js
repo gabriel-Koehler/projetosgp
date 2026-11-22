@@ -6,6 +6,7 @@ import { renderCorrection, renderResults } from './post-exam.js';
 import { parseQuestionsCsv } from './question-csv.js';
 import { importRealQuestions } from './question-import.js';
 import { renderClassStudents } from './class-students.js';
+import { createNotice } from './notice.js';
 import {
   api, allQuestions, evaluationQr
 } from './api.js';
@@ -20,11 +21,8 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({
 let state, user, step = 1,
   draft = {},
   selectedSemester = 's1';
-const screen = $('screen'),
-  notice = message => {
-    $('notice').hidden = false;
-    $('notice').textContent = message;
-  };
+const screen = $('screen');
+const notice = createNotice($('notice'), $('notice-message'), $('notice-dismiss'));
 const head = (title, sub, actions = '') => '<header class="section-heading"><div><h1>' + title + '</h1><p>' + sub + '</p></div><div class="actions">' + actions + '</div></header>';
 const button = (label, action, cls = '') => '<button type="button" class="' + cls + '" data-action="' + action + '">' + label + '</button>';
 const empty = (title, detail) => '<div class="panel empty"><h2>' + title + '</h2><p>' + detail + '</p></div>';
