@@ -24,6 +24,18 @@ ALTER TABLE professor ADD COLUMN IF NOT EXISTS google_sub TEXT;
 ALTER TABLE professor ALTER COLUMN senha_hash DROP NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_professor_google_sub ON professor (google_sub);
 
+-- Cadastro com senha só cria o professor depois da confirmação por e-mail.
+CREATE TABLE IF NOT EXISTS cadastro_professor_pendente (
+    email        TEXT PRIMARY KEY,
+    username     TEXT NOT NULL,
+    nome         TEXT NOT NULL,
+    senha_hash   TEXT NOT NULL,
+    codigo_hash  TEXT NOT NULL,
+    expira_em    TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_cadastro_professor_expira ON cadastro_professor_pendente (expira_em);
+ALTER TABLE cadastro_professor_pendente ENABLE ROW LEVEL SECURITY;
+
 -- RF02
 CREATE TABLE IF NOT EXISTS semestre (
     id            BIGSERIAL PRIMARY KEY,

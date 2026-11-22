@@ -257,3 +257,9 @@ Diagnóstico HTTP público: `/` retorna 404 da plataforma, enquanto `/api/health
 - Pendências de ambiente para validação externa: acesso ao GitHub para publicação e PR, PostgreSQL de teste para confirmar persistência e credenciais OAuth para login Google real.
 
 - Complemento na mesma branch: removida a exposição de credenciais de demonstração, adicionado login por nome de usuário ou e-mail, incluídas confirmação e orientação de força da senha e disponibilizado o botão Google na tela de login e cadastro.
+
+## Confirmação de e-mail no cadastro de professores
+
+- Branch `feat/confirmacao-email-professor`, baseada no commit `64dde6a` do cadastro já integrado pelo responsável.
+- O cadastro por senha só cria o professor depois de validar um código enviado via Resend. Código de uso único, com validade de 15 minutos.
+- Validação de API com envio simulado. Publicação exige migração no Supabase e configuração do remetente e da chave Resend na Vercel.

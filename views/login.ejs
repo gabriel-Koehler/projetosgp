@@ -11,6 +11,6 @@
   <small id="password-hint">Use pelo menos 8 caracteres. Para uma senha forte, prefira 12 ou mais, combine letras, números e símbolos e evite sequências previsíveis.</small>
 </div>
 <label id="confirmation-field" hidden>Confirme a senha<input name="passwordConfirmation" type="password" autocomplete="new-password" maxlength="128"></label>
-</div><p id="auth-feedback" role="alert"<% if (!authNotice) { %> hidden<% } %>><%= authNotice %></p><button type="submit" id="submit-auth">Entrar</button></form>
-<p class="auth-switch"><span id="switch-label">Não tem uma conta?</span> <button id="switch-mode" class="text-button" type="button">Crie uma!</button></p></div><small class="auth-footer">© <%= new Date().getFullYear() %> AvaliaSystem</small></section>
+</div><label id="email-code-field" hidden>Código de confirmação<input name="code" type="text" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" maxlength="16" disabled></label><p id="auth-feedback" role="alert"<% if (!authNotice) { %> hidden<% } %>><%= authNotice %></p><button type="submit" id="submit-auth">Entrar</button></form>
+<p class="auth-switch"><button id="resume-verification" class="text-button" type="button" hidden>Já tenho um código</button> <span id="switch-label">Não tem uma conta?</span> <button id="switch-mode" class="text-button" type="button">Crie uma!</button></p></div><small class="auth-footer">© <%= new Date().getFullYear() %> AvaliaSystem</small></section>
 </main></body></html>

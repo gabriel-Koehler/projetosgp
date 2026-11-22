@@ -39,6 +39,8 @@ class Settings:
     google_client_id: str | None = None
     google_client_secret: str | None = None
     google_redirect_uri: str | None = None
+    resend_api_key: str | None = None
+    registration_email_from: str | None = None
 
     @property
     def google_enabled(self) -> bool:
@@ -69,4 +71,6 @@ def get_settings() -> Settings:
         google_client_id=os.getenv("GOOGLE_CLIENT_ID") or None,
         google_client_secret=os.getenv("GOOGLE_CLIENT_SECRET") or None,
         google_redirect_uri=os.getenv("GOOGLE_REDIRECT_URI") or None,
+        resend_api_key=os.getenv("RESEND_API_KEY") or None,
+        registration_email_from=os.getenv("REGISTRATION_EMAIL_FROM") or None,
     )
