@@ -62,7 +62,8 @@ class MemoryProvider:
 
     def add_user(self, name, email, password, user_id=None, *, username=None):
         with self.lock:
-            if any(u["email"] == email.lower() for u in self.users.values()):
+            email = email.lower() if email else None
+            if email and any(u["email"] == email for u in self.users.values()):
                 raise ValueError("Já existe uma conta com esse e-mail.")
             username = username.lower() if username else None
             if username and any(u["username"] == username for u in self.users.values()):
@@ -70,7 +71,7 @@ class MemoryProvider:
             salt = token_bytes(16)
             user = {
                 "username": username,
-                "id": user_id or str(uuid4()), "name": name, "email": email.lower(),
+                "id": user_id or str(uuid4()), "name": name, "email": email,
                 "salt": salt, "password": pbkdf2_hmac("sha256", password.encode(), salt, 120000),
             }
             self.users[user["id"]] = user

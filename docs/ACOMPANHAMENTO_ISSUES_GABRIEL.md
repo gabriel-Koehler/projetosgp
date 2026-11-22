@@ -258,8 +258,8 @@ Diagnóstico HTTP público: `/` retorna 404 da plataforma, enquanto `/api/health
 
 - Complemento na mesma branch: removida a exposição de credenciais de demonstração, adicionado login por nome de usuário ou e-mail, incluídas confirmação e orientação de força da senha e disponibilizado o botão Google na tela de login e cadastro.
 
-## Confirmação de e-mail no cadastro de professores
+## Cadastro por usuário sem e-mail
 
-- Branch `feat/confirmacao-email-professor`, baseada no commit `64dde6a` do cadastro já integrado pelo responsável.
-- O cadastro por senha só cria o professor depois de validar um código enviado via Resend. Código de uso único, com validade de 15 minutos.
-- Validação de API com envio simulado. Publicação exige migração no Supabase e configuração do remetente e da chave Resend na Vercel.
+- Branch `feat/confirmacao-email-professor` atualizada para aproveitar o PR anterior. O fluxo de envio de código foi revertido e o cadastro local passa a pedir nome, nome de usuário e senha.
+- Login com Google segue pelo OAuth já configurado. Contas antigas também podem usar o e-mail anteriormente cadastrado.
+- A mudança dispensa o Resend e a tabela de cadastros pendentes. O esquema atual de professores aceita contas sem e-mail.

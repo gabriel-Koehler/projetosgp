@@ -27,58 +27,16 @@ class ProfessorRepository:
         ).fetchone()
         return Professor(**linha) if linha else None
 
-    def cadastrar(self, username: str, email: str, nome: str, senha_hash: str) -> dict | None:
+    def cadastrar(self, username: str, nome: str, senha_hash: str) -> dict | None:
         return self.conn.execute(
             """
-            INSERT INTO professor (username, email, nome, senha_hash)
-            SELECT %s, %s, %s, %s
-            WHERE NOT EXISTS (SELECT 1 FROM professor WHERE lower(username) IN (%s, %s))
+            INSERT INTO professor (username, nome, senha_hash)
+            SELECT %s, %s, %s
+            WHERE NOT EXISTS (SELECT 1 FROM professor WHERE lower(username) = %s)
             ON CONFLICT DO NOTHING
             RETURNING id, username, nome
             """,
-            (username, email, nome, senha_hash, username, email),
-        ).fetchone()
-
-    def cadastro_disponivel(self, username: str, email: str) -> bool:
-        return self.conn.execute(
-            """
-            SELECT NOT EXISTS (
-                SELECT 1 FROM professor WHERE email = %s OR lower(username) IN (%s, %s)
-            ) AS disponivel
-            """,
-            (email, username, email),
-        ).fetchone()["disponivel"]
-
-    def salvar_cadastro_pendente(self, email: str, username: str, nome: str,
-                                 senha_hash: str, codigo_hash: str) -> bool:
-        self.conn.execute("DELETE FROM cadastro_professor_pendente WHERE expira_em <= now()")
-        result = self.conn.execute(
-            """
-            INSERT INTO cadastro_professor_pendente (email, username, nome, senha_hash, codigo_hash, expira_em)
-            VALUES (%s, %s, %s, %s, %s, now() + interval '15 minutes')
-            ON CONFLICT (email) DO UPDATE SET
-                username = EXCLUDED.username, nome = EXCLUDED.nome, senha_hash = EXCLUDED.senha_hash,
-                codigo_hash = EXCLUDED.codigo_hash, expira_em = EXCLUDED.expira_em
-            WHERE cadastro_professor_pendente.expira_em <= now() + interval '14 minutes'
-            """,
-            (email, username, nome, senha_hash, codigo_hash),
-        )
-        return result.rowcount == 1
-
-    def cancelar_cadastro_pendente(self, email: str, codigo_hash: str) -> None:
-        self.conn.execute(
-            "DELETE FROM cadastro_professor_pendente WHERE email = %s AND codigo_hash = %s",
-            (email, codigo_hash),
-        )
-
-    def consumir_cadastro_pendente(self, email: str, codigo_hash: str) -> dict | None:
-        return self.conn.execute(
-            """
-            DELETE FROM cadastro_professor_pendente
-            WHERE email = %s AND codigo_hash = %s AND expira_em > now()
-            RETURNING username, email, nome, senha_hash
-            """,
-            (email, codigo_hash),
+            (username, nome, senha_hash, username),
         ).fetchone()
 
     def autenticar_google(self, subject: str, nome: str) -> dict:
