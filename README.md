@@ -480,4 +480,4 @@ GOOGLE_CLIENT_SECRET=
 GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
 ```
 
-Em produção, use a URL HTTPS pública do AvaliaSystem com o mesmo caminho. O primeiro acesso Google cria o professor e os seguintes usam a mesma conta. Contas por senha e contas Google têm cadastros independentes, mesmo quando usam o mesmo e-mail. [Documentação do Google sobre OpenID Connect](https://developers.google.com/identity/openid-connect/openid-connect)
+Para testar no computador, inicie o modo persistente com `npm run dev:real` (Node.js 22 ou superior) e abra a mesma origem definida na URI autorizada (por exemplo, `http://localhost:3000`). Em produção, use a URL HTTPS pública do AvaliaSystem com o mesmo caminho. O primeiro acesso Google cria o professor e os seguintes usam a mesma conta. Contas por senha e contas Google têm cadastros independentes, mesmo quando usam o mesmo e-mail. [Documentação do Google sobre OpenID Connect](https://developers.google.com/identity/openid-connect/openid-connect)

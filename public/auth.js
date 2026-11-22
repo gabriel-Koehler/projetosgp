@@ -103,10 +103,4 @@ $('auth-form').onsubmit = async event => {
 };
 
 setMode('login');
-const params = new URLSearchParams(location.search);
-if (params.has('expired')) feedback('Sua sessão expirou. Entre novamente.');
-if (params.has('google')) {
-  feedback(params.get('google') === 'unavailable'
-    ? 'O acesso com Google está indisponível.'
-    : 'Não foi possível entrar com o Google. Tente novamente.');
-}
+if ($('auth-feedback').textContent) $('auth-feedback').hidden = false;

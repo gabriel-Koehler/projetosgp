@@ -69,7 +69,16 @@ async function sessionUser(req) {
   }
 }
 const pageRoute = handler => (req,res) => Promise.resolve(handler(req,res)).catch(()=>res.status(503).render('unavailable'));
-app.get('/', pageRoute(async (req, res) => (await sessionUser(req)) ? res.redirect('/dashboard') : res.render('login')));
+app.get('/', pageRoute(async (req, res) => {
+  if (await sessionUser(req)) return res.redirect('/dashboard');
+  const google = req.query.google;
+  const authNotice = google === 'unavailable'
+    ? 'O login com Google ainda não está configurado neste ambiente.'
+    : google === 'failed'
+      ? 'Não foi possível entrar com o Google. Tente novamente.'
+      : req.query.expired ? 'Sua sessão expirou. Entre novamente.' : '';
+  res.render('login', {authNotice});
+}));
 app.get('/dashboard', pageRoute(async (req, res) => {
   const user = await sessionUser(req);
   if (!user) return res.redirect('/');
