@@ -37,6 +37,10 @@ test('web renders login for API 401 and protects dashboard using public fallback
     await new Promise(resolve=>server.once('listening',resolve));
     const request=path=>new Promise((resolve,reject)=>get({hostname:'127.0.0.1',port:server.address().port,path,headers:{cookie:'session=test'}},res=>{let body='';res.on('data',c=>body+=c);res.on('end',()=>resolve({status:res.statusCode,body,location:res.headers.location}));}).on('error',reject));
     assert.equal((await request('/')).status,200);
+    const oauthUnavailable = await request('/?google=unavailable');
+    assert.equal(oauthUnavailable.status,200);
+    assert.match(oauthUnavailable.body, /action="\/api\/auth\/google"/);
+    assert.match(oauthUnavailable.body, /role="alert">O login com Google ainda não está configurado/);
     assert.equal(received.url,'https://example.com/api/auth/me');
     assert.equal(received.init.headers.Cookie,'session=test');
     const dashboard=await request('/dashboard');

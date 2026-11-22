@@ -394,24 +394,19 @@ small {
   margin: 20px 0 0
 }
 
-.demo-help {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 20px;
-  padding-top: 13px;
-  border-top: 1px solid var(--border)
-}
-
-.demo-help summary {
-  cursor: pointer
-}
-
-.demo-help p {
-  margin: 8px 0 0
-}
-
 .auth-footer {
   font-size: 11px
+}
+
+.password-guidance {
+  display: grid;
+  gap: .25rem;
+  margin: .5rem 0 .75rem;
+  font-size: .8rem;
+}
+
+.password-guidance meter {
+  width: 100%;
 }
 
 #auth-feedback,

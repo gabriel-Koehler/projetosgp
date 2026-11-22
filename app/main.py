@@ -14,10 +14,11 @@ from uuid import uuid4
 import qrcode
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator, model_validator
 
 from app.mocks.data_provider import MemoryProvider
+from app.schemas.auth import Username
 
 provider = MemoryProvider()
 app = FastAPI(title="AvaliaSystem Mock API", version="1.0.0")
@@ -50,6 +51,8 @@ class Recovery(Payload):
 class Register(Recovery):
     name: Text
     password: Password
+    username: Username | None = None
+    passwordConfirmation: str | None = Field(default=None, max_length=128)
 
 
 class Semester(Payload):
@@ -161,22 +164,29 @@ def health():
 def login(body: Login, request: Request, response: Response):
     user = provider.authenticate(body.email, body.password)
     if not user:
-        raise HTTPException(401, "E-mail ou senha inválidos.")
+        raise HTTPException(401, "Usuário, e-mail ou senha inválidos.")
     return sign_in(user, request, response)
 
 
 @app.post("/api/auth/register")
 def register(body: Register, request: Request, response: Response):
+    if body.passwordConfirmation is not None and body.password != body.passwordConfirmation:
+        raise HTTPException(422, "As senhas não coincidem.")
     try:
-        user = provider.add_user(body.name, body.email, body.password)
+        user = provider.add_user(body.name, body.email, body.password, username=body.username)
     except ValueError as error:
         raise HTTPException(409, str(error)) from error
     return sign_in(user, request, response)
 
 
+@app.get("/api/auth/google")
+def google_unavailable():
+    return RedirectResponse("/?google=unavailable", status_code=303)
+
+
 @app.post("/api/auth/recovery")
 def recovery(body: Recovery):
-    return data({"message": "Solicitação simulada. Este MVP não envia e-mails; use a conta de demonstração ou crie uma conta."})
+    return data({"message": "Solicitação simulada. Este ambiente não envia e-mails de recuperação."})
 
 
 @app.post("/api/auth/logout")
