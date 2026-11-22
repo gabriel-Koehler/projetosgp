@@ -36,17 +36,14 @@ def login(dados: LoginRequest, request: Request, settings: Settings = Depends(ge
 
 @router.post("/register", response_model=ProfessorResponse, status_code=status.HTTP_201_CREATED)
 def register(dados: RegisterRequest, request: Request, conn: psycopg.Connection = Depends(get_conn)):
+    if dados.password != dados.passwordConfirmation:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "As senhas não coincidem.")
     professor = ProfessorRepository(conn).cadastrar(
-        dados.email.lower(), dados.name, passwords.gerar_hash(dados.password)
+        dados.username.lower(), dados.email.lower(), dados.name, passwords.gerar_hash(dados.password)
     )
     if professor is None:
-        raise HTTPException(status.HTTP_409_CONFLICT, "Já existe uma conta com esse e-mail.")
+        raise HTTPException(status.HTTP_409_CONFLICT, "Nome de usuário ou e-mail já cadastrado.")
     return iniciar_sessao(request, professor)
-
-
-@router.get("/options")
-def options(settings: Settings = Depends(get_settings)):
-    return {"google": settings.google_enabled}
 
 
 def redirect(url: str) -> RedirectResponse:

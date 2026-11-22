@@ -15,6 +15,10 @@ CREATE TABLE IF NOT EXISTS professor (
     criado_em   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Professores existentes continuam usando o username original, inclusive se for um e-mail.
+ALTER TABLE professor ADD COLUMN IF NOT EXISTS email TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_professor_email ON professor (email);
+
 -- Contas Google usam o identificador estável do provedor e dispensam senha local.
 ALTER TABLE professor ADD COLUMN IF NOT EXISTS google_sub TEXT;
 ALTER TABLE professor ALTER COLUMN senha_hash DROP NOT NULL;

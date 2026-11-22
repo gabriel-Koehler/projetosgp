@@ -4,6 +4,26 @@ import {
 const $ = id => document.getElementById(id);
 const real = window.APP_CONFIG?.dataMode === 'real';
 let mode = 'login';
+const password = $('password');
+const confirmation = document.querySelector('[name=passwordConfirmation]');
+
+function updatePasswordFeedback() {
+  const value = password.value;
+  const varieties = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^A-Za-z0-9\s]/]
+    .filter(pattern => pattern.test(value)).length;
+  let strength = 0;
+  if (value) {
+    strength = 1;
+    if (value.length >= 8 && (varieties >= 2 || value.length >= 12)) strength = 2;
+    if (value.length >= 12 && varieties >= 3 && new Set(value).size >= 6) strength = 3;
+  }
+  $('password-strength').value = strength;
+  const label = ['Força da senha', 'Força da senha: fraca', 'Força da senha: média', 'Força da senha: forte'][strength];
+  if ($('password-strength-label').textContent !== label) $('password-strength-label').textContent = label;
+  confirmation.setCustomValidity(confirmation.value && confirmation.value !== value ? 'As senhas não coincidem.' : '');
+}
+password.addEventListener('input', updatePasswordFeedback);
+confirmation.addEventListener('input', updatePasswordFeedback);
 const feedback = message => {
   $('auth-feedback').hidden = false;
   $('auth-feedback').textContent = message;
@@ -17,15 +37,27 @@ function setMode(next) {
   $('auth-subtitle').textContent = register ? 'Cadastre-se como professor' :
     recovery ? 'Recuperação simulada no MVP' : 'Acesse sua conta de professor';
   const email = document.querySelector('[name=email]');
-  email.type = real && !register ? 'text' : 'email';
-  email.placeholder = real && !register ? 'Seu usuário ou e-mail' : 'seu@email.com';
+  email.type = register || recovery ? 'email' : 'text';
+  email.placeholder = register || recovery ? 'seu@email.com' : 'Seu usuário ou e-mail';
   email.autocomplete = register ? 'email' : 'username';
-  email.parentElement.firstChild.textContent = real && !register ? 'Usuário ou e-mail' : 'E-mail';
-  $('password').minLength = register && real ? 8 : 0;
-  $('password').placeholder = register && real ? 'Pelo menos 8 caracteres' : 'Sua senha';
+  email.parentElement.firstChild.textContent = register || recovery ? 'E-mail' : 'Usuário ou e-mail';
+  password.minLength = register ? 8 : 0;
+  password.placeholder = register ? 'Pelo menos 8 caracteres' : 'Sua senha';
+  if (register) password.setAttribute('aria-describedby', 'password-hint');
+  else password.removeAttribute('aria-describedby');
+  $('password-guidance').hidden = !register;
+  $('confirmation-field').hidden = !register;
+  confirmation.disabled = !register;
+  confirmation.required = register;
+  confirmation.value = '';
+  updatePasswordFeedback();
   $('recover').hidden = real || register;
-  $('name-field').hidden = !register;
-  $('name-field').querySelector('input').required = register;
+  for (const field of ['name-field', 'username-field']) {
+    $(field).hidden = !register;
+    const input = $(field).querySelector('input');
+    input.required = register;
+    input.disabled = !register;
+  }
   $('password-field').hidden = recovery;
   $('password').required = !recovery;
   $('password').autocomplete = register ? 'new-password' : 'current-password';
@@ -36,7 +68,6 @@ function setMode(next) {
 }
 $('switch-mode').onclick = () => setMode(mode === 'login' ? 'register' : 'login');
 $('recover').onclick = () => setMode('recovery');
-$('google').onclick = () => location.assign('/api/auth/google');
 $('toggle-password').onclick = () => {
   const show = $('password').type === 'password';
   $('password').type = show ? 'text' : 'password';
@@ -54,7 +85,6 @@ $('auth-form').onsubmit = async event => {
   $('auth-feedback').hidden = true;
   try {
     const body = Object.fromEntries(new FormData(event.target));
-    if (mode !== 'register') delete body.name;
     if (mode === 'recovery') delete body.password;
     const data = await api('/auth/' + mode, {
       method: 'POST',
@@ -73,12 +103,6 @@ $('auth-form').onsubmit = async event => {
 };
 
 setMode('login');
-if (real) {
-  api('/auth/options').then(({google}) => {
-    $('google').hidden = !google;
-    document.querySelector('.divider').hidden = !google;
-  }).catch(() => {});
-}
 const params = new URLSearchParams(location.search);
 if (params.has('expired')) feedback('Sua sessão expirou. Entre novamente.');
 if (params.has('google')) {

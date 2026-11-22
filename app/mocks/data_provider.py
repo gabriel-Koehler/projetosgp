@@ -58,14 +58,18 @@ class MemoryProvider:
         self.states = {}
         self.sessions = {}
         self.publications = {}
-        self.add_user("Prof. Dr. Carlos Silva", "professor@avaliasystem.com", "123456", "professor")
+        self.add_user("Prof. Dr. Carlos Silva", "professor@avaliasystem.com", "123456", "professor", username="professor")
 
-    def add_user(self, name, email, password, user_id=None):
+    def add_user(self, name, email, password, user_id=None, *, username=None):
         with self.lock:
             if any(u["email"] == email.lower() for u in self.users.values()):
                 raise ValueError("Já existe uma conta com esse e-mail.")
+            username = username.lower() if username else None
+            if username and any(u["username"] == username for u in self.users.values()):
+                raise ValueError("Nome de usuário já cadastrado.")
             salt = token_bytes(16)
             user = {
+                "username": username,
                 "id": user_id or str(uuid4()), "name": name, "email": email.lower(),
                 "salt": salt, "password": pbkdf2_hmac("sha256", password.encode(), salt, 120000),
             }
@@ -73,10 +77,10 @@ class MemoryProvider:
             self.states[user["id"]] = initial_state()
             return user
 
-    def authenticate(self, email, password):
-        email = "professor@avaliasystem.com" if email == "professor" else email.lower()
+    def authenticate(self, identifier, password):
+        identifier = identifier.lower()
         with self.lock:
-            user = next((u for u in self.users.values() if u["email"] == email), None)
+            user = next((u for u in self.users.values() if identifier in (u["email"], u["username"])), None)
             if user and compare_digest(user["password"], pbkdf2_hmac("sha256", password.encode(), user["salt"], 120000)):
                 return user
         return None

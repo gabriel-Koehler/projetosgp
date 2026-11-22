@@ -255,3 +255,5 @@ Diagnóstico HTTP público: `/` retorna 404 da plataforma, enquanto `/api/health
 - Cadastro por e-mail e senha na tela de login existente e criação de professor no primeiro acesso Google.
 - Validação local em modo de demonstração por HTTP e testes de API com Google simulado. Testes de integração adicionados para execução com PostgreSQL descartável.
 - Pendências de ambiente para validação externa: acesso ao GitHub para publicação e PR, PostgreSQL de teste para confirmar persistência e credenciais OAuth para login Google real.
+
+- Complemento na mesma branch: removida a exposição de credenciais de demonstração, adicionado login por nome de usuário ou e-mail, incluídas confirmação e orientação de força da senha e disponibilizado o botão Google na tela de login e cadastro.

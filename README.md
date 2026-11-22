@@ -468,11 +468,11 @@ projetosgp/
 
 ### Cadastro de professores
 
-Na tela de login, selecione **Crie uma!** e informe nome, e-mail e uma senha de pelo menos oito caracteres. A conta é criada no PostgreSQL e abre o painel. O login aceita o e-mail cadastrado e os nomes de usuário já existentes. No modo de demonstração, o cadastro continua em memória.
+Na tela de login, selecione **Crie uma!** e informe nome, nome de usuário, e-mail e uma senha de pelo menos oito caracteres. Confirme a senha e consulte o indicador de força enquanto digita. A conta é criada no PostgreSQL e abre o painel. Entre com o nome de usuário ou e-mail cadastrado. No modo de demonstração, o cadastro continua em memória.
 
 Antes de disponibilizar o cadastro na versão persistente, execute `python -m app.database.migrate` no ambiente do projeto para atualizar a tabela de professores.
 
-Para habilitar **Continuar com o Google**, crie um cliente OAuth do tipo **Aplicativo da Web** no Google Cloud, autorize a URI exata de retorno e configure as variáveis abaixo no backend.
+Para conectar o botão **Continuar com o Google** ao provedor, crie um cliente OAuth do tipo **Aplicativo da Web** no Google Cloud, autorize a URI exata de retorno e configure as variáveis abaixo no backend.
 
 ```dotenv
 GOOGLE_CLIENT_ID=
