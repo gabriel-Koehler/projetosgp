@@ -468,11 +468,9 @@ projetosgp/
 
 ### Cadastro de professores
 
-Na tela de login, selecione **Crie uma!** e informe nome, nome de usuário, e-mail e uma senha de pelo menos oito caracteres. Confirme a senha e consulte o indicador de força enquanto digita. No modo persistente, confira a caixa de entrada e digite o código recebido. O código expira em 15 minutos e só pode ser usado uma vez. A confirmação cria a conta no PostgreSQL e abre o painel. Entre com o nome de usuário ou e-mail cadastrado. No modo de demonstração, o cadastro continua em memória.
+Na tela de login, selecione **Crie uma!** e informe nome, nome de usuário, e-mail e uma senha de pelo menos oito caracteres. Confirme a senha e consulte o indicador de força enquanto digita. A conta é criada no PostgreSQL e abre o painel. Entre com o nome de usuário ou e-mail cadastrado. No modo de demonstração, o cadastro continua em memória.
 
 Antes de disponibilizar o cadastro na versão persistente, execute `python -m app.database.migrate` no ambiente do projeto para atualizar a tabela de professores.
-
-O envio do código usa a API do Resend. Verifique um domínio de envio no Resend e configure `RESEND_API_KEY` e `REGISTRATION_EMAIL_FROM` no backend (ambiente Production na Vercel). Se o envio estiver indisponível, o cadastro por senha aguarda uma nova tentativa. Contas cadastradas antes dessa migração continuam acessíveis.
 
 Para conectar o botão **Continuar com o Google** ao provedor, crie um cliente OAuth do tipo **Aplicativo da Web** no Google Cloud, autorize a URI exata de retorno e configure as variáveis abaixo no backend.
 

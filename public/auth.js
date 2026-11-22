@@ -6,7 +6,6 @@ const real = window.APP_CONFIG?.dataMode === 'real';
 let mode = 'login';
 const password = $('password');
 const confirmation = document.querySelector('[name=passwordConfirmation]');
-const code = document.querySelector('[name=code]');
 
 function updatePasswordFeedback() {
   const value = password.value;
@@ -32,27 +31,16 @@ const feedback = message => {
 
 function setMode(next) {
   mode = next;
-  const register = mode === 'register';
-  const verify = mode === 'confirm-email';
-  const showPassword = register || mode === 'login';
-  $('auth-title').textContent = ({
-    register: 'Crie sua conta', 'confirm-email': 'Confirme seu e-mail', recovery: 'Recuperar acesso'
-  })[mode] || 'Entrar na conta';
-  $('auth-subtitle').textContent = ({
-    register: 'Cadastre-se como professor',
-    'confirm-email': 'Informe o código enviado para a sua caixa de entrada',
-    recovery: 'Recuperação simulada no MVP'
-  })[mode] || 'Acesse sua conta de professor';
-  $('email-code-field').hidden = !verify;
-  code.disabled = !verify;
-  code.required = verify;
-  code.value = '';
-  $('resume-verification').hidden = !real || !register;
+  const register = mode === 'register',
+    recovery = mode === 'recovery';
+  $('auth-title').textContent = register ? 'Crie sua conta' : recovery ? 'Recuperar acesso' : 'Entrar na conta';
+  $('auth-subtitle').textContent = register ? 'Cadastre-se como professor' :
+    recovery ? 'Recuperação simulada no MVP' : 'Acesse sua conta de professor';
   const email = document.querySelector('[name=email]');
-  email.type = mode === 'login' ? 'text' : 'email';
-  email.placeholder = mode === 'login' ? 'Seu usuário ou e-mail' : 'seu@email.com';
-  email.autocomplete = mode === 'login' ? 'username' : 'email';
-  email.parentElement.firstChild.textContent = mode === 'login' ? 'Usuário ou e-mail' : 'E-mail';
+  email.type = register || recovery ? 'email' : 'text';
+  email.placeholder = register || recovery ? 'seu@email.com' : 'Seu usuário ou e-mail';
+  email.autocomplete = register ? 'email' : 'username';
+  email.parentElement.firstChild.textContent = register || recovery ? 'E-mail' : 'Usuário ou e-mail';
   password.minLength = register ? 8 : 0;
   password.placeholder = register ? 'Pelo menos 8 caracteres' : 'Sua senha';
   if (register) password.setAttribute('aria-describedby', 'password-hint');
@@ -70,23 +58,15 @@ function setMode(next) {
     input.required = register;
     input.disabled = !register;
   }
-  $('password-field').hidden = !showPassword;
-  password.disabled = !showPassword;
-  password.required = showPassword;
-  password.autocomplete = register ? 'new-password' : 'current-password';
-  $('submit-auth').textContent = ({
-    register: 'Criar conta', 'confirm-email': 'Confirmar e-mail', recovery: 'Solicitar recuperação'
-  })[mode] || 'Entrar';
-  $('switch-label').textContent = mode === 'login' ? 'Não tem uma conta?' :
-    verify ? 'Precisa de outro código?' : 'Já tem uma conta?';
-  $('switch-mode').textContent = mode === 'login' ? 'Crie uma!' : verify ? 'Voltar ao cadastro' : 'Entrar';
+  $('password-field').hidden = recovery;
+  $('password').required = !recovery;
+  $('password').autocomplete = register ? 'new-password' : 'current-password';
+  $('submit-auth').textContent = register ? 'Criar conta' : recovery ? 'Solicitar recuperação' : 'Entrar';
+  $('switch-label').textContent = mode === 'login' ? 'Não tem uma conta?' : 'Já tem uma conta?';
+  $('switch-mode').textContent = mode === 'login' ? 'Crie uma!' : 'Entrar';
   $('auth-feedback').hidden = true;
 }
-$('switch-mode').onclick = () => setMode(['login', 'confirm-email'].includes(mode) ? 'register' : 'login');
-$('resume-verification').onclick = () => {
-  setMode('confirm-email');
-  code.focus();
-};
+$('switch-mode').onclick = () => setMode(mode === 'login' ? 'register' : 'login');
 $('recover').onclick = () => setMode('recovery');
 $('toggle-password').onclick = () => {
   const show = $('password').type === 'password';
@@ -101,33 +81,24 @@ $('auth-form').onsubmit = async event => {
   button.disabled = true;
   $('switch-mode').disabled = true;
   $('recover').disabled = true;
-  $('resume-verification').disabled = true;
   button.textContent = 'Aguarde…';
   $('auth-feedback').hidden = true;
   try {
     const body = Object.fromEntries(new FormData(event.target));
+    if (mode === 'recovery') delete body.password;
     const data = await api('/auth/' + mode, {
       method: 'POST',
       body
     });
-    if (mode === 'register' && real) {
-      password.value = '';
-      setMode('confirm-email');
-      feedback(data.message);
-      code.focus();
-    } else if (mode === 'recovery') {
-      feedback(data.message);
-    } else {
-      location.assign('/dashboard');
-    }
+    if (mode === 'recovery') feedback(data.message);
+    else location.assign('/dashboard');
   } catch (e) {
     feedback(e.message);
   } finally {
     button.disabled = false;
     $('switch-mode').disabled = false;
     $('recover').disabled = false;
-    $('resume-verification').disabled = false;
-    if (button.textContent === 'Aguarde…') button.textContent = label;
+    button.textContent = label;
   }
 };
 
