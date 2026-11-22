@@ -94,4 +94,4 @@ app.get('/health', async (req, res) => {
     res.status(503).json({ status: 'unavailable' });
   }
 });
-if (!process.env.VERCEL) app.listen(port, process.env.HOST || '127.0.0.1', () => console.log('AvaliaSystem em http://localhost:' + port + ' â†’ API Python ' + backend));
+if (!process.env.VERCEL) app.listen(port, process.env.HOST || '127.0.0.1', () => console.log('AvaliaSystem em http://localhost:' + port));
