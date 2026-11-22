@@ -36,11 +36,16 @@ function setMode(next) {
   $('auth-title').textContent = register ? 'Crie sua conta' : recovery ? 'Recuperar acesso' : 'Entrar na conta';
   $('auth-subtitle').textContent = register ? 'Cadastre-se como professor' :
     recovery ? 'Recuperação simulada no MVP' : 'Acesse sua conta de professor';
-  const email = document.querySelector('[name=email]');
-  email.type = register || recovery ? 'email' : 'text';
-  email.placeholder = register || recovery ? 'seu@email.com' : 'Seu usuário ou e-mail';
-  email.autocomplete = register ? 'email' : 'username';
-  email.parentElement.firstChild.textContent = register || recovery ? 'E-mail' : 'Usuário ou e-mail';
+  const identifierField = $('identifier-field');
+  const identifier = identifierField.querySelector('input');
+  identifierField.hidden = register;
+  identifier.disabled = register;
+  identifier.required = !register;
+  identifier.type = recovery ? 'email' : 'text';
+  identifier.placeholder = recovery ? 'seu@email.com' : 'Seu usuário ou e-mail';
+  identifier.autocomplete = recovery ? 'email' : 'username';
+  identifierField.firstChild.textContent = recovery ? 'E-mail' : 'Usuário ou e-mail';
+  $('auth-divider').textContent = register ? 'ou crie uma conta com senha' : 'ou entre com sua senha';
   password.minLength = register ? 8 : 0;
   password.placeholder = register ? 'Pelo menos 8 caracteres' : 'Sua senha';
   if (register) password.setAttribute('aria-describedby', 'password-hint');

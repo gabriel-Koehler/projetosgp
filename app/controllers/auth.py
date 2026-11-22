@@ -39,10 +39,10 @@ def register(dados: RegisterRequest, request: Request, conn: psycopg.Connection 
     if dados.password != dados.passwordConfirmation:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "As senhas não coincidem.")
     professor = ProfessorRepository(conn).cadastrar(
-        dados.username.lower(), dados.email.lower(), dados.name, passwords.gerar_hash(dados.password)
+        dados.username.lower(), dados.name, passwords.gerar_hash(dados.password)
     )
     if professor is None:
-        raise HTTPException(status.HTTP_409_CONFLICT, "Nome de usuário ou e-mail já cadastrado.")
+        raise HTTPException(status.HTTP_409_CONFLICT, "Nome de usuário já cadastrado.")
     return iniciar_sessao(request, professor)
 
 

@@ -36,7 +36,7 @@ class ProfessorRegistrationTest(unittest.TestCase):
                 {"id": 42, "username": "prof.ana", "nome": "Ana"}, None,
             ]
             data = {
-                "username": "Prof.Ana", "name": " Ana ", "email": "ANA@example.com",
+                "username": "Prof.Ana", "name": " Ana ",
                 "password": "senha-forte", "passwordConfirmation": "senha-forte",
             }
             mismatch = self.client.post("/api/auth/register", json=dict(data, passwordConfirmation="diferente"))
@@ -46,8 +46,8 @@ class ProfessorRegistrationTest(unittest.TestCase):
             response = self.client.post("/api/auth/register", json=data)
             self.assertEqual(response.status_code, 201)
             self.assertEqual(response.json(), {"username": "prof.ana", "nome": "Ana"})
-            username, email, name, password_hash = repo.cadastrar.call_args.args
-            self.assertEqual((username, email, name), ("prof.ana", "ana@example.com", "Ana"))
+            username, name, password_hash = repo.cadastrar.call_args.args
+            self.assertEqual((username, name), ("prof.ana", "Ana"))
             self.assertTrue(passwords.verificar(data["password"], password_hash))
             self.assertEqual(self.client.get("/api/auth/me").json(), response.json())
             self.assertEqual(self.client.post("/api/auth/register", json=data).status_code, 409)

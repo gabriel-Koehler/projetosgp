@@ -468,7 +468,7 @@ projetosgp/
 
 ### Cadastro de professores
 
-Na tela de login, selecione **Crie uma!** e informe nome, nome de usuário, e-mail e uma senha de pelo menos oito caracteres. Confirme a senha e consulte o indicador de força enquanto digita. A conta é criada no PostgreSQL e abre o painel. Entre com o nome de usuário ou e-mail cadastrado. No modo de demonstração, o cadastro continua em memória.
+Na tela de login, selecione **Crie uma!** e informe nome, nome de usuário e uma senha de pelo menos oito caracteres. Confirme a senha e consulte o indicador de força enquanto digita. A conta é criada no PostgreSQL e abre o painel. Entre com o nome de usuário escolhido. Contas anteriores com e-mail cadastrado também podem usar o e-mail para entrar. No modo de demonstração, o cadastro continua em memória.
 
 Antes de disponibilizar o cadastro na versão persistente, execute `python -m app.database.migrate` no ambiente do projeto para atualizar a tabela de professores.
 
@@ -480,4 +480,4 @@ GOOGLE_CLIENT_SECRET=
 GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
 ```
 
-Para testar no computador, inicie o modo persistente com `npm run dev:real` (Node.js 22 ou superior) e abra a mesma origem definida na URI autorizada (por exemplo, `http://localhost:3000`). Em produção, use a URL HTTPS pública do AvaliaSystem com o mesmo caminho. O primeiro acesso Google cria o professor e os seguintes usam a mesma conta. Contas por senha e contas Google têm cadastros independentes, mesmo quando usam o mesmo e-mail. [Documentação do Google sobre OpenID Connect](https://developers.google.com/identity/openid-connect/openid-connect)
+Para testar no computador, inicie o modo persistente com `npm run dev:real` (Node.js 22 ou superior) e abra a mesma origem definida na URI autorizada (por exemplo, `http://localhost:3000`). Em produção, use a URL HTTPS pública do AvaliaSystem com o mesmo caminho. O primeiro acesso Google cria o professor e os seguintes usam a mesma conta. Contas por senha e contas Google têm cadastros independentes. [Documentação do Google sobre OpenID Connect](https://developers.google.com/identity/openid-connect/openid-connect)

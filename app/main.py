@@ -48,11 +48,20 @@ class Recovery(Payload):
         return value.lower()
 
 
-class Register(Recovery):
+class Register(Payload):
     name: Text
     password: Password
     username: Username | None = None
+    email: Text | None = None
     passwordConfirmation: str | None = Field(default=None, max_length=128)
+
+    @model_validator(mode="after")
+    def validate_identifier(self):
+        if self.email:
+            self.email = Recovery.email_format(self.email)
+        elif not self.username:
+            raise ValueError("Informe um nome de usuário.")
+        return self
 
 
 class Semester(Payload):

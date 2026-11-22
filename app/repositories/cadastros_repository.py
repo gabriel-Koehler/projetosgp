@@ -27,16 +27,16 @@ class ProfessorRepository:
         ).fetchone()
         return Professor(**linha) if linha else None
 
-    def cadastrar(self, username: str, email: str, nome: str, senha_hash: str) -> dict | None:
+    def cadastrar(self, username: str, nome: str, senha_hash: str) -> dict | None:
         return self.conn.execute(
             """
-            INSERT INTO professor (username, email, nome, senha_hash)
-            SELECT %s, %s, %s, %s
-            WHERE NOT EXISTS (SELECT 1 FROM professor WHERE lower(username) IN (%s, %s))
+            INSERT INTO professor (username, nome, senha_hash)
+            SELECT %s, %s, %s
+            WHERE NOT EXISTS (SELECT 1 FROM professor WHERE lower(username) = %s)
             ON CONFLICT DO NOTHING
             RETURNING id, username, nome
             """,
-            (username, email, nome, senha_hash, username, email),
+            (username, nome, senha_hash, username),
         ).fetchone()
 
     def autenticar_google(self, subject: str, nome: str) -> dict:
