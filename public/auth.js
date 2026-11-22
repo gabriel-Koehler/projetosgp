@@ -14,7 +14,16 @@ function setMode(next) {
   const register = mode === 'register',
     recovery = mode === 'recovery';
   $('auth-title').textContent = register ? 'Crie sua conta' : recovery ? 'Recuperar acesso' : 'Entrar na conta';
-  $('auth-subtitle').textContent = recovery ? 'Recuperação simulada no MVP' : 'Acesse sua conta de professor';
+  $('auth-subtitle').textContent = register ? 'Cadastre-se como professor' :
+    recovery ? 'Recuperação simulada no MVP' : 'Acesse sua conta de professor';
+  const email = document.querySelector('[name=email]');
+  email.type = real && !register ? 'text' : 'email';
+  email.placeholder = real && !register ? 'Seu usuário ou e-mail' : 'seu@email.com';
+  email.autocomplete = register ? 'email' : 'username';
+  email.parentElement.firstChild.textContent = real && !register ? 'Usuário ou e-mail' : 'E-mail';
+  $('password').minLength = register && real ? 8 : 0;
+  $('password').placeholder = register && real ? 'Pelo menos 8 caracteres' : 'Sua senha';
+  $('recover').hidden = real || register;
   $('name-field').hidden = !register;
   $('name-field').querySelector('input').required = register;
   $('password-field').hidden = recovery;
@@ -27,7 +36,7 @@ function setMode(next) {
 }
 $('switch-mode').onclick = () => setMode(mode === 'login' ? 'register' : 'login');
 $('recover').onclick = () => setMode('recovery');
-$('google').onclick = () => feedback('Login com Google não está conectado neste MVP. Use o acesso de demonstração ou crie uma conta.');
+$('google').onclick = () => location.assign('/api/auth/google');
 $('toggle-password').onclick = () => {
   const show = $('password').type === 'password';
   $('password').type = show ? 'text' : 'password';
@@ -39,6 +48,8 @@ $('auth-form').onsubmit = async event => {
   const button = $('submit-auth'),
     label = button.textContent;
   button.disabled = true;
+  $('switch-mode').disabled = true;
+  $('recover').disabled = true;
   button.textContent = 'Aguarde…';
   $('auth-feedback').hidden = true;
   try {
@@ -55,15 +66,24 @@ $('auth-form').onsubmit = async event => {
     feedback(e.message);
   } finally {
     button.disabled = false;
+    $('switch-mode').disabled = false;
+    $('recover').disabled = false;
     button.textContent = label;
   }
 };
 
+setMode('login');
 if (real) {
-  for (const selector of ['#google','.divider','#recover','.auth-switch','.demo-help']) document.querySelector(selector).hidden = true;
-  const login = document.querySelector('[name=email]');
-  login.type = 'text'; login.placeholder = 'Seu usuário'; login.maxLength = 200;
-  login.parentElement.firstChild.textContent = 'Usuário';
-  $('auth-subtitle').textContent = 'Use o usuário cadastrado pela instituição';
+  document.querySelector('.demo-help').hidden = true;
+  api('/auth/options').then(({google}) => {
+    $('google').hidden = !google;
+    document.querySelector('.divider').hidden = !google;
+  }).catch(() => {});
 }
-if (new URLSearchParams(location.search).get('expired')) feedback('Sua sessão expirou. Entre novamente.');
+const params = new URLSearchParams(location.search);
+if (params.has('expired')) feedback('Sua sessão expirou. Entre novamente.');
+if (params.has('google')) {
+  feedback(params.get('google') === 'unavailable'
+    ? 'O acesso com Google está indisponível.'
+    : 'Não foi possível entrar com o Google. Tente novamente.');
+}

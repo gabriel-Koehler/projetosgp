@@ -4,6 +4,8 @@ Todas as consultas filtram pelo professor dono dos dados: um professor nunca
 enxerga semestres, turmas ou alunos de outro.
 """
 
+from uuid import uuid4
+
 import psycopg
 
 from app.models.cadastros import Aluno, Professor, Semestre, Turma
@@ -18,6 +20,29 @@ class ProfessorRepository:
             "SELECT id, username, nome, senha_hash FROM professor WHERE username = %s", (username,)
         ).fetchone()
         return Professor(**linha) if linha else None
+
+    def cadastrar(self, email: str, nome: str, senha_hash: str) -> dict | None:
+        return self.conn.execute(
+            """
+            INSERT INTO professor (username, nome, senha_hash)
+            SELECT %s, %s, %s
+            WHERE NOT EXISTS (SELECT 1 FROM professor WHERE lower(username) = %s)
+            ON CONFLICT (username) DO NOTHING
+            RETURNING id, username, nome
+            """,
+            (email, nome, senha_hash, email),
+        ).fetchone()
+
+    def autenticar_google(self, subject: str, nome: str) -> dict:
+        return self.conn.execute(
+            """
+            INSERT INTO professor (username, nome, google_sub)
+            VALUES (%s, %s, %s)
+            ON CONFLICT (google_sub) DO UPDATE SET google_sub = EXCLUDED.google_sub
+            RETURNING id, username, nome
+            """,
+            (f"google-{uuid4().hex}", nome, subject),
+        ).fetchone()
 
 
 class SemestreRepository:

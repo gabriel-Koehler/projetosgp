@@ -247,3 +247,11 @@ PR publicado: [#63 — validação real do Supabase e proteção do pacote](http
 ## Rota inicial Vercel — 2026-10-12
 
 Diagnóstico HTTP público: `/` retorna 404 da plataforma, enquanto `/api/health` e `/health` respondem 200 e `/api/auth/me` responde 401. Adicionada regra explícita para `/` no serviço web. Branch `fix/vercel-root-route`. Validação de produção pendente do deployment do novo commit.
+
+
+## Cadastro de professores — 2026-11-22
+
+- Branch `feat/cadastro-professor`, criada a partir de `main` no commit `7eca281`.
+- Cadastro por e-mail e senha na tela de login existente e criação de professor no primeiro acesso Google.
+- Validação local em modo de demonstração por HTTP e testes de API com Google simulado. Testes de integração adicionados para execução com PostgreSQL descartável.
+- Pendências de ambiente para validação externa: acesso ao GitHub para publicação e PR, PostgreSQL de teste para confirmar persistência e credenciais OAuth para login Google real.

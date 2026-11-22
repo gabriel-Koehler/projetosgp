@@ -15,6 +15,11 @@ CREATE TABLE IF NOT EXISTS professor (
     criado_em   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Contas Google usam o identificador estável do provedor e dispensam senha local.
+ALTER TABLE professor ADD COLUMN IF NOT EXISTS google_sub TEXT;
+ALTER TABLE professor ALTER COLUMN senha_hash DROP NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_professor_google_sub ON professor (google_sub);
+
 -- RF02
 CREATE TABLE IF NOT EXISTS semestre (
     id            BIGSERIAL PRIMARY KEY,

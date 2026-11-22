@@ -40,6 +40,7 @@ export function requestBody(path, body, real) {
 }
 export function responseData(path, payload, real) {
   if (!real) return payload?.data;
+  if (path === '/auth/options') return payload;
   if (path.startsWith('/questions/importar')) return payload;
   if (path.startsWith('/questions') && payload?.itens) return {
     ...payload, itens: payload.itens.map(value => responseData('/questions/item', value, true))

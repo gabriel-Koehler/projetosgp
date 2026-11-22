@@ -44,8 +44,12 @@ def autenticar(request: Request, settings: Settings, username: str, password: st
         return {"id": None, "username": settings.professor_username, "nome": settings.professor_nome}
 
     with pool.connection() as conn:
-        professor = ProfessorRepository(conn).obter_por_username(username)
-    if not passwords.verificar(password, professor.senha_hash if professor else _hash_falso()) or not professor:
+        repository = ProfessorRepository(conn)
+        professor = repository.obter_por_username(username)
+        if professor is None and "@" in username and username != username.lower():
+            professor = repository.obter_por_username(username.lower())
+    hash_salvo = professor.senha_hash if professor else None
+    if not passwords.verificar(password, hash_salvo or _hash_falso()) or not hash_salvo:
         return None
     return {"id": professor.id, "username": professor.username, "nome": professor.nome}
 

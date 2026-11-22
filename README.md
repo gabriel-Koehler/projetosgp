@@ -464,3 +464,20 @@ projetosgp/
 - **Quadro Kanban:** Acompanhamento de todas as entregas em [`docs/KANBAN_BOARD.md`](docs/KANBAN_BOARD.md).
 - **Rastreabilidade de Entregas:** Histórico detalhado de commits e branches em [`docs/ACOMPANHAMENTO_ISSUES_GABRIEL.md`](docs/ACOMPANHAMENTO_ISSUES_GABRIEL.md).
 - **Controle de Branches e Code Review:** Todas as funcionalidades seguem o fluxo de criação de branches temáticas, commits semânticos, submissão de Pull Request e revisão por pares antes do merge.
+
+
+### Cadastro de professores
+
+Na tela de login, selecione **Crie uma!** e informe nome, e-mail e uma senha de pelo menos oito caracteres. A conta é criada no PostgreSQL e abre o painel. O login aceita o e-mail cadastrado e os nomes de usuário já existentes. No modo de demonstração, o cadastro continua em memória.
+
+Antes de disponibilizar o cadastro na versão persistente, execute `python -m app.database.migrate` no ambiente do projeto para atualizar a tabela de professores.
+
+Para habilitar **Continuar com o Google**, crie um cliente OAuth do tipo **Aplicativo da Web** no Google Cloud, autorize a URI exata de retorno e configure as variáveis abaixo no backend.
+
+```dotenv
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
+```
+
+Em produção, use a URL HTTPS pública do AvaliaSystem com o mesmo caminho. O primeiro acesso Google cria o professor e os seguintes usam a mesma conta. Contas por senha e contas Google têm cadastros independentes, mesmo quando usam o mesmo e-mail. [Documentação do Google sobre OpenID Connect](https://developers.google.com/identity/openid-connect/openid-connect)

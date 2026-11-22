@@ -1,11 +1,21 @@
 """Formatos de entrada e saída (JSON) das rotas de autenticação."""
 
-from pydantic import BaseModel
+from typing import Annotated
+
+from pydantic import BaseModel, Field, StringConstraints
 
 
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+
+class RegisterRequest(BaseModel):
+    name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]
+    email: Annotated[str, StringConstraints(
+        strip_whitespace=True, max_length=200, pattern=r"^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$"
+    )]
+    password: str = Field(min_length=8, max_length=128)
 
 
 class ProfessorResponse(BaseModel):

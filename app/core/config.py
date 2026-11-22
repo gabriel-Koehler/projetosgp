@@ -36,6 +36,13 @@ class Settings:
     supabase_url: str | None = None
     supabase_key: str | None = None
     supabase_bucket: str = "folhas-resposta"
+    google_client_id: str | None = None
+    google_client_secret: str | None = None
+    google_redirect_uri: str | None = None
+
+    @property
+    def google_enabled(self) -> bool:
+        return bool(self.google_client_id and self.google_client_secret and self.google_redirect_uri)
 
 
 @lru_cache
@@ -59,4 +66,7 @@ def get_settings() -> Settings:
         supabase_url=os.getenv("SUPABASE_URL") or None,
         supabase_key=os.getenv("SUPABASE_KEY") or None,
         supabase_bucket=os.getenv("SUPABASE_BUCKET", "folhas-resposta"),
+        google_client_id=os.getenv("GOOGLE_CLIENT_ID") or None,
+        google_client_secret=os.getenv("GOOGLE_CLIENT_SECRET") or None,
+        google_redirect_uri=os.getenv("GOOGLE_REDIRECT_URI") or None,
     )

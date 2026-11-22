@@ -9,7 +9,7 @@ class Professor:
     id: int
     username: str
     nome: str
-    senha_hash: str
+    senha_hash: str | None
 
 
 @dataclass
