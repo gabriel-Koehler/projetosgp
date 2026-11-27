@@ -1,11 +1,13 @@
 import { api } from './api.js';
 import { escapeHtml as esc } from './html.js';
+import { attachCameraCapture } from './camera-capture.js';
 
 const options = items => items.map(i => `<option value="${esc(i.id)}">${esc(i.name)}</option>`).join('');
 const heading = title => `<header class="section-heading"><h1>${title}</h1></header>`;
 
 export function realCorrection(root, state, notice) {
   let disposed = false, revision = 0, evaluation, busy = false;
+  let clearCapture = () => {}, disposeCamera = () => {}, closeCamera = () => {};
   root.innerHTML = heading('Correção de provas') + (!state.evaluations.length
     ? '<section class="panel"><p>Crie uma avaliação antes de corrigir.</p><a href="#create">Criar avaliação</a></section>'
     : `<form class="panel"><label>Avaliação<select name="evaluation">${options(state.evaluations)}</select></label>
@@ -27,6 +29,8 @@ export function realCorrection(root, state, notice) {
   };
   const load = async () => {
     const current = ++revision;
+    disposeCamera();
+    clearCapture();
     context.innerHTML = '<p role="status">Carregando avaliação…</p>'; error('');
     try {
       const selected = await api('/evaluations/' + encodeURIComponent(form.elements.evaluation.value));
@@ -35,20 +39,57 @@ export function realCorrection(root, state, notice) {
       evaluation = selected;
       context.innerHTML = `<label>Versão<select name="version">${options(selected.versions)}</select></label>
         <label>Aluno<select name="student"><option value="">Sem identificação</option>${students.map(s => `<option value="${s.id}">${esc(s.nome)} · ${esc(s.matricula)}</option>`).join('')}</select></label>
-        <h2>Leitura da folha</h2><p>Use a folha gerada pelo sistema. Envie PNG ou JPEG de até 4 MB, ou informe as respostas manualmente.</p>
+        <h2>Leitura da folha</h2><p>Use a folha gerada pelo sistema. Envie PNG ou JPEG de até 4 MB, tire uma foto com a câmera ou informe as respostas manualmente.</p>
         <label>Imagem<input type="file" name="image" accept="image/png,image/jpeg"></label>
+        <div class="camera-capture"><button type="button" class="secondary" id="open-camera">Abrir câmera</button>
+          <div id="camera-panel" hidden><video id="camera-video" autoplay muted playsinline aria-label="Prévia da câmera"></video>
+            <div class="actions"><button type="button" id="capture-photo">Tirar foto</button>
+              <button type="button" class="secondary" id="retake-photo" hidden>Tirar outra foto</button>
+              <button type="button" class="secondary" id="close-camera">Fechar câmera</button></div>
+            <p id="camera-status" role="status" aria-live="polite"></p>
+          </div>
+        </div><div id="file-preview"></div>
         <button type="button" id="read-sheet">Ler folha</button><p id="reading-status" role="status"></p>
         <h2>Confira as respostas</h2><div class="review-grid" id="answers"></div>
         <label><input type="checkbox" name="confirm" required> Conferi o aluno, a versão e as respostas.</label>
         <button type="submit">Corrigir e salvar</button>`;
+      let capturedFile = null, capturedUrl = null;
+      const cameraPanel = context.querySelector('#camera-panel');
+      clearCapture = () => {
+        if (capturedUrl) URL.revokeObjectURL(capturedUrl);
+        capturedUrl = null;
+        capturedFile = null;
+      };
+      const camera = attachCameraCapture({
+        openButton:context.querySelector('#open-camera'), panel:cameraPanel,
+        video:context.querySelector('#camera-video'), captureButton:context.querySelector('#capture-photo'),
+        retakeButton:context.querySelector('#retake-photo'), closeButton:context.querySelector('#close-camera'),
+        status:context.querySelector('#camera-status'), isBusy:() => busy, onError:error,
+        onCapture:file => {
+          clearCapture();
+          capturedFile = file;
+          capturedUrl = URL.createObjectURL(file);
+          form.elements.image.value = '';
+          context.querySelector('#file-preview').innerHTML = `<p><strong>Foto capturada</strong> · ${(file.size/1024).toFixed(1)} KB · pronta para leitura</p><img src="${capturedUrl}" alt="Prévia da folha fotografada">`;
+          error('');
+        }
+      });
+      closeCamera = camera.close;
+      disposeCamera = camera.dispose;
       review();
       form.elements.version.onchange = () => { review(); context.querySelector('#reading-status').textContent = ''; };
+      form.elements.image.onchange = () => {
+        camera.close();
+        clearCapture();
+        context.querySelector('#file-preview').replaceChildren();
+      };
       context.querySelector('#read-sheet').onclick = async () => {
         if (busy) return;
-        const file = form.elements.image.files[0];
+        const file = form.elements.image.files[0] || capturedFile;
         if (!file || !['image/png', 'image/jpeg'].includes(file.type) || file.size > 4 * 1024 * 1024) {
-          error('Selecione uma imagem PNG ou JPEG de até 4 MB.'); return;
+          error('Envie uma imagem PNG/JPEG ou tire uma foto. O limite é 4 MB.'); return;
         }
+        camera.close();
         busy = true; error('');
         form.elements.evaluation.disabled = form.elements.version.disabled = true;
         context.querySelector('#read-sheet').disabled = true;
@@ -72,6 +113,7 @@ export function realCorrection(root, state, notice) {
   form.onsubmit = async event => {
     event.preventDefault();
     if (busy || !version() || !form.reportValidity()) return;
+    closeCamera();
     busy = true; error('');
     const selected = version();
     const body = {codigo:selected.code, aluno_id:form.elements.student.value ? Number(form.elements.student.value) : null,
@@ -84,7 +126,7 @@ export function realCorrection(root, state, notice) {
     finally { busy = false; if (!disposed) controls.forEach(el => el.disabled = false); }
   };
   load();
-  return () => { disposed = true; revision++; };
+  return () => { disposed = true; revision++; disposeCamera(); clearCapture(); };
 }
 
 export function realResults(root, state) {

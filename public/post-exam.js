@@ -4,6 +4,7 @@ import {
 import {
   escapeHtml as esc
 } from './html.js';
+import { attachCameraCapture } from './camera-capture.js';
 const letters = ['A', 'B', 'C', 'D'];
 const choose = (label, name, items) => `<label>${label}<select name="${name}">${items.map(i => `<option value="${esc(i.id)}">${esc(i.name)}</option>`).join('')}</select></label>`;
 const title = (name, sub) => `<header class="section-heading"><div><h1>${name}</h1><p>${sub}</p></div></header>`;
@@ -15,6 +16,14 @@ export function renderCorrection(root, state, refresh, notice) {
     <span class="badge">Ambiente de simulação</span><p>A leitura gera respostas fictícias. O arquivo fica apenas neste navegador; não há reconhecimento óptico nesta etapa.</p>
     <h2>1. Identifique a prova</h2>${choose('Avaliação', 'evaluationId', state.evaluations)}<div id="correction-context" class="grid-two"></div>
     <h2>2. Envie a folha de respostas</h2><label>Imagem PNG/JPEG ou PDF · até 10 MB<input id="answer-file" type="file" accept="image/png,image/jpeg,application/pdf"></label>
+    <div class="camera-capture"><button type="button" class="secondary" id="open-camera">Abrir câmera</button>
+      <div id="camera-panel" hidden><video id="camera-video" autoplay muted playsinline aria-label="Prévia da câmera"></video>
+        <div class="actions"><button type="button" id="capture-photo">Tirar foto</button>
+          <button type="button" class="secondary" id="retake-photo" hidden>Tirar outra foto</button>
+          <button type="button" class="secondary" id="close-camera">Fechar câmera</button></div>
+        <p id="camera-status" role="status" aria-live="polite"></p>
+      </div>
+    </div>
     <div id="file-preview"></div><div class="actions"><button type="button" id="simulate-reading" disabled>Simular leitura</button><button type="button" id="manual-reading" class="secondary">Informar respostas manualmente</button></div>
     <div id="reading-status" role="status" aria-live="polite"></div><progress id="reading-progress" max="3" value="0" hidden aria-label="Progresso da leitura simulada"></progress>
     <section id="answer-review" hidden><h2>3. Revise as respostas</h2><p>Confira cada marcação e ajuste o que for necessário. A nota será calculada pelo gabarito da versão selecionada.</p><div id="read-answers" class="review-grid"></div><label class="confirm-review"><input id="review-confirmation" type="checkbox" required>Conferi as respostas e a identificação do aluno e da versão.</label><button type="submit" id="save-correction">Corrigir e salvar resultado</button></section>
@@ -41,6 +50,18 @@ export function renderCorrection(root, state, refresh, notice) {
     $('file-preview').replaceChildren();
     $('simulate-reading').disabled = true;
   };
+  const camera = attachCameraCapture({
+    openButton:$('open-camera'), panel:$('camera-panel'), video:$('camera-video'),
+    captureButton:$('capture-photo'), retakeButton:$('retake-photo'), closeButton:$('close-camera'),
+    status:$('camera-status'), isBusy:() => busy, onError:error,
+    onCapture:captured => {
+      clearFile();
+      file = captured;
+      url = URL.createObjectURL(file);
+      $('file-preview').innerHTML = `<p><strong>Foto capturada</strong> · ${(file.size/1024).toFixed(1)} KB · pronta para simular</p><img src="${url}" alt="Prévia da folha fotografada">`;
+      $('simulate-reading').disabled = false;
+    }
+  });
   const reset = (preserveInput = false) => {
     generation++;
     $('answer-review').hidden = true;
@@ -52,6 +73,7 @@ export function renderCorrection(root, state, refresh, notice) {
     clearFile(preserveInput === true);
   };
   const context = () => {
+    camera.close();
     reset();
     $('correction-context').innerHTML = choose('Aluno', 'studentId', state.students.filter(s => s.classId === evaluation().classId)) + choose('Versão', 'version', evaluation().versions.map(v => ({
       id: v.name,
@@ -74,6 +96,7 @@ export function renderCorrection(root, state, refresh, notice) {
     $('save-correction').disabled = value;
   };
   $('answer-file').onchange = async () => {
+    camera.close();
     const selected = $('answer-file').files[0];
     reset(true);
     if (!selected) return;
@@ -107,6 +130,7 @@ export function renderCorrection(root, state, refresh, notice) {
     });
   };
   $('manual-reading').onclick = () => {
+    camera.close();
     generation++;
     error('');
     $('reading-status').textContent = 'Entrada manual: informe todas as respostas.';
@@ -115,6 +139,7 @@ export function renderCorrection(root, state, refresh, notice) {
   };
   $('simulate-reading').onclick = async () => {
     if (!file || busy) return;
+    camera.close();
     error('');
     $('answer-review').hidden = true;
     lock(true);
@@ -136,6 +161,7 @@ export function renderCorrection(root, state, refresh, notice) {
   form.onsubmit = async event => {
     event.preventDefault();
     if (busy || $('answer-review').hidden || !$('review-confirmation').checked) return;
+    camera.close();
     const fields = new FormData(form);
     lock(true);
     error('');
@@ -163,6 +189,7 @@ export function renderCorrection(root, state, refresh, notice) {
   return () => {
     disposed = true;
     generation++;
+    camera.dispose();
     if (url) URL.revokeObjectURL(url);
   };
 }
